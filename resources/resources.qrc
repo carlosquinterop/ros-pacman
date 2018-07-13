@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>textures/map1.bmp</file>
+        <file>textures/map1.png</file>
+        <file>textures/map2.png</file>
+        <file>textures/map3.png</file>
+        <file>textures/map4.png</file>
+        <file>textures/map5.png</file>
+        <file>textures/pacman.png</file>
+        <file>textures/pacman.jpeg</file>
+    </qresource>
+</RCC>
