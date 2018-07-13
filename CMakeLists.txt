@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pacman)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set(Qt5Widgets_DIR "/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
