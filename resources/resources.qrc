@@ -8,5 +8,6 @@
         <file>textures/map5.png</file>
         <file>textures/pacman.png</file>
         <file>textures/pacman.jpeg</file>
+        <file>textures/bigSafeSearch.png</file>
     </qresource>
 </RCC>

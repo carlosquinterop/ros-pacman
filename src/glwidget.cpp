@@ -2,12 +2,12 @@
 
 GLWidget::GLWidget(QWidget *parent)
 {
-    mapImage = new QImage(tr(":/resources/textures/map1.png"));
+    mapImage = new QImage(tr(":/resources/textures/bigSafeSearch.png"));
     pacmanImage = new QImage(tr(":/resources/textures/pacman.jpeg"));
     mapWidth = mapImage->width();
     mapHeight = mapImage->height();
-    pacmanHeight = mapHeight/23;
-    pacmanWidth = mapWidth/23;
+    pacmanHeight = 20;
+    pacmanWidth = 20;
     memset(obstacles, 1, 1000*1000*sizeof(bool));
     QVector<QRgb> table = mapImage->colorTable();
     cout << "width = " << mapImage->width() << ", length = " << mapImage->height() << " format = " << mapImage->format() << ", Colors = " << table.size() << endl;
@@ -22,7 +22,7 @@ GLWidget::GLWidget(QWidget *parent)
 	for (int j = 0;j < mapImage->width();j++)
 	{
 	    QColor clrCurrent( mapImage->pixel(j, i) );
-	    if(clrCurrent.red() == 189 && clrCurrent.green() == 191 && clrCurrent.blue() == 189)
+	    if(clrCurrent.red() == 255 && clrCurrent.green() == 255 && clrCurrent.blue() == 255)
 	    {
 		obstacles[i][j] = true;
 	    }
@@ -41,8 +41,8 @@ GLWidget::GLWidget(QWidget *parent)
     ortho[3] = mapHeight*0.5;
     
     //Pacman's initial pose
-    pacmanCoord.setX(0);
-    pacmanCoord.setY(-10);
+    pacmanCoord.setX(-14*pacmanWidth);
+    pacmanCoord.setY(-2*pacmanHeight);
     w = 0.0; 
 }
 
@@ -58,7 +58,7 @@ QSize GLWidget::minimumSizeHint() const
 
 QSize GLWidget::sizeHint() const
 {
-    return QSize(600, 600);
+    return QSize(mapWidth, mapHeight);
 }
 
 void GLWidget::cleanup()
@@ -179,7 +179,7 @@ void GLWidget::paintGL()
     glEnd();
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
-    glColor3f(0.0, 0.0, 0.0);
+    glColor3f(1.0, 1.0, 1.0);
 }
 
 void GLWidget::resizeGL(int w, int h)
@@ -206,48 +206,40 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void GLWidget::receiveKeySlot(int key)
 {
-    int threshold = 2;
+    int threshold = 0;
+    int stepX = pacmanWidth, stepY = pacmanHeight;
     if(key == Qt::Key_D)
     {
-      QPoint coord1(pacmanCoord.x() + (int)(pacmanWidth*0.5) + threshold, pacmanCoord.y() + (int)(pacmanHeight*0.5));
-      QPoint coord2(pacmanCoord.x() + (int)(pacmanWidth*0.5) + threshold, pacmanCoord.y() - (int)(pacmanHeight*0.5));
-      QPoint coord3(pacmanCoord.x() + (int)(pacmanWidth*0.5) + threshold, pacmanCoord.y());
-      if (!obstacles[getIndexRowFromCoord(coord1)][getIndexColFromCoord(coord1)] && !obstacles[getIndexRowFromCoord(coord2)][getIndexColFromCoord(coord2)] && !obstacles[getIndexRowFromCoord(coord3)][getIndexColFromCoord(coord3)])
-	  pacmanCoord.setX(pacmanCoord.x() + 1);
+      QPoint coord1(pacmanCoord.x() + (int)(pacmanWidth*0.5) + threshold + 1, pacmanCoord.y());
+      if (!obstacles[getIndexRowFromCoord(coord1)][getIndexColFromCoord(coord1)])
+	  pacmanCoord.setX(pacmanCoord.x() + stepX);
       w = 0.0;
       update();
     }
     else if(key == Qt::Key_A)
     {
-      QPoint coord1(pacmanCoord.x() - (int)(pacmanWidth*0.5) - threshold, pacmanCoord.y() + (int)(pacmanHeight*0.5));
-      QPoint coord2(pacmanCoord.x() - (int)(pacmanWidth*0.5) - threshold, pacmanCoord.y() - (int)(pacmanHeight*0.5));
-      QPoint coord3(pacmanCoord.x() - (int)(pacmanWidth*0.5) - threshold, pacmanCoord.y());
-      if (!obstacles[getIndexRowFromCoord(coord1)][getIndexColFromCoord(coord1)] && !obstacles[getIndexRowFromCoord(coord2)][getIndexColFromCoord(coord2)] && !obstacles[getIndexRowFromCoord(coord3)][getIndexColFromCoord(coord3)])
-	  pacmanCoord.setX(pacmanCoord.x() - 1);
+      QPoint coord1(pacmanCoord.x() - (int)(pacmanWidth*0.5) - threshold - 1, pacmanCoord.y());
+      if (!obstacles[getIndexRowFromCoord(coord1)][getIndexColFromCoord(coord1)])
+	  pacmanCoord.setX(pacmanCoord.x() - stepX);
       w = 180.0;
       update();
     }
     else if(key == Qt::Key_W)
     {
-      QPoint coord1(pacmanCoord.x() - (int)(pacmanWidth*0.5), pacmanCoord.y() + (int)(pacmanHeight*0.5) + threshold + 1);
-      QPoint coord2(pacmanCoord.x() + (int)(pacmanWidth*0.5), pacmanCoord.y() + (int)(pacmanHeight*0.5) + threshold + 1);
-      QPoint coord3(pacmanCoord.x(), pacmanCoord.y() + (int)(pacmanHeight*0.5) + threshold + 1);
-      if (!obstacles[getIndexRowFromCoord(coord1)][getIndexColFromCoord(coord1)] && !obstacles[getIndexRowFromCoord(coord2)][getIndexColFromCoord(coord2)] && !obstacles[getIndexRowFromCoord(coord3)][getIndexColFromCoord(coord3)])
-	  pacmanCoord.setY(pacmanCoord.y() + 1);
+      QPoint coord1(pacmanCoord.x(), pacmanCoord.y() + (int)(pacmanHeight*0.5) + threshold + 1);
+      if (!obstacles[getIndexRowFromCoord(coord1)][getIndexColFromCoord(coord1)])
+	  pacmanCoord.setY(pacmanCoord.y() + stepY);
       w = 90.0;
       update();
     }
     else if(key == Qt::Key_S)
     {
-      QPoint coord1(pacmanCoord.x() - (int)(pacmanWidth*0.5), pacmanCoord.y() - (int)(pacmanHeight*0.5) - threshold - 1);
-      QPoint coord2(pacmanCoord.x() + (int)(pacmanWidth*0.5), pacmanCoord.y() - (int)(pacmanHeight*0.5) - threshold - 1);
-      QPoint coord3(pacmanCoord.x(), pacmanCoord.y() - (int)(pacmanHeight*0.5) - threshold - 1);
-      if (!obstacles[getIndexRowFromCoord(coord1)][getIndexColFromCoord(coord1)] && !obstacles[getIndexRowFromCoord(coord2)][getIndexColFromCoord(coord2)])
-	  pacmanCoord.setY(pacmanCoord.y() - 1);
+      QPoint coord1(pacmanCoord.x(), pacmanCoord.y() - (int)(pacmanHeight*0.5) - threshold - 1);
+      if (!obstacles[getIndexRowFromCoord(coord1)][getIndexColFromCoord(coord1)])
+	  pacmanCoord.setY(pacmanCoord.y() - stepY);
       w = 270.0;
       update();
     }
-    //cout << "x = " << pacmanCoord.x() << ", y = " << pacmanCoord.y() << endl;
 }
 
 void GLWidget::loadTexture (QImage* img)
