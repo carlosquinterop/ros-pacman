@@ -13,7 +13,7 @@ COMPILATION
 	- source devel/setup.bash
 	- catkin_make
 	
-EJECUCION
+EXECUTION
 	- roscore
 	- rosrun pacman pacman (in a new terminal)
 
