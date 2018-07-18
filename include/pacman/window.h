@@ -14,6 +14,9 @@
 #include <QDesktopWidget>
 #include <QApplication>
 #include <QMessageBox>
+#include <QTimer>
+#include "pacman/listenmsgthread.h"
+
 
 using namespace std;
 
@@ -41,12 +44,16 @@ private slots:
     
 private:
     GLWidget *glWidget;
+    QVBoxLayout *mainLayout;
     QPushButton *playBtn;
     MainWindow *mainWindow;
     Maps *maps;
-	QComboBox *mapsList;
-	QHBoxLayout *container;
+    QComboBox *mapsList;
+    QHBoxLayout *container;
     bool allowPlay;
+    QTimer *refreshTimer;
+    const int refreshTimeMs = 50;
+    ListenMsgThread *listenMsg;
     
 signals:
     void arrowKey(int key);

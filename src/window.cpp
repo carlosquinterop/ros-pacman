@@ -4,37 +4,41 @@
 Window::Window()
 {
     maps = new Maps;
-	glWidget = new GLWidget;
-	allowPlay = false;
-	
-    QVBoxLayout *mainLayout = new QVBoxLayout;
+    glWidget = new GLWidget;
+    refreshTimer = new QTimer();
+    mainLayout = new QVBoxLayout;
     container = new QHBoxLayout;
+    listenMsg = new ListenMsgThread();
        
     QWidget *w = new QWidget;
     w->setLayout(container);
     mainLayout->addWidget(w);
     playBtn = new QPushButton(tr("Play"));
-    connect(playBtn, &QPushButton::clicked, this, &Window::playSlot);
     mainLayout->addWidget(playBtn);
     
     mapsList = new QComboBox;    
     listArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
     
+    connect(playBtn, &QPushButton::clicked, this, &Window::playSlot);
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(createMap(QString)));
     connect(maps, SIGNAL(sendMapData(int,int,QImage*,bool*,int,int)), glWidget, SLOT(receiveMapDataGL(int,int,QImage*,bool*,int,int)));
-	connect(this, SIGNAL(arrowKey(int)), glWidget, SLOT(receiveKeySlot(int)));
-	
-	container->addWidget(glWidget);
+    connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(updateSimulationSlot()));
+    connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(setPacmanCommand(int)));
+    
+    refreshTimer->start(refreshTimeMs);
+    
+    container->addWidget(glWidget);
     maps->createMap(mapsList->currentText());
     mainLayout->addWidget(mapsList);
 
     setLayout(mainLayout);
+    
+    allowPlay = false;
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
 {
-	if(allowPlay)
-   		emit arrowKey(e->key());
+    
 }
 
 void Window::listArrayMap(QString path)
@@ -48,18 +52,17 @@ void Window::listArrayMap(QString path)
 
 void Window::playSlot()
 {
-	if(playBtn->text() == "Play")
-	{
-		playBtn->setText("Stop");
-		allowPlay = true;
-		mapsList->setEnabled(false);
-	}
-	else
-	{
-		playBtn->setText("Play");
-		allowPlay = false;
-		maps->createMap(mapsList->currentText());
-		mapsList->setEnabled(true);
-	}
-	
+    if(playBtn->text() == "Play")
+    {
+      playBtn->setText("Stop");
+      mapsList->setEnabled(false);
+      listenMsg->start();
+    }
+    else
+    {
+      playBtn->setText("Play");
+      listenMsg->setWorkingThread();
+      maps->createMap(mapsList->currentText());
+      mapsList->setEnabled(true);
+    }
 }

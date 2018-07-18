@@ -2,8 +2,9 @@
 
 GLWidget::GLWidget(QWidget *parent)
 {
-	firstTime = true;
-	pacmanImage = new QImage(tr(":/resources/textures/pacman.jpeg"));
+    firstTime = true;
+    pacmanImage = new QImage(tr(":/resources/textures/pacman.jpeg"));
+    pacmanCommand = Action::None;
 }
 
 GLWidget::~GLWidget()
@@ -86,53 +87,50 @@ void GLWidget::resizeGL(int w, int h)
     glLoadIdentity();
 }
 
-void GLWidget::receiveKeySlot(int key)
+void GLWidget::updateSimulationSlot()
 {
     int threshold = 0;
     int stepX = pacmanWidth, stepY = pacmanHeight;
-    if(key == Qt::Key_D)
+    if(pacmanCommand == Action::Right)
     {
       QPoint coord1(pacmanCoord.x() + (int)(pacmanWidth*0.5) + threshold + 1, pacmanCoord.y());
       if (!obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)])
 	  pacmanCoord.setX(pacmanCoord.x() + stepX);
       w = 0.0;
-      update();
     }
-    else if(key == Qt::Key_A)
+    else if(pacmanCommand == Action::Left)
     {
       QPoint coord1(pacmanCoord.x() - (int)(pacmanWidth*0.5) - threshold - 1, pacmanCoord.y());
       if (!obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)])
 	  pacmanCoord.setX(pacmanCoord.x() - stepX);
       w = 180.0;
-      update();
     }
-    else if(key == Qt::Key_W)
+    else if(pacmanCommand == Action::Up)
     {
       QPoint coord1(pacmanCoord.x(), pacmanCoord.y() + (int)(pacmanHeight*0.5) + threshold + 1);
       if (!obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)])
 	  pacmanCoord.setY(pacmanCoord.y() + stepY);
       w = 90.0;
-      update();
     }
-    else if(key == Qt::Key_S)
+    else if(pacmanCommand == Action::Down)
     {
       QPoint coord1(pacmanCoord.x(), pacmanCoord.y() - (int)(pacmanHeight*0.5) - threshold - 1);
       if (!obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)])
 	  pacmanCoord.setY(pacmanCoord.y() - stepY);
       w = 270.0;
-      update();
     }
+    update();//Schedule paintGL()
 }
 
 void GLWidget::receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, bool *mObstacles, int rowPacman, int colPacman)
 {
-	if(!firstTime)
-		loadNewTexture(mapImage);
-	else
-		firstTime = false;
-		
-	_mapImage = new QImage(*mapImage);	
-	mapWidth = mapImage->width();
+    if(!firstTime)
+      loadNewTexture(mapImage);
+    else
+      firstTime = false;
+
+    _mapImage = new QImage(*mapImage);	
+    mapWidth = mapImage->width();
     mapHeight = mapImage->height();
     pacmanHeight = hPacman;
     pacmanWidth = wPacman;
@@ -150,6 +148,13 @@ void GLWidget::receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, bool
     update();
 }
 
+void GLWidget::setPacmanCommand(int aPacmanCommand)
+{
+    //pacmanCommand = aPacmanCommand;
+    pacmanCommand = static_cast<Action>(aPacmanCommand);
+}
+
+
 void GLWidget::loadTexture (QImage* img)
 {
     GLuint tex;
@@ -165,7 +170,7 @@ void GLWidget::loadTexture (QImage* img)
 
 void GLWidget::loadNewTexture (QImage* img)
 {
-	GLuint tex;
+    GLuint tex;
     glEnable(GL_TEXTURE_2D); // Enable texturing
     QImage t = (img->convertToFormat(QImage::Format_RGBA8888)).mirrored();
     glGenTextures(1, &tex); // Obtain an id for the texture

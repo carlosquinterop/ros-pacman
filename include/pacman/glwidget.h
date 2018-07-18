@@ -25,11 +25,14 @@ public:
     void loadTexture (QImage* img);
     int getIndexRowFromCoord(QPoint coord);
     int getIndexColFromCoord(QPoint coord);
-	void loadNewTexture (QImage* img);
+    void loadNewTexture (QImage* img);
+    enum class Action {Up, Down, Right, Left, None};
     
+        
 private slots:
-    void receiveKeySlot(int key);
+    void updateSimulationSlot();
     void receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, bool *mObstacles, int rowPacman, int colPacman);
+    void setPacmanCommand(int aPacmanCommand);
 
 protected:
     void initializeGL() override;
@@ -44,6 +47,7 @@ private:
     bool *obstacles, firstTime;
     QPoint pacmanCoord;
     double w;
+    Action pacmanCommand;
 };
 
 #endif
