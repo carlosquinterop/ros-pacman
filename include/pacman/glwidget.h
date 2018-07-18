@@ -5,10 +5,6 @@
 #include <QOpenGLWidget>
 #include <GL/glu.h>
 #include <QOpenGLFunctions>
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLBuffer>
-#include <QMouseEvent>
-#include <QOpenGLShaderProgram>
 #include <QCoreApplication>
 #include <math.h>
 #include <iostream>
@@ -16,8 +12,6 @@
 #include <QImage>
 
 using namespace std;
-
-QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
 
 class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -31,30 +25,23 @@ public:
     void loadTexture (QImage* img);
     int getIndexRowFromCoord(QPoint coord);
     int getIndexColFromCoord(QPoint coord);
-
-public slots:
-    void cleanup();
+	void loadNewTexture (QImage* img);
     
 private slots:
     void receiveKeySlot(int key);
+    void receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, bool *mObstacles, int rowPacman, int colPacman);
 
 protected:
     void initializeGL() override;
     void paintGL() override;
     void resizeGL(int width, int height) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-
+   
 private:
-    QPoint m_lastPos;
-    QOpenGLVertexArrayObject m_vao;
-    QOpenGLBuffer m_logoVbo;
-    QOpenGLShaderProgram *m_program;
     double ortho[4];
     QVector<GLuint> texIds;
-    QImage *mapImage, *pacmanImage;
+    QImage *_mapImage, *pacmanImage;
     int mapWidth, mapHeight, pacmanHeight, pacmanWidth;
-    bool obstacles[1000][1000];
+    bool *obstacles, firstTime;
     QPoint pacmanCoord;
     double w;
 };

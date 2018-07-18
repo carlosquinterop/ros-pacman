@@ -3,6 +3,19 @@
 
 #include <QWidget>
 #include <QObject>
+#include "maps.h"
+#include <iostream>
+#include <ros/package.h>
+#include "pacman/glwidget.h"
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QKeyEvent>
+#include <QPushButton>
+#include <QDesktopWidget>
+#include <QApplication>
+#include <QMessageBox>
+
+using namespace std;
 
 class QSlider;
 class QPushButton;
@@ -15,7 +28,10 @@ class Window : public QWidget
     Q_OBJECT
 
 public:
-    Window(MainWindow *mw);
+    Window();
+
+private:
+	void listArrayMap(QString path);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -27,6 +43,10 @@ private:
     GLWidget *glWidget;
     QPushButton *playBtn;
     MainWindow *mainWindow;
+    Maps *maps;
+	QComboBox *mapsList;
+	QHBoxLayout *container;
+    bool allowPlay;
     
 signals:
     void arrowKey(int key);

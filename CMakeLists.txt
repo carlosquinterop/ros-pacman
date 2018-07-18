@@ -7,6 +7,7 @@ set(Qt5Widgets_DIR "/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets")
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  roslib
   #std_msgs
   #message_generation
   Qt5Widgets
@@ -23,7 +24,7 @@ find_package(OpenGL REQUIRED)
 list(APPEND libs ${OPENGL_LIBRARIES})
 
 catkin_package(
-   CATKIN_DEPENDS roscpp rospy
+   CATKIN_DEPENDS roscpp rospy roslib
    DEPENDS Qt5Widgets Qt5Gui Qt5Core OpenGL
 )
 
@@ -35,13 +36,13 @@ include_directories(include
 set(pacman_SRCS
   src/main.cpp
   src/glwidget.cpp
-  src/mainwindow.cpp
   src/window.cpp
+  src/maps.cpp
 )
 set(pacman_HDRS
   include/pacman/glwidget.h
-  include/pacman/mainwindow.h
   include/pacman/window.h
+  include/pacman/maps.h
 )
 
 qt5_wrap_cpp(pacman_MOCS ${pacman_HDRS})
