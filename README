@@ -15,5 +15,11 @@ COMPILATION
 	
 EXECUTION
 	- roscore
-	- rosrun pacman pacman (in a new terminal)
+	- Open a new terminal and source devel/setup.bash
+	- rosrun pacman pacman_world
+	- Open a new terminal and source devel/setup.bash
+	- rosrun pacman pacman_controller
+
+FOR DEVELOPMENT (Recommended)
+	- http://wiki.ros.org/IDEs#Reusing_your_shell.27s_environment
 
