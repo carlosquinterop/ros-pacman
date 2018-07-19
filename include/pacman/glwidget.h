@@ -26,12 +26,18 @@ public:
     int getIndexRowFromCoord(QPoint coord);
     int getIndexColFromCoord(QPoint coord);
     void loadNewTexture (QImage* img);
+    void drawCircle(float x, float y, float radius, float red, float green, float blue);
+    void drawCookies();
+    void drawBonus();
+    void setCoordCookies(QVector<int> *pCookies);
+    void setCoordBonus(QVector<int> *pBonus);
+    
     enum class Action {Up, Down, Right, Left, None};
     
         
 private slots:
     void updateSimulationSlot();
-    void receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, bool *mObstacles, int rowPacman, int colPacman);
+    void receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, int *mObstacles, int rowPacman, int colPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
     void setPacmanCommand(int aPacmanCommand);
 
 protected:
@@ -44,9 +50,13 @@ private:
     QVector<GLuint> texIds;
     QImage *_mapImage, *pacmanImage;
     int mapWidth, mapHeight, pacmanHeight, pacmanWidth;
-    bool *obstacles, firstTime;
+    int *obstacles, firstTime;
     QPoint pacmanCoord;
+    QPoint *cookiesCoord;
+    QPoint *bonusCoord;
     double w;
+    int sCookies;
+    int sBonus;
     Action pacmanCommand;
 };
 

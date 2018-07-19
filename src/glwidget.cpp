@@ -53,6 +53,10 @@ void GLWidget::paintGL()
     glVertex2f  (0.5*mapWidth, -0.5*mapHeight);
     glEnd();
     glDisable(GL_TEXTURE_2D);
+    
+    //Dibujar Galletas y Bonus
+    drawCookies();
+    drawBonus();
        
     //Dibujando pacman
     glShadeModel(GL_SMOOTH);
@@ -94,48 +98,48 @@ void GLWidget::updateSimulationSlot()
     if(pacmanCommand == Action::Right)
     {
       QPoint coord1(pacmanCoord.x() + (int)(pacmanWidth*0.5) + threshold + 1, pacmanCoord.y());
-      if (!obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)])
+      if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
 	  pacmanCoord.setX(pacmanCoord.x() + stepX);
       w = 0.0;
     }
     else if(pacmanCommand == Action::Left)
     {
       QPoint coord1(pacmanCoord.x() - (int)(pacmanWidth*0.5) - threshold - 1, pacmanCoord.y());
-      if (!obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)])
+      if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
 	  pacmanCoord.setX(pacmanCoord.x() - stepX);
       w = 180.0;
     }
     else if(pacmanCommand == Action::Up)
     {
       QPoint coord1(pacmanCoord.x(), pacmanCoord.y() + (int)(pacmanHeight*0.5) + threshold + 1);
-      if (!obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)])
+      if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
 	  pacmanCoord.setY(pacmanCoord.y() + stepY);
       w = 90.0;
     }
     else if(pacmanCommand == Action::Down)
     {
       QPoint coord1(pacmanCoord.x(), pacmanCoord.y() - (int)(pacmanHeight*0.5) - threshold - 1);
-      if (!obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)])
+      if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
 	  pacmanCoord.setY(pacmanCoord.y() - stepY);
       w = 270.0;
     }
     update();//Schedule paintGL()
 }
 
-void GLWidget::receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, bool *mObstacles, int rowPacman, int colPacman)
+void GLWidget::receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, int *mObstacles, int rowPacman, int colPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus)
 {
     if(!firstTime)
       loadNewTexture(mapImage);
     else
       firstTime = false;
 
-    _mapImage = new QImage(*mapImage);	
+    _mapImage = new QImage(*mapImage);
     mapWidth = mapImage->width();
     mapHeight = mapImage->height();
     pacmanHeight = hPacman;
     pacmanWidth = wPacman;
-    obstacles = new bool[(mapHeight)*(mapWidth)];
-    memcpy(obstacles, mObstacles, (mapHeight)*(mapWidth)*sizeof(bool));
+    obstacles = new int[(mapHeight)*(mapWidth)];
+    memcpy(obstacles, mObstacles, (mapHeight)*(mapWidth)*sizeof(int));
     //Map coordinates
     ortho[0] = -mapWidth*0.5;
     ortho[1] = mapWidth*0.5;
@@ -145,6 +149,10 @@ void GLWidget::receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, bool
     pacmanCoord.setX(colPacman*pacmanWidth+ortho[0]+pacmanWidth*0.5);
     pacmanCoord.setY(ortho[3]-rowPacman*pacmanHeight-pacmanHeight*0.5);
     w = 0.0; 
+    
+    setCoordCookies(pCookies);
+    setCoordBonus(pBonus);
+    
     update();
 }
 
@@ -153,7 +161,6 @@ void GLWidget::setPacmanCommand(int aPacmanCommand)
     //pacmanCommand = aPacmanCommand;
     pacmanCommand = static_cast<Action>(aPacmanCommand);
 }
-
 
 void GLWidget::loadTexture (QImage* img)
 {
@@ -189,4 +196,62 @@ int GLWidget::getIndexRowFromCoord(QPoint coord)
 int GLWidget::getIndexColFromCoord(QPoint coord)
 {
     return (int)(coord.x() + mapWidth*0.5);
+}
+
+void GLWidget::drawCircle(float x, float y, float radius, float red, float green, float blue) 
+{ 
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glTranslatef(x, y, 0.0f);
+    glColor3f(red, green, blue);
+    static const int circle_points = 100;
+    static const float angle = 2.0f * 3.1416f / circle_points;
+
+    // this code (mostly) copied from question:
+    glBegin(GL_POLYGON);
+    double angle1=0.0;
+    glVertex2d(radius * cos(0.0) , radius * sin(0.0));
+    int i;
+    for (i=0; i<circle_points; i++)
+    {       
+        glVertex2d(radius * cos(angle1), radius *sin(angle1));
+        angle1 += angle;
+    }
+    glEnd();
+    glPopMatrix();
+}
+
+void GLWidget::setCoordCookies(QVector< int >* pCookies)
+{
+    sCookies = pCookies->size()/2;
+    cookiesCoord = new QPoint[sCookies];
+    for(int i = 0; i < sCookies; i++)
+    {
+	cookiesCoord[i].setX(pCookies->at(i*2 + 1)*pacmanWidth+ortho[0]+pacmanWidth*0.5);
+	cookiesCoord[i].setY(ortho[3]-(pCookies->at(i*2))*pacmanHeight-pacmanHeight*0.5);
+    }
+}
+
+void GLWidget::drawCookies()
+{
+    for(int i = 0; i < sCookies; i++)
+	drawCircle(cookiesCoord[i].x(), cookiesCoord[i].y(), 6.0, 1.0, 1.0, 0.0);
+}
+
+void GLWidget::setCoordBonus(QVector< int >* pBonus)
+{
+    sBonus = pBonus->size()/2;
+    bonusCoord = new QPoint[sBonus];
+    for(int i = 0; i < sBonus; i++)
+    {
+	bonusCoord[i].setX(pBonus->at(i*2 + 1)*pacmanWidth+ortho[0]+pacmanWidth*0.5);
+	bonusCoord[i].setY(ortho[3]-(pBonus->at(i*2))*pacmanHeight-pacmanHeight*0.5);
+    }
+}
+
+void GLWidget::drawBonus()
+{
+    for(int i = 0; i < sBonus; i++)
+	drawCircle(bonusCoord[i].x(), bonusCoord[i].y(), 11.0, 1.0, 0.8, 0.0);
 }

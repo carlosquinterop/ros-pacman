@@ -21,7 +21,7 @@ Window::Window()
     
     connect(playBtn, &QPushButton::clicked, this, &Window::playSlot);
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(createMap(QString)));
-    connect(maps, SIGNAL(sendMapData(int,int,QImage*,bool*,int,int)), glWidget, SLOT(receiveMapDataGL(int,int,QImage*,bool*,int,int)));
+    connect(maps, SIGNAL(sendMapData(int,int,QImage*,int*,int,int,QVector<int>*,QVector<int>*,QVector<int>*)), glWidget, SLOT(receiveMapDataGL(int,int,QImage*,int*,int,int,QVector<int>*,QVector<int>*,QVector<int>*)));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(updateSimulationSlot()));
     connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(setPacmanCommand(int)));
     
@@ -47,7 +47,7 @@ void Window::listArrayMap(QString path)
     dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
     QStringList list = dir.entryList();
     for(int i = 0; i < list.size(); i++)
-	mapsList->addItem(list.at(i));
+	mapsList->addItem(list.at(i).split(".")[0]);
 }
 
 void Window::playSlot()
