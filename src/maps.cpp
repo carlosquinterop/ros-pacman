@@ -53,32 +53,63 @@ void Maps::createObstaclesArray(QByteArray text, int colsText, int rowsText)
 {
     cols = colsText*BLOCK_SIZE;
     rows = rowsText*BLOCK_SIZE;
-    mObstacles = new bool[(rows)*(cols)];
+    mObstacles = new int[(rows)*(cols)];
     
     //Inicializacion matriz obstaculos
     for(int i = 0; i < rows; i++)
 	for(int j = 0; j < cols; j++)
-	    mObstacles[i*cols + j] = false;
+	    mObstacles[i*cols + j] = 0;
+    
+    pGhosts = new QVector<int>;
+    pCookies = new QVector<int>;
+    pBonus = new QVector<int>;
     
     //Construccion matriz de obstaculos
     for(int i = 0; i < rowsText; i++)
     {
 	for(int j = 0; j < colsText; j++)
 	{
-	    if(text[i*colsText + j] == '%')
+	    if(text[i*colsText + j] == '%' || (text[i*colsText + j] == '.') || (text[i*colsText + j] == 'o'))
 	    {
+		int aux = 0;
+		if(text[i*colsText + j] == '%') //Obstaculos
+		{
+		    aux = 1;
+		}
+		else if(text[i*colsText + j] == '.') //Galletas
+		{
+		    pCookies->append(i);
+		    pCookies->append(j);
+		    aux = 2;
+		}
+		else //Bonos
+		{
+		    pBonus->append(i);
+		    pBonus->append(j);
+		    aux = 3;
+		}
+		
 		for(int k = (i*BLOCK_SIZE); k < ((i*BLOCK_SIZE) + BLOCK_SIZE); k++)
 		{
 		    for(int l = (j*BLOCK_SIZE); l < ((j*BLOCK_SIZE) + BLOCK_SIZE); l++)
 		    {
-			mObstacles[k*cols + l] = true;
+			mObstacles[k*cols + l] = aux;
 		    }
 		}
 	    }
+	    	    	    
+	    //Pacman
 	    if(text[i*colsText + j] == 'P')
 	    {
 		rowPacman = i;
 		colPacman = j;		
+	    } 
+	    
+	    //Pacman
+	    if(text[i*colsText + j] == 'G')
+	    {
+		pGhosts->append(i);
+		pGhosts->append(j);
 	    } 
 	}
     }
@@ -87,12 +118,14 @@ void Maps::createObstaclesArray(QByteArray text, int colsText, int rowsText)
 void Maps::printObstaclesArray()
 {
     //Imprimir matriz obstaculos
+    cout << "------------------------------------------" <<endl;
     for(int i = 0; i < rows; i++)
     {
 	for(int j = 0; j < cols; j++)
 	    cout << mObstacles[i*cols + j] << "";
 	cout << endl;
     }
+    cout << "------------------------------------------" <<endl;
 }
 
 void Maps::createImageFromObstaclesArray()
@@ -103,7 +136,7 @@ void Maps::createImageFromObstaclesArray()
         for(int j = 0; j < cols; j++)
         {
             QRgb value;
-            if(mObstacles[i*cols + j] == true)
+            if(mObstacles[i*cols + j] == 1)
             {
                 value = qRgb(255,255,255);
 		image->setPixel(j, i, value);
@@ -136,7 +169,7 @@ void Maps::createMap(QString nameMap)
     
     //Lectura de archivo
     int colsText, rowsText;
-    QByteArray text = file2ArrayMap(nameMap, colsText, rowsText);
+    QByteArray text = file2ArrayMap(nameMap + ".lay", colsText, rowsText);
     
     //Creacion matriz de obstaculos
     createObstaclesArray(text, colsText, rowsText);
@@ -148,8 +181,8 @@ void Maps::createMap(QString nameMap)
     createImageFromObstaclesArray();
 
     //Guardar imagen
-    saveImage(nameMap.split(".").at(0) + ".png");
+    saveImage(nameMap + ".png");
     
-    emit sendMapData(BLOCK_SIZE, BLOCK_SIZE, image, mObstacles, rowPacman, colPacman);
+    emit sendMapData(BLOCK_SIZE, BLOCK_SIZE, image, mObstacles, rowPacman, colPacman, pGhosts, pCookies, pBonus);
 }
 
