@@ -38,7 +38,7 @@ void GLWidget::paintGL()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
       
-    // Dibujando mapa
+    //Draw map
     glColor3f(0.7, 0.7, 0.7);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texIds[1]);
@@ -54,11 +54,13 @@ void GLWidget::paintGL()
     glEnd();
     glDisable(GL_TEXTURE_2D);
     
-    //Dibujar Galletas y Bonus
+    //Draw cookies
     drawCookies();
+    
+    //Draw Bonuses
     drawBonus();
        
-    //Dibujando pacman
+    //Draw Pacman
     glShadeModel(GL_SMOOTH);
     glPushMatrix();
     glTranslated(pacmanCoord.x(), pacmanCoord.y(), 0);
@@ -93,36 +95,36 @@ void GLWidget::resizeGL(int w, int h)
 
 void GLWidget::updateSimulationSlot()
 {
-    int threshold = 0;
     int stepX = pacmanWidth, stepY = pacmanHeight;
     if(pacmanCommand == Action::Right)
     {
-      QPoint coord1(pacmanCoord.x() + (int)(pacmanWidth*0.5) + threshold + 1, pacmanCoord.y());
+      QPoint coord1(pacmanCoord.x() + (int)(pacmanWidth*0.5)  + 1, pacmanCoord.y());
       if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
 	  pacmanCoord.setX(pacmanCoord.x() + stepX);
       w = 0.0;
     }
     else if(pacmanCommand == Action::Left)
     {
-      QPoint coord1(pacmanCoord.x() - (int)(pacmanWidth*0.5) - threshold - 1, pacmanCoord.y());
+      QPoint coord1(pacmanCoord.x() - (int)(pacmanWidth*0.5) - 1, pacmanCoord.y());
       if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
 	  pacmanCoord.setX(pacmanCoord.x() - stepX);
       w = 180.0;
     }
     else if(pacmanCommand == Action::Up)
     {
-      QPoint coord1(pacmanCoord.x(), pacmanCoord.y() + (int)(pacmanHeight*0.5) + threshold + 1);
+      QPoint coord1(pacmanCoord.x(), pacmanCoord.y() + (int)(pacmanHeight*0.5) + 1);
       if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
 	  pacmanCoord.setY(pacmanCoord.y() + stepY);
       w = 90.0;
     }
     else if(pacmanCommand == Action::Down)
     {
-      QPoint coord1(pacmanCoord.x(), pacmanCoord.y() - (int)(pacmanHeight*0.5) - threshold - 1);
+      QPoint coord1(pacmanCoord.x(), pacmanCoord.y() - (int)(pacmanHeight*0.5) - 1);
       if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
 	  pacmanCoord.setY(pacmanCoord.y() - stepY);
       w = 270.0;
     }
+    pacmanCommand = Action::None;
     update();//Schedule paintGL()
 }
 
@@ -140,17 +142,22 @@ void GLWidget::receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, int 
     pacmanWidth = wPacman;
     obstacles = new int[(mapHeight)*(mapWidth)];
     memcpy(obstacles, mObstacles, (mapHeight)*(mapWidth)*sizeof(int));
+    
     //Map coordinates
     ortho[0] = -mapWidth*0.5;
     ortho[1] = mapWidth*0.5;
     ortho[2] = -mapHeight*0.5;
     ortho[3] = mapHeight*0.5;
+    
     //Pacman's initial pose
     pacmanCoord.setX(colPacman*pacmanWidth+ortho[0]+pacmanWidth*0.5);
     pacmanCoord.setY(ortho[3]-rowPacman*pacmanHeight-pacmanHeight*0.5);
     w = 0.0; 
     
+    //Set cookies coordinates
     setCoordCookies(pCookies);
+    
+    //Set bonus coordinates
     setCoordBonus(pBonus);
     
     update();
@@ -158,7 +165,6 @@ void GLWidget::receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, int 
 
 void GLWidget::setPacmanCommand(int aPacmanCommand)
 {
-    //pacmanCommand = aPacmanCommand;
     pacmanCommand = static_cast<Action>(aPacmanCommand);
 }
 

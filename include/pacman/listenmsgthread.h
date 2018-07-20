@@ -17,13 +17,11 @@ class ListenMsgThread : public QThread
     void run();
 public:
     ListenMsgThread();
-    void setWorkingThread();
     void callback(const pacman::Num::ConstPtr& msg);
-        
+    void setWorkingThread(bool aWork);
+           
 private:
     bool work;
-    ros::NodeHandle *node;
-    ros::Subscriber sub;
     
 signals:
     void UpdatePacmanCommand(int action);

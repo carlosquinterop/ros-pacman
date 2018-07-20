@@ -16,7 +16,7 @@
 #include <QMessageBox>
 #include <QTimer>
 #include "pacman/listenmsgthread.h"
-
+#include "ros/ros.h"
 
 using namespace std;
 
@@ -54,7 +54,9 @@ private:
     QTimer *refreshTimer;
     const int refreshTimeMs = 50;
     ListenMsgThread *listenMsg;
-    
+    ros::NodeHandle *node;
+    ros::Subscriber subscriber;
+     
 signals:
     void arrowKey(int key);
 };

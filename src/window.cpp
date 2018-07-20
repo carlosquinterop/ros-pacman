@@ -34,6 +34,15 @@ Window::Window()
     setLayout(mainLayout);
     
     allowPlay = false;
+    
+    //Initialize ROS node, suscriptions and advertisements
+    char **argv;
+    int argc = 0;
+    ros::init(argc, argv, "pacman_world");
+    node = new ros::NodeHandle();
+    subscriber = node->subscribe("exampletopic", 100, &ListenMsgThread::callback, listenMsg);
+    
+    listenMsg->start();  
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -47,21 +56,21 @@ void Window::listArrayMap(QString path)
     dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
     QStringList list = dir.entryList();
     for(int i = 0; i < list.size(); i++)
-	mapsList->addItem(list.at(i).split(".")[0]);
+      mapsList->addItem(list.at(i).split(".")[0]);
 }
 
 void Window::playSlot()
 {
     if(playBtn->text() == "Play")
     {
+      listenMsg->setWorkingThread(true);
       playBtn->setText("Stop");
       mapsList->setEnabled(false);
-      listenMsg->start();
     }
     else
     {
+      listenMsg->setWorkingThread(false);
       playBtn->setText("Play");
-      listenMsg->setWorkingThread();
       maps->createMap(mapsList->currentText());
       mapsList->setEnabled(true);
     }
