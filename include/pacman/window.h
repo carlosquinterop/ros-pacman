@@ -17,6 +17,8 @@
 #include <QTimer>
 #include "pacman/listenmsgthread.h"
 #include "ros/ros.h"
+#include "pacman/pacmanPos.h"
+#include "pacman/pos.h"
 
 using namespace std;
 
@@ -41,6 +43,7 @@ protected:
 
 private slots:
     void playSlot();
+    void updatePacmanPosSlot(QPoint pos);
     
 private:
     GLWidget *glWidget;
@@ -56,7 +59,8 @@ private:
     ListenMsgThread *listenMsg;
     ros::NodeHandle *node;
     ros::Subscriber subscriber;
-     
+    ros::Publisher publisher; 
+    pacman::pacmanPos msg;
 signals:
     void arrowKey(int key);
 };

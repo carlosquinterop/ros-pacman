@@ -126,6 +126,8 @@ void GLWidget::updateSimulationSlot()
     }
     pacmanCommand = Action::None;
     update();//Schedule paintGL()
+    emit UpdatePacmanPos(pacmanCoord);
+  
 }
 
 void GLWidget::receiveMapDataGL(int wPacman, int hPacman, QImage* mapImage, int *mObstacles, int rowPacman, int colPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus)

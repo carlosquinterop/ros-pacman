@@ -58,6 +58,9 @@ private:
     int sCookies;
     int sBonus;
     Action pacmanCommand;
+
+    signals:
+    void UpdatePacmanPos(QPoint coordPacman);
 };
 
 #endif
