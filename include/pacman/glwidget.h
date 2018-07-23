@@ -31,7 +31,6 @@ public:
     void drawBonus();
     void setCoordCookies(QVector<int> *pCookies);
     void setCoordBonus(QVector<int> *pBonus);
-    
     enum class Action {Up, Down, Right, Left, None};
     
         
