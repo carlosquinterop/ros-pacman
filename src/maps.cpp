@@ -60,6 +60,7 @@ void Maps::createObstaclesArray(QByteArray text, int colsText, int rowsText)
 	for(int j = 0; j < cols; j++)
 	    mObstacles[i*cols + j] = 0;
     
+    pPacman = new QVector<int>;
     pGhosts = new QVector<int>;
     pCookies = new QVector<int>;
     pBonus = new QVector<int>;
@@ -101,11 +102,11 @@ void Maps::createObstaclesArray(QByteArray text, int colsText, int rowsText)
 	    //Pacman
 	    if(text[i*colsText + j] == 'P')
 	    {
-		rowPacman = i;
-		colPacman = j;		
+		pPacman->append(i);
+		pPacman->append(j);	
 	    } 
 	    
-	    //Pacman
+	    //Ghosts
 	    if(text[i*colsText + j] == 'G')
 	    {
 		pGhosts->append(i);
@@ -164,9 +165,6 @@ void Maps::saveImage(QString fileName)
 }
 void Maps::createMap(QString nameMap)
 {
-    rowPacman = -1;
-    colPacman = -1;
-    
     //Lectura de archivo
     int colsText, rowsText;
     QByteArray text = file2ArrayMap(nameMap + ".lay", colsText, rowsText);
@@ -183,6 +181,6 @@ void Maps::createMap(QString nameMap)
     //Guardar imagen
     saveImage(nameMap + ".png");
     
-    emit sendMapData(BLOCK_SIZE, BLOCK_SIZE, image, mObstacles, rowPacman, colPacman, pGhosts, pCookies, pBonus);
+    emit sendMapData(BLOCK_SIZE, BLOCK_SIZE, image, mObstacles, pPacman, pGhosts, pCookies, pBonus);
 }
 

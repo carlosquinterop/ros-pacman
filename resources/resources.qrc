@@ -1,5 +1,21 @@
 <RCC>
     <qresource prefix="/resources">
         <file>textures/pacman.jpeg</file>
+        <file>textures/redGhostUp.jpg</file>
+        <file>textures/redGhostDown.jpg</file>
+        <file>textures/redGhostRight.jpg</file>
+        <file>textures/redGhostLeft.jpg</file>
+        <file>textures/pinkGhostUp.jpg</file>
+        <file>textures/pinkGhostDown.jpg</file>
+        <file>textures/pinkGhostRight.jpg</file>
+        <file>textures/pinkGhostLeft.jpg</file>
+        <file>textures/blueGhostUp.jpg</file>
+        <file>textures/blueGhostDown.jpg</file>
+        <file>textures/blueGhostRight.jpg</file>
+        <file>textures/blueGhostLeft.jpg</file>
+        <file>textures/orangeGhostUp.jpg</file>
+        <file>textures/orangeGhostDown.jpg</file>
+        <file>textures/orangeGhostRight.jpg</file>
+        <file>textures/orangeGhostLeft.jpg</file>
     </qresource>
 </RCC>

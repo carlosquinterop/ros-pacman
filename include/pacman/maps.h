@@ -33,10 +33,11 @@ private:
     void saveImage(QString fileName);
    
 private:
-    int rows, cols, rowPacman, colPacman;
+    int rows, cols;
     int BLOCK_SIZE = 50;
     int *mObstacles;
     
+    QVector<int> *pPacman;
     QVector<int> *pGhosts;
     QVector<int> *pCookies;
     QVector<int> *pBonus;
@@ -47,7 +48,7 @@ public slots:
     
 signals:
     //void sendMapData(int wPacman, int hPacman, QImage *mapImage, int *mObstacles, int rowPacman, int colPacman);
-    void sendMapData(int wPacman, int hPacman, QImage *mapImage, int *mObstacles, int rowPacman, int colPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
+    void sendMapData(int blockWidth, int blockHeight, QImage *mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
 };
 
 #endif

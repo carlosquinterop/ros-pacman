@@ -21,10 +21,11 @@ Window::Window()
     
     connect(playBtn, &QPushButton::clicked, this, &Window::playSlot);
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(createMap(QString)));
-    connect(maps, SIGNAL(sendMapData(int,int,QImage*,int*,int,int,QVector<int>*,QVector<int>*,QVector<int>*)), glWidget, SLOT(receiveMapDataGL(int,int,QImage*,int*,int,int,QVector<int>*,QVector<int>*,QVector<int>*)));
+    connect(maps, SIGNAL(sendMapData(int, int, QImage*, int*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), glWidget, SLOT(receiveMapDataGL(int, int, QImage*, int*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(updateSimulationSlot()));
     connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(setPacmanCommand(int)));
     connect(glWidget, SIGNAL(UpdatePacmanPos(QPoint)), this, SLOT(updatePacmanPosSlot(QPoint)));
+    
     refreshTimer->start(refreshTimeMs);
     container->addWidget(glWidget);
     maps->createMap(mapsList->currentText());
@@ -80,5 +81,5 @@ void Window::updatePacmanPosSlot(QPoint pos)
     msg.pacmanPos.x = pos.x();
     msg.pacmanPos.y = pos.y();
     publisher.publish(msg);
-    ROS_INFO("%d", msg.pacmanPos.x);
+    //ROS_INFO("%d", msg.pacmanPos.x);
 }

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <QObject>
 #include <QPoint>
+#include <math.h>
 
 using namespace std;
 
@@ -12,11 +13,12 @@ class Ghosts: public QObject
     Q_OBJECT
 
 public:
-    Ghosts();
-    enum class Mode {Chase, Scatter, Frightened};
+  enum class Mode {Chase, Scatter, Frightened};
     enum class Action {Up, Down, Right, Left, None};
+    enum class Personality {Shadow, Speedy, Bashful, Pokey}; 
+    Ghosts(QPoint initialPosition, Ghosts::Personality character, int aHeight, int aWidth);
+    int getTexId();
     
-private:
     QPoint currentPosition;
     double orientation;
     Mode mode;
@@ -24,10 +26,11 @@ private:
     Action action;
     Action previousAction;
     QString name;
-    QString personality;
-    QString fileName;
+    Personality character;
+    QString upFileName, downFileName, rightFileName, leftFileName;
     int height;
     int width;
+    int texId;
 };
 
 #endif
