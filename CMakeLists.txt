@@ -15,7 +15,13 @@ find_package(catkin REQUIRED COMPONENTS
   Qt5Core
 )
 
-add_message_files(FILES Num.msg)
+add_message_files(
+FILES 
+Num.msg
+pos.msg
+pacmanPos.msg
+cookiesPos.msg
+)
 
 generate_messages(DEPENDENCIES std_msgs)
 

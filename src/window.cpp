@@ -24,9 +24,8 @@ Window::Window()
     connect(maps, SIGNAL(sendMapData(int,int,QImage*,int*,int,int,QVector<int>*,QVector<int>*,QVector<int>*)), glWidget, SLOT(receiveMapDataGL(int,int,QImage*,int*,int,int,QVector<int>*,QVector<int>*,QVector<int>*)));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(updateSimulationSlot()));
     connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(setPacmanCommand(int)));
-    
+    connect(glWidget, SIGNAL(UpdatePacmanPos(QPoint)), this, SLOT(updatePacmanPosSlot(QPoint)));
     refreshTimer->start(refreshTimeMs);
-    
     container->addWidget(glWidget);
     maps->createMap(mapsList->currentText());
     mainLayout->addWidget(mapsList);
@@ -41,7 +40,8 @@ Window::Window()
     ros::init(argc, argv, "pacman_world");
     node = new ros::NodeHandle();
     subscriber = node->subscribe("exampletopic", 100, &ListenMsgThread::callback, listenMsg);
-    
+    publisher = node->advertise<pacman::pacmanPos>("pacmanCoord", 100);
+     
     listenMsg->start();  
 }
 
@@ -74,4 +74,11 @@ void Window::playSlot()
       maps->createMap(mapsList->currentText());
       mapsList->setEnabled(true);
     }
+}
+void Window::updatePacmanPosSlot(QPoint pos)
+{
+    msg.pacmanPos.x = pos.x();
+    msg.pacmanPos.y = pos.y();
+    publisher.publish(msg);
+    ROS_INFO("%d", msg.pacmanPos.x);
 }
