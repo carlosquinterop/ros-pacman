@@ -54,4 +54,4 @@ qtcreator-*
 CATKIN_IGNORE
 
 #Map images
-resources/textures/*.png
+#resources/textures/*.png
