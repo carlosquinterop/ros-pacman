@@ -1,21 +1,21 @@
 <RCC>
     <qresource prefix="/resources">
         <file>textures/pacman.jpeg</file>
-        <file>textures/redGhostUp.jpg</file>
-        <file>textures/redGhostDown.jpg</file>
-        <file>textures/redGhostRight.jpg</file>
-        <file>textures/redGhostLeft.jpg</file>
-        <file>textures/pinkGhostUp.jpg</file>
-        <file>textures/pinkGhostDown.jpg</file>
-        <file>textures/pinkGhostRight.jpg</file>
-        <file>textures/pinkGhostLeft.jpg</file>
-        <file>textures/blueGhostUp.jpg</file>
-        <file>textures/blueGhostDown.jpg</file>
-        <file>textures/blueGhostRight.jpg</file>
-        <file>textures/blueGhostLeft.jpg</file>
-        <file>textures/orangeGhostUp.jpg</file>
-        <file>textures/orangeGhostDown.jpg</file>
-        <file>textures/orangeGhostRight.jpg</file>
-        <file>textures/orangeGhostLeft.jpg</file>
+        <file>textures/redGhostUp.png</file>
+        <file>textures/redGhostDown.png</file>
+        <file>textures/redGhostRight.png</file>
+        <file>textures/redGhostLeft.png</file>
+        <file>textures/pinkGhostUp.png</file>
+        <file>textures/pinkGhostDown.png</file>
+        <file>textures/pinkGhostRight.png</file>
+        <file>textures/pinkGhostLeft.png</file>
+        <file>textures/blueGhostUp.png</file>
+        <file>textures/blueGhostDown.png</file>
+        <file>textures/blueGhostRight.png</file>
+        <file>textures/blueGhostLeft.png</file>
+        <file>textures/orangeGhostUp.png</file>
+        <file>textures/orangeGhostDown.png</file>
+        <file>textures/orangeGhostRight.png</file>
+        <file>textures/orangeGhostLeft.png</file>
     </qresource>
 </RCC>

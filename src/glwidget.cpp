@@ -204,22 +204,22 @@ void GLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
     loadTexture(new QImage(tr(":/resources/textures/pacman.jpeg")));    
-    loadTexture(new QImage(tr(":/resources/textures/redGhostUp.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/redGhostDown.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/redGhostRight.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/redGhostLeft.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/pinkGhostUp.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/pinkGhostDown.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/pinkGhostRight.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/pinkGhostLeft.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/blueGhostUp.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/blueGhostDown.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/blueGhostRight.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/blueGhostLeft.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/orangeGhostUp.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/orangeGhostDown.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/orangeGhostRight.jpg")));
-    loadTexture(new QImage(tr(":/resources/textures/orangeGhostLeft.jpg")));
+    loadTexture(new QImage(tr(":/resources/textures/redGhostUp.png")));
+    loadTexture(new QImage(tr(":/resources/textures/redGhostDown.png")));
+    loadTexture(new QImage(tr(":/resources/textures/redGhostRight.png")));
+    loadTexture(new QImage(tr(":/resources/textures/redGhostLeft.png")));
+    loadTexture(new QImage(tr(":/resources/textures/pinkGhostUp.png")));
+    loadTexture(new QImage(tr(":/resources/textures/pinkGhostDown.png")));
+    loadTexture(new QImage(tr(":/resources/textures/pinkGhostRight.png")));
+    loadTexture(new QImage(tr(":/resources/textures/pinkGhostLeft.png")));
+    loadTexture(new QImage(tr(":/resources/textures/blueGhostUp.png")));
+    loadTexture(new QImage(tr(":/resources/textures/blueGhostDown.png")));
+    loadTexture(new QImage(tr(":/resources/textures/blueGhostRight.png")));
+    loadTexture(new QImage(tr(":/resources/textures/blueGhostLeft.png")));
+    loadTexture(new QImage(tr(":/resources/textures/orangeGhostUp.png")));
+    loadTexture(new QImage(tr(":/resources/textures/orangeGhostDown.png")));
+    loadTexture(new QImage(tr(":/resources/textures/orangeGhostRight.png")));
+    loadTexture(new QImage(tr(":/resources/textures/orangeGhostLeft.png")));
     loadTexture(_mapImage);
 }
 
