@@ -23,7 +23,7 @@ QSize GLWidget::sizeHint() const
     return QSize(mapWidth, mapHeight);
 }
 
-void GLWidget::loadTexture (QImage* img)
+void GLWidget::LoadTexture (QImage* img)
 {
     GLuint tex;
     glEnable(GL_TEXTURE_2D); // Enable texturing
@@ -36,7 +36,7 @@ void GLWidget::loadTexture (QImage* img)
     glDisable(GL_TEXTURE_2D);
 }
 
-void GLWidget::loadNewTexture (QImage* img)
+void GLWidget::LoadNewTexture (QImage* img)
 {
     GLuint tex;
     glEnable(GL_TEXTURE_2D); // Enable texturing
@@ -49,7 +49,7 @@ void GLWidget::loadNewTexture (QImage* img)
     glDisable(GL_TEXTURE_2D);
 }
 
-void GLWidget::drawMap()
+void GLWidget::DrawMap()
 {
     glColor3f(0.7, 0.7, 0.7);
     glEnable(GL_TEXTURE_2D);
@@ -67,7 +67,7 @@ void GLWidget::drawMap()
     glDisable(GL_TEXTURE_2D);
 }
 
-void GLWidget::drawPacman()
+void GLWidget::DrawPacman()
 {
     for(int i=0;i < nPacman;i++)
     {
@@ -94,7 +94,7 @@ void GLWidget::drawPacman()
     }
 }
 
-void GLWidget::drawGhosts()
+void GLWidget::DrawGhosts()
 {
     for(int i=0;i < nGhosts;i++)
     {
@@ -104,7 +104,7 @@ void GLWidget::drawGhosts()
 	glRotated(0, 0, 0, 1);
 	glColor3f(1.0, 1.0, 1.0);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texIds[ghostsArray[i]->getTexId()]);
+	glBindTexture(GL_TEXTURE_2D, texIds[ghostsArray[i]->GetTexId()]);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex2f  (-0.5*ghostsArray[i]->width , -0.5*ghostsArray[i]->height);
@@ -121,19 +121,19 @@ void GLWidget::drawGhosts()
     }
 }
 
-void GLWidget::drawCookies()
+void GLWidget::DrawCookies()
 {
     for(int i = 0; i < sCookies; i++)
-	drawCircle(cookiesCoord[i].x(), cookiesCoord[i].y(), 6.0, 1.0, 1.0, 0.0);
+	DrawCircle(cookiesCoord[i].x(), cookiesCoord[i].y(), 6.0, 1.0, 1.0, 0.0);
 }
 
-void GLWidget::drawBonus()
+void GLWidget::DrawBonus()
 {
     for(int i = 0; i < sBonus; i++)
-	drawCircle(bonusCoord[i].x(), bonusCoord[i].y(), 11.0, 1.0, 0.8, 0.0);
+	DrawCircle(bonusCoord[i].x(), bonusCoord[i].y(), 11.0, 1.0, 0.8, 0.0);
 }
 
-void GLWidget::drawCircle(float x, float y, float radius, float red, float green, float blue) 
+void GLWidget::DrawCircle(float x, float y, float radius, float red, float green, float blue) 
 { 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -157,7 +157,7 @@ void GLWidget::drawCircle(float x, float y, float radius, float red, float green
     glPopMatrix();
 }
 
-void GLWidget::togglePlaying()
+void GLWidget::TogglePlaying()
 {
     if (allowToPlay)
       allowToPlay = false;
@@ -165,7 +165,7 @@ void GLWidget::togglePlaying()
       allowToPlay = true;
 }
 
-void GLWidget::updatePacmanPosition(int i)
+void GLWidget::UpdatePacmanPosition(int i)
 {
     int stepX = pacmanArray[i]->width, stepY = pacmanArray[i]->height;
     
@@ -203,24 +203,24 @@ void GLWidget::updatePacmanPosition(int i)
 void GLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
-    loadTexture(new QImage(tr(":/resources/textures/pacman.jpeg")));    
-    loadTexture(new QImage(tr(":/resources/textures/redGhostUp.png")));
-    loadTexture(new QImage(tr(":/resources/textures/redGhostDown.png")));
-    loadTexture(new QImage(tr(":/resources/textures/redGhostRight.png")));
-    loadTexture(new QImage(tr(":/resources/textures/redGhostLeft.png")));
-    loadTexture(new QImage(tr(":/resources/textures/pinkGhostUp.png")));
-    loadTexture(new QImage(tr(":/resources/textures/pinkGhostDown.png")));
-    loadTexture(new QImage(tr(":/resources/textures/pinkGhostRight.png")));
-    loadTexture(new QImage(tr(":/resources/textures/pinkGhostLeft.png")));
-    loadTexture(new QImage(tr(":/resources/textures/blueGhostUp.png")));
-    loadTexture(new QImage(tr(":/resources/textures/blueGhostDown.png")));
-    loadTexture(new QImage(tr(":/resources/textures/blueGhostRight.png")));
-    loadTexture(new QImage(tr(":/resources/textures/blueGhostLeft.png")));
-    loadTexture(new QImage(tr(":/resources/textures/orangeGhostUp.png")));
-    loadTexture(new QImage(tr(":/resources/textures/orangeGhostDown.png")));
-    loadTexture(new QImage(tr(":/resources/textures/orangeGhostRight.png")));
-    loadTexture(new QImage(tr(":/resources/textures/orangeGhostLeft.png")));
-    loadTexture(_mapImage);
+    LoadTexture(new QImage(tr(":/resources/textures/pacman.jpeg")));    
+    LoadTexture(new QImage(tr(":/resources/textures/redGhostUp.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/redGhostDown.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/redGhostRight.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/redGhostLeft.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/pinkGhostUp.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/pinkGhostDown.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/pinkGhostRight.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/pinkGhostLeft.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/blueGhostUp.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/blueGhostDown.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/blueGhostRight.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/blueGhostLeft.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/orangeGhostUp.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/orangeGhostDown.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/orangeGhostRight.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/orangeGhostLeft.png")));
+    LoadTexture(_mapImage);
 }
 
 void GLWidget::paintGL()
@@ -232,11 +232,11 @@ void GLWidget::paintGL()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
       
-    drawMap();
-    drawCookies();
-    drawBonus();
-    drawPacman();
-    drawGhosts();
+    DrawMap();
+    DrawCookies();
+    DrawBonus();
+    DrawPacman();
+    DrawGhosts();
 }
 
 void GLWidget::resizeGL(int w, int h)
@@ -249,12 +249,12 @@ void GLWidget::resizeGL(int w, int h)
     glLoadIdentity();
 }
 
-void GLWidget::updateSimulationSlot()
+void GLWidget::UpdateSimulationSlot()
 {
     //Update pacman dynamics
     for(int i = 0;i < nPacman;i++)
     {
-	updatePacmanPosition(i);
+	UpdatePacmanPosition(i);
 	//TODO: change this signal to send all pacman positions (transformed)
 	emit UpdatePacmanPos(pacmanArray[i]->currentPosition);
     }
@@ -264,7 +264,7 @@ void GLWidget::updateSimulationSlot()
     {
 	for(int i = 0;i < nGhosts;i++)
 	{
-	    ghostsArray[i]->updateGhostPosition();
+	    ghostsArray[i]->UpdateGhostPosition();
 	}
 	//TODO: emit signal here to send all ghost positions (transformed)
     }
@@ -285,10 +285,10 @@ void GLWidget::updateSimulationSlot()
     update();
 }
 
-void GLWidget::receiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus)
+void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus)
 {
     if(!firstTime)
-      loadNewTexture(mapImage);
+      LoadNewTexture(mapImage);
     else
       firstTime = false;
 
@@ -346,7 +346,7 @@ void GLWidget::receiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     update();
 }
 
-void GLWidget::setPacmanCommand(int aPacmanCommand)
+void GLWidget::SetPacmanCommand(int aPacmanCommand)
 {
     //TODO :modify pacman message to be able to receive up to two pacman actions
     pacmanArray[0]->action = static_cast<Pacman::Action>(aPacmanCommand);

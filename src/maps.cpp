@@ -5,7 +5,7 @@ Maps::Maps(QWidget* parent)
     
 }
 
-QByteArray Maps::file2ArrayMap(QString fileName, int& colsText, int& rowsText)
+QByteArray Maps::File2ArrayMap(QString fileName, int& colsText, int& rowsText)
 {
     //Carga archivo .lay
     QFile file(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/" + fileName);
@@ -49,7 +49,7 @@ QByteArray Maps::file2ArrayMap(QString fileName, int& colsText, int& rowsText)
     return text;
 }
 
-void Maps::createObstaclesArray(QByteArray text, int colsText, int rowsText)
+void Maps::CreateObstaclesArray(QByteArray text, int colsText, int rowsText)
 {
     cols = colsText*BLOCK_SIZE;
     rows = rowsText*BLOCK_SIZE;
@@ -116,7 +116,7 @@ void Maps::createObstaclesArray(QByteArray text, int colsText, int rowsText)
     }
 }
 
-void Maps::printObstaclesArray()
+void Maps::PrintObstaclesArray()
 {
     //Imprimir matriz obstaculos
     cout << "------------------------------------------" <<endl;
@@ -129,7 +129,7 @@ void Maps::printObstaclesArray()
     cout << "------------------------------------------" <<endl;
 }
 
-void Maps::createImageFromObstaclesArray()
+void Maps::CreateImageFromObstaclesArray()
 {
     image = new QImage(cols, rows, QImage::Format_RGB32);
     for(int i = 0; i < rows; i++)
@@ -151,7 +151,7 @@ void Maps::createImageFromObstaclesArray()
    }
 }
 
-void Maps::saveImage(QString fileName)
+void Maps::SaveImage(QString fileName)
 {
     //Guardar Imagen
    QFile fileMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/textures/" + fileName);
@@ -163,24 +163,23 @@ void Maps::saveImage(QString fileName)
 	  cout << "No se pudo abrir" << endl;
    }
 }
-void Maps::createMap(QString nameMap)
+void Maps::CreateMap(QString nameMap)
 {
     //Lectura de archivo
     int colsText, rowsText;
-    QByteArray text = file2ArrayMap(nameMap + ".lay", colsText, rowsText);
+    QByteArray text = File2ArrayMap(nameMap + ".lay", colsText, rowsText);
     
     //Creacion matriz de obstaculos
-    createObstaclesArray(text, colsText, rowsText);
+    CreateObstaclesArray(text, colsText, rowsText);
     
     //Impresion matriz obstaculos
     //printObstaclesArray();
     
     //Creacion imagen
-    createImageFromObstaclesArray();
+    CreateImageFromObstaclesArray();
 
     //Guardar imagen
-    saveImage(nameMap + ".png");
+    SaveImage(nameMap + ".png");
     
-    emit sendMapData(BLOCK_SIZE, BLOCK_SIZE, image, mObstacles, pPacman, pGhosts, pCookies, pBonus);
+    emit SendMapData(BLOCK_SIZE, BLOCK_SIZE, image, mObstacles, pPacman, pGhosts, pCookies, pBonus);
 }
-

@@ -23,10 +23,10 @@ Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeig
 	name = "Inky";
     else if (character == Ghosts::Personality::Pokey)
 	name = "Clyde";
-    getTexId();
+    GetTexId();
 }
 
-int Ghosts::getTexId()
+int Ghosts::GetTexId()
 {
     if (character == Ghosts::Personality::Shadow)
     { 
@@ -78,7 +78,7 @@ int Ghosts::getTexId()
     return texId;
 }
 
-void Ghosts::updateGhostPosition()
+void Ghosts::UpdateGhostPosition()
 {
     int stepX = width;
     int stepY = height;
@@ -102,18 +102,18 @@ void Ghosts::updateGhostPosition()
     {
 	QVector<Ghosts::Action> *possibleActions;
 	possibleActions = new QVector<Ghosts::Action>;
-	getPossibleActions(possibleActions);
+	GetPossibleActions(possibleActions);
 
 	if (possibleActions->size() == 1)
 	    action = possibleActions->at(0);
 	else if (possibleActions->size() == 2)
 	{
-	    if (!isPossibleAction(action, possibleActions))
+	    if (!IsPossibleAction(action, possibleActions))
 		action = possibleActions->at(rand() % possibleActions->size()); 
 	}
 	else if (possibleActions->size() >= 3)
 	{
-	    calculateTargetPosition();
+	    CalculateTargetPosition();
 	    action = possibleActions->at(rand() % possibleActions->size());
 	}
     }
@@ -140,7 +140,7 @@ void Ghosts::updateGhostPosition()
     }
 }
 
-void Ghosts::calculateTargetPosition()
+void Ghosts::CalculateTargetPosition()
 {
     /*
     if (character == Ghosts::Personality::Shadow)
@@ -161,7 +161,7 @@ void Ghosts::calculateTargetPosition()
     }*/
 }
 
-int Ghosts::getPossibleActions(QVector<Ghosts::Action>* possibleActions)
+int Ghosts::GetPossibleActions(QVector<Ghosts::Action>* possibleActions)
 {
     QPoint coordLeft(currentPosition.x() - (int)(width*0.5) - 1, currentPosition.y());
     QPoint coordDown(currentPosition.x(), currentPosition.y() - (int)(height*0.5) - 1);
@@ -178,7 +178,7 @@ int Ghosts::getPossibleActions(QVector<Ghosts::Action>* possibleActions)
 	possibleActions->append(Ghosts::Action::Up);
 }
 
-void Ghosts::printPossibleActions(QVector<Ghosts::Action>* possibleActions)
+void Ghosts::PrintPossibleActions(QVector<Ghosts::Action>* possibleActions)
 {
     for (int i = 0;i < possibleActions->size();i++)
     {
@@ -193,7 +193,7 @@ void Ghosts::printPossibleActions(QVector<Ghosts::Action>* possibleActions)
     }
 }
 
-bool Ghosts::isPossibleAction(Ghosts::Action anAction, QVector<Ghosts::Action>* possibleActions)
+bool Ghosts::IsPossibleAction(Ghosts::Action anAction, QVector<Ghosts::Action>* possibleActions)
 {
     bool isPossible = false;
     for (int i = 0;i < possibleActions->size();i++)

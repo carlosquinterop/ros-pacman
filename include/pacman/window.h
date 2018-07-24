@@ -36,14 +36,14 @@ public:
     Window();
 
 private:
-	void listArrayMap(QString path);
+    void ListArrayMap(QString path);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
-    void playSlot();
-    void updatePacmanPosSlot(QPoint pos);
+    void PlaySlot();
+    void UpdatePacmanPosSlot(QPoint pos);
     
 private:
     GLWidget *glWidget;
@@ -63,7 +63,7 @@ private:
     pacman::pacmanPos msg;
     
 signals:
-    void arrowKey(int key);
+    void ArrowKey(int key);
 };
 
 #endif

@@ -25,16 +25,16 @@ public:
     ~GLWidget();
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
-    void loadTexture (QImage* img);
-    void loadNewTexture (QImage* img);
-    void drawMap();
-    void drawPacman();
-    void drawGhosts();
-    void drawCookies();
-    void drawBonus();
-    void drawCircle(float x, float y, float radius, float red, float green, float blue);
-    void togglePlaying();
-    void updatePacmanPosition(int i);
+    void LoadTexture (QImage* img);
+    void LoadNewTexture (QImage* img);
+    void DrawMap();
+    void DrawPacman();
+    void DrawGhosts();
+    void DrawCookies();
+    void DrawBonus();
+    void DrawCircle(float x, float y, float radius, float red, float green, float blue);
+    void TogglePlaying();
+    void UpdatePacmanPosition(int i);
     
 protected:
     void initializeGL() override;
@@ -42,9 +42,9 @@ protected:
     void resizeGL(int width, int height) override;
     
 private slots:
-    void updateSimulationSlot();
-    void receiveMapDataGL(int blockWidht, int blockHeight, QImage* mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
-    void setPacmanCommand(int aPacmanCommand);
+    void UpdateSimulationSlot();
+    void ReceiveMapDataGL(int blockWidht, int blockHeight, QImage* mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
+    void SetPacmanCommand(int aPacmanCommand);
    
 private:
     bool allowToPlay;

@@ -26,11 +26,11 @@ public:
     Maps(QWidget *parent = 0);
     
 private:
-    QByteArray file2ArrayMap(QString fileName, int &colsText, int &rowsText);
-    void createObstaclesArray(QByteArray text, int colsText, int rowsText);
-    void printObstaclesArray();
-    void createImageFromObstaclesArray();
-    void saveImage(QString fileName);
+    QByteArray File2ArrayMap(QString fileName, int &colsText, int &rowsText);
+    void CreateObstaclesArray(QByteArray text, int colsText, int rowsText);
+    void PrintObstaclesArray();
+    void CreateImageFromObstaclesArray();
+    void SaveImage(QString fileName);
    
 private:
     int rows, cols;
@@ -44,11 +44,11 @@ private:
     QImage* image;
     
 public slots:
-    void createMap(QString nameMap);
+    void CreateMap(QString nameMap);
     
 signals:
     //void sendMapData(int wPacman, int hPacman, QImage *mapImage, int *mObstacles, int rowPacman, int colPacman);
-    void sendMapData(int blockWidth, int blockHeight, QImage *mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
+    void SendMapData(int blockWidth, int blockHeight, QImage *mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
 };
 
 #endif

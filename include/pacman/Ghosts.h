@@ -15,16 +15,16 @@ class Ghosts: public QObject
     Q_OBJECT
 
 public:
-  enum class Mode {Chase, Scatter, Frightened};
+    enum class Mode {Chase, Scatter, Frightened};
     enum class Action {Up, Down, Right, Left, None};
     enum class Personality {Shadow, Speedy, Bashful, Pokey}; 
     Ghosts(QPoint initialPosition, Ghosts::Personality character, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, int *cObstacles);
-    int getTexId();
-    void updateGhostPosition();
-    void calculateTargetPosition();
-    int getPossibleActions(QVector<Ghosts::Action> *possibleActions);
-    void printPossibleActions(QVector<Ghosts::Action>* possibleActions);
-    bool isPossibleAction(Ghosts::Action anAction, QVector<Ghosts::Action>* possibleActions);
+    int GetTexId();
+    void UpdateGhostPosition();
+    void CalculateTargetPosition();
+    int GetPossibleActions(QVector<Ghosts::Action> *possibleActions);
+    void PrintPossibleActions(QVector<Ghosts::Action>* possibleActions);
+    bool IsPossibleAction(Ghosts::Action anAction, QVector<Ghosts::Action>* possibleActions);
 
     QPoint currentPosition;
     double orientation;

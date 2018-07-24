@@ -17,18 +17,18 @@ Window::Window()
     mainLayout->addWidget(playBtn);
     
     mapsList = new QComboBox;    
-    listArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
+    ListArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
     
-    connect(playBtn, &QPushButton::clicked, this, &Window::playSlot);
-    connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(createMap(QString)));
-    connect(maps, SIGNAL(sendMapData(int, int, QImage*, int*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), glWidget, SLOT(receiveMapDataGL(int, int, QImage*, int*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)));
-    connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(updateSimulationSlot()));
-    connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(setPacmanCommand(int)));
-    connect(glWidget, SIGNAL(UpdatePacmanPos(QPoint)), this, SLOT(updatePacmanPosSlot(QPoint)));
+    connect(playBtn, &QPushButton::clicked, this, &Window::PlaySlot);
+    connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(CreateMap(QString)));
+    connect(maps, SIGNAL(SendMapData(int, int, QImage*, int*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, int*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)));
+    connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(UpdateSimulationSlot()));
+    connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(SetPacmanCommand(int)));
+    connect(glWidget, SIGNAL(UpdatePacmanPos(QPoint)), this, SLOT(UpdatePacmanPosSlot(QPoint)));
     
     refreshTimer->start(refreshTimeMs);
     container->addWidget(glWidget);
-    maps->createMap(mapsList->currentText());
+    maps->CreateMap(mapsList->currentText());
     mainLayout->addWidget(mapsList);
 
     setLayout(mainLayout);
@@ -51,7 +51,7 @@ void Window::keyPressEvent(QKeyEvent *e)
     
 }
 
-void Window::listArrayMap(QString path)
+void Window::ListArrayMap(QString path)
 {
     QDir dir(path);
     dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
@@ -60,7 +60,7 @@ void Window::listArrayMap(QString path)
       mapsList->addItem(list.at(i).split(".")[0]);
 }
 
-void Window::playSlot()
+void Window::PlaySlot()
 {
     if(playBtn->text() == "Play")
     {
@@ -72,12 +72,12 @@ void Window::playSlot()
     {
       listenMsg->setWorkingThread(false);
       playBtn->setText("Play");
-      maps->createMap(mapsList->currentText());
+      maps->CreateMap(mapsList->currentText());
       mapsList->setEnabled(true);
     }
-    glWidget->togglePlaying();
+    glWidget->TogglePlaying();
 }
-void Window::updatePacmanPosSlot(QPoint pos)
+void Window::UpdatePacmanPosSlot(QPoint pos)
 {
     msg.pacmanPos.x = pos.x();
     msg.pacmanPos.y = pos.y();
