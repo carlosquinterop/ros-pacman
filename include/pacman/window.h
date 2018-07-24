@@ -55,12 +55,13 @@ private:
     QHBoxLayout *container;
     bool allowPlay;
     QTimer *refreshTimer;
-    const int refreshTimeMs = 50;
+    const int refreshTimeMs = 200;
     ListenMsgThread *listenMsg;
     ros::NodeHandle *node;
     ros::Subscriber subscriber;
     ros::Publisher publisher; 
     pacman::pacmanPos msg;
+    
 signals:
     void arrowKey(int key);
 };

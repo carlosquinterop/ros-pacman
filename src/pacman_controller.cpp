@@ -7,11 +7,9 @@ void pacmanPosCallback(const pacman::pacmanPos::ConstPtr& msg)
 {
   int x = msg->pacmanPos.x;
   int y = msg->pacmanPos.y;
-  ROS_INFO("Pos Recibida:  x = [%d]  y = [%d]", x, y);
+  //ROS_INFO("Pos Recibida:  x = [%d]  y = [%d]", x, y);
 }
-/**
- * This tutorial demonstrates simple sending of messages over the ROS system.
- */
+
 int main(int argc, char **argv)
 {
     srand (time(NULL));

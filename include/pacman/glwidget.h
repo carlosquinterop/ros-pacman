@@ -12,6 +12,7 @@
 #include <QImage>
 #include "pacman/Ghosts.h"
 #include "pacman/Pacman.h"
+#include "Utilities.h"
 
 using namespace std;
 
@@ -32,9 +33,9 @@ public:
     void drawCookies();
     void drawBonus();
     void drawCircle(float x, float y, float radius, float red, float green, float blue);
-    int getIndexRowFromCoord(QPoint coord);
-    int getIndexColFromCoord(QPoint coord);
-
+    void togglePlaying();
+    void updatePacmanPosition(int i);
+    
 protected:
     void initializeGL() override;
     void paintGL() override;
@@ -46,24 +47,21 @@ private slots:
     void setPacmanCommand(int aPacmanCommand);
    
 private:
+    bool allowToPlay;
     QImage *_mapImage;  
     double ortho[4];
     QVector<GLuint> texIds;   
     int mapWidth, mapHeight;
     int *obstacles, firstTime;
-    
-    QImage *pacmanImage;    
     int nPacman;
     Pacman **pacmanArray;
-
-    QPoint *cookiesCoord;
-    QPoint *bonusCoord;
+    int nGhosts;
+    Ghosts **ghostsArray;
     int sCookies;
     int sBonus;
-
-    Ghosts **ghostsArray;
-    int nGhosts;
-    QPoint **ghostsCoord;
+    QPoint *cookiesCoord;
+    QPoint *bonusCoord;
+    Utilities utilities;
 
 signals:
     void UpdatePacmanPos(QPoint coordPacman);

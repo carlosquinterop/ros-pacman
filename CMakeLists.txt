@@ -47,6 +47,7 @@ set(pacman_SRCS
   src/maps.cpp
   src/Ghosts.cpp
   src/Pacman.cpp
+  src/Utilities.cpp
 )
 set(pacman_HDRS
   include/pacman/glwidget.h
@@ -55,6 +56,7 @@ set(pacman_HDRS
   include/pacman/listenmsgthread.h
   include/pacman/Ghosts.h
   include/pacman/Pacman.h
+  include/pacman/Utilities.h
 )
 
 qt5_wrap_cpp(pacman_MOCS ${pacman_HDRS})

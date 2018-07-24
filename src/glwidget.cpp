@@ -3,7 +3,8 @@
 GLWidget::GLWidget(QWidget *parent)
 {
     firstTime = true;
-    nPacman = 1;
+    allowToPlay = false;
+    nPacman = 0;
     nGhosts = 0;
 }
 
@@ -100,7 +101,7 @@ void GLWidget::drawGhosts()
 	glShadeModel(GL_SMOOTH);
 	glPushMatrix();
 	glTranslated(ghostsArray[i]->currentPosition.x(), ghostsArray[i]->currentPosition.y(), 0);
-	glRotated(ghostsArray[i]->orientation, 0, 0, 1);
+	glRotated(0, 0, 0, 1);
 	glColor3f(1.0, 1.0, 1.0);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texIds[ghostsArray[i]->getTexId()]);
@@ -156,14 +157,47 @@ void GLWidget::drawCircle(float x, float y, float radius, float red, float green
     glPopMatrix();
 }
 
-int GLWidget::getIndexRowFromCoord(QPoint coord)
+void GLWidget::togglePlaying()
 {
-    return (int)(abs(coord.y() - mapHeight*0.5));
+    if (allowToPlay)
+      allowToPlay = false;
+    else
+      allowToPlay = true;
 }
 
-int GLWidget::getIndexColFromCoord(QPoint coord)
+void GLWidget::updatePacmanPosition(int i)
 {
-    return (int)(coord.x() + mapWidth*0.5);
+    int stepX = pacmanArray[i]->width, stepY = pacmanArray[i]->height;
+    
+    if(pacmanArray[i]->action == Pacman::Action::Right)
+    {
+      QPoint coord(pacmanArray[i]->currentPosition.x() + (int)(pacmanArray[i]->width*0.5)  + 1, pacmanArray[i]->currentPosition.y());
+      if (obstacles[utilities.getIndexRowFromCoord(coord, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coord, mapWidth)] != 1)
+	  pacmanArray[i]->currentPosition.setX(pacmanArray[i]->currentPosition.x() + stepX);
+      pacmanArray[i]->orientation = 0.0;
+    }
+    else if(pacmanArray[i]->action == Pacman::Action::Left)
+    {
+      QPoint coord(pacmanArray[i]->currentPosition.x() - (int)(pacmanArray[i]->width*0.5) - 1, pacmanArray[i]->currentPosition.y());
+      if (obstacles[utilities.getIndexRowFromCoord(coord, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coord, mapWidth)] != 1)
+	  pacmanArray[i]->currentPosition.setX(pacmanArray[i]->currentPosition.x() - stepX);
+      pacmanArray[i]->orientation = 180.0;
+    }
+    else if(pacmanArray[i]->action == Pacman::Action::Up)
+    {
+      QPoint coord(pacmanArray[i]->currentPosition.x(), pacmanArray[i]->currentPosition.y() + (int)(pacmanArray[i]->height*0.5) + 1);
+      if (obstacles[utilities.getIndexRowFromCoord(coord, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coord, mapWidth)] != 1)
+	  pacmanArray[i]->currentPosition.setY(pacmanArray[i]->currentPosition.y() + stepY);
+      pacmanArray[i]->orientation = 90.0;
+    }
+    else if(pacmanArray[i]->action == Pacman::Action::Down)
+    {
+      QPoint coord(pacmanArray[i]->currentPosition.x(), pacmanArray[i]->currentPosition.y() - (int)(pacmanArray[i]->height*0.5) - 1);
+      if (obstacles[utilities.getIndexRowFromCoord(coord, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coord, mapWidth)] != 1)
+	  pacmanArray[i]->currentPosition.setY(pacmanArray[i]->currentPosition.y() - stepY);
+      pacmanArray[i]->orientation = 270.0;
+    }
+    pacmanArray[i]->action = Pacman::Action::None;    
 }
 
 void GLWidget::initializeGL()
@@ -199,10 +233,10 @@ void GLWidget::paintGL()
     glLoadIdentity();
       
     drawMap();
-    drawPacman();
-    drawGhosts();
     drawCookies();
     drawBonus();
+    drawPacman();
+    drawGhosts();
 }
 
 void GLWidget::resizeGL(int w, int h)
@@ -217,40 +251,38 @@ void GLWidget::resizeGL(int w, int h)
 
 void GLWidget::updateSimulationSlot()
 {
-    int i = 0;
-    int stepX = pacmanArray[i]->width, stepY = pacmanArray[i]->height;
-    if(pacmanArray[i]->action == Pacman::Action::Right)
+    //Update pacman dynamics
+    for(int i = 0;i < nPacman;i++)
     {
-      QPoint coord1(pacmanArray[i]->currentPosition.x() + (int)(pacmanArray[i]->width*0.5)  + 1, pacmanArray[i]->currentPosition.y());
-      if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
-	  pacmanArray[i]->currentPosition.setX(pacmanArray[i]->currentPosition.x() + stepX);
-      pacmanArray[i]->orientation = 0.0;
+	updatePacmanPosition(i);
+	//TODO: change this signal to send all pacman positions (transformed)
+	emit UpdatePacmanPos(pacmanArray[i]->currentPosition);
     }
-    else if(pacmanArray[i]->action == Pacman::Action::Left)
+    
+    //Update ghost dynamics
+    if(allowToPlay)
     {
-      QPoint coord1(pacmanArray[i]->currentPosition.x() - (int)(pacmanArray[i]->width*0.5) - 1, pacmanArray[i]->currentPosition.y());
-      if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
-	  pacmanArray[i]->currentPosition.setX(pacmanArray[i]->currentPosition.x() - stepX);
-      pacmanArray[i]->orientation = 180.0;
+	for(int i = 0;i < nGhosts;i++)
+	{
+	    ghostsArray[i]->updateGhostPosition();
+	}
+	//TODO: emit signal here to send all ghost positions (transformed)
     }
-    else if(pacmanArray[i]->action == Pacman::Action::Up)
-    {
-      QPoint coord1(pacmanArray[i]->currentPosition.x(), pacmanArray[i]->currentPosition.y() + (int)(pacmanArray[i]->height*0.5) + 1);
-      if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
-	  pacmanArray[i]->currentPosition.setY(pacmanArray[i]->currentPosition.y() + stepY);
-      pacmanArray[i]->orientation = 90.0;
-    }
-    else if(pacmanArray[i]->action == Pacman::Action::Down)
-    {
-      QPoint coord1(pacmanArray[i]->currentPosition.x(), pacmanArray[i]->currentPosition.y() - (int)(pacmanArray[i]->height*0.5) - 1);
-      if (obstacles[getIndexRowFromCoord(coord1)*mapWidth + getIndexColFromCoord(coord1)] != 1)
-	  pacmanArray[i]->currentPosition.setY(pacmanArray[i]->currentPosition.y() - stepY);
-      pacmanArray[i]->orientation = 270.0;
-    }
-    pacmanArray[i]->action = Pacman::Action::None;
-    update();//Schedule paintGL()
-    emit UpdatePacmanPos(pacmanArray[i]->currentPosition);
-  
+    
+    //TODO
+    //Update cookies
+	//For each cookie
+	  //Check if any pacman position equals the i-th cookie position and remove if necessary
+	//emit signal here to send all cookie positions (transformed)
+	
+    //TODO
+    //Update Bonuses
+    //For each bonus
+	  //Check if any pacman position equals the i-th bonus position and remove if necessary
+	//emit signal here to send all bonus positions (transformed)
+    
+    //Schedule paintGL()
+    update();
 }
 
 void GLWidget::receiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus)
@@ -260,7 +292,7 @@ void GLWidget::receiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     else
       firstTime = false;
 
-    //Map
+    //Set Map
     _mapImage = new QImage(*mapImage);
     mapWidth = mapImage->width();
     mapHeight = mapImage->height();
@@ -281,9 +313,6 @@ void GLWidget::receiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
 	pacmanPositions.setY(ortho[3]-(pPacman->at(i*2))*blockHeight-blockHeight*0.5);
 	pacmanArray[i] = new Pacman(pacmanPositions, (double)0, blockHeight, blockWidth);
     }
-    
-    //cout << "nPacman = " << nPacman << endl;
-        
         
     //Set Ghosts
     nGhosts = pGhosts->size()/2;
@@ -294,7 +323,7 @@ void GLWidget::receiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     {
 	ghostPositions.setX(pGhosts->at(i*2 + 1)*blockWidth+ortho[0]+blockWidth*0.5);
 	ghostPositions.setY(ortho[3]-(pGhosts->at(i*2))*blockHeight-blockHeight*0.5);
-	ghostsArray[i] = new Ghosts(ghostPositions, ghostsPersonality[i], blockHeight, blockWidth);
+	ghostsArray[i] = new Ghosts(ghostPositions, ghostsPersonality[i], blockHeight, blockWidth, pacmanArray[0]->currentPosition, mapHeight, mapWidth, obstacles);
     }
     
     //Set cookies
@@ -319,5 +348,6 @@ void GLWidget::receiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
 
 void GLWidget::setPacmanCommand(int aPacmanCommand)
 {
+    //TODO :modify pacman message to be able to receive up to two pacman actions
     pacmanArray[0]->action = static_cast<Pacman::Action>(aPacmanCommand);
 }

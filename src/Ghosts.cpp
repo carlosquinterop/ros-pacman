@@ -1,51 +1,28 @@
 #include "pacman/Ghosts.h"
 
-Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeight, int aWidth)
+Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, int *cObstacles)
 {
     mode = Mode::Scatter;
     currentPosition = initialPosition;
     character = aCharacter;
-    orientation = 0;
+    orientation = 180.0;
     height = aHeight;
     width = aWidth;
-    previousAction = Action::None;
     action = Action::None;
+    pacmanPosition = initialPacmanPosition;
+    mapHeight = cMapHeight;
+    mapWidth = cMapWidth;
+    obstacles = new int[(mapHeight)*(mapWidth)];
+    memcpy(obstacles, cObstacles, (mapHeight)*(mapWidth)*sizeof(int));
+        
     if (character == Ghosts::Personality::Shadow)
-    {
 	name = "Blinky";
-	upFileName = tr(":/resources/textures/redGhostUp.jpg");
-	downFileName = tr(":/resources/textures/redGhostDown.jpg");
-	rightFileName = tr(":/resources/textures/redGhostRight.jpg");
-	leftFileName = tr(":/resources/textures/redGhostLeft.jpg");
-	//targetPosition
-    }
     else if (character == Ghosts::Personality::Speedy)
-    {
 	name = "Pinky";
-	upFileName = tr(":/resources/textures/pinkGhostUp.jpg");
-	downFileName = tr(":/resources/textures/pinkGhostDown.jpg");
-	rightFileName = tr(":/resources/textures/pinkGhostRight.jpg");
-	leftFileName = tr(":/resources/textures/pinkGhostLeft.jpg");
-	//targetPosition
-    }
     else if (character == Ghosts::Personality::Bashful)
-    {
 	name = "Inky";
-	upFileName = tr(":/resources/textures/blueGhostUp.jpg");
-	downFileName = tr(":/resources/textures/blueGhostDown.jpg");
-	rightFileName = tr(":/resources/textures/blueGhostRight.jpg");
-	leftFileName = tr(":/resources/textures/blueGhostLeft.jpg");
-	//targetPosition
-    }
     else if (character == Ghosts::Personality::Pokey)
-    {
 	name = "Clyde";
-	upFileName = tr(":/resources/textures/orangeGhostUp.jpg");
-	downFileName = tr(":/resources/textures/orangeGhostDown.jpg");
-	rightFileName = tr(":/resources/textures/orangeGhostRight.jpg");
-	leftFileName = tr(":/resources/textures/orangeGhostLeft.jpg");
-	//targetPosition
-    }
     getTexId();
 }
 
@@ -99,4 +76,130 @@ int Ghosts::getTexId()
 	texId = -1;
     
     return texId;
+}
+
+void Ghosts::updateGhostPosition()
+{
+    int stepX = width;
+    int stepY = height;
+    if (action == Ghosts::Action::None)
+    {
+	QPoint coordLeft(currentPosition.x() - stepX, currentPosition.y());
+	QPoint coordRight(currentPosition.x() + stepX, currentPosition.y());
+	QPoint coordUp(currentPosition.x(), currentPosition.y() + stepY);
+	QPoint coordDown(currentPosition.x(), currentPosition.y() - stepY);
+	
+	if (obstacles[utilities.getIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordLeft, mapWidth)] != 1)
+	    action = Ghosts::Action::Left;
+	else if (obstacles[utilities.getIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordDown, mapWidth)] != 1)
+	    action = Ghosts::Action::Down;
+	else if (obstacles[utilities.getIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordRight, mapWidth)] != 1)
+	    action = Ghosts::Action::Right;
+	else if (obstacles[utilities.getIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordUp, mapWidth)] != 1)
+	    action = Ghosts::Action::Up;
+    }
+    else
+    {
+	QVector<Ghosts::Action> *possibleActions;
+	possibleActions = new QVector<Ghosts::Action>;
+	getPossibleActions(possibleActions);
+
+	if (possibleActions->size() == 1)
+	    action = possibleActions->at(0);
+	else if (possibleActions->size() == 2)
+	{
+	    if (!isPossibleAction(action, possibleActions))
+		action = possibleActions->at(rand() % possibleActions->size()); 
+	}
+	else if (possibleActions->size() >= 3)
+	{
+	    calculateTargetPosition();
+	    action = possibleActions->at(rand() % possibleActions->size());
+	}
+    }
+    
+    if (action == Ghosts::Action::Left)
+    {
+	currentPosition.setX(currentPosition.x() - stepX);
+	orientation = 180.0;
+    }
+    else if (action == Ghosts::Action::Right)
+    {
+	currentPosition.setX(currentPosition.x() + stepX);
+	orientation = 0.0;
+    }
+    else if (action == Ghosts::Action::Up)
+    {
+	currentPosition.setY(currentPosition.y() + stepY);
+	orientation = 90;
+    }
+    else if (action == Ghosts::Action::Down)
+    {
+	currentPosition.setY(currentPosition.y() - stepY);
+	orientation = 270;
+    }
+}
+
+void Ghosts::calculateTargetPosition()
+{
+    /*
+    if (character == Ghosts::Personality::Shadow)
+    {
+	targetPosition
+    }
+    else if (character == Ghosts::Personality::Speedy)
+    {
+	targetPosition
+    }
+    else if (character == Ghosts::Personality::Bashful)
+    {
+	targetPosition
+    }
+    else if (character == Ghosts::Personality::Pokey)
+    {
+	targetPosition
+    }*/
+}
+
+int Ghosts::getPossibleActions(QVector<Ghosts::Action>* possibleActions)
+{
+    QPoint coordLeft(currentPosition.x() - (int)(width*0.5) - 1, currentPosition.y());
+    QPoint coordDown(currentPosition.x(), currentPosition.y() - (int)(height*0.5) - 1);
+    QPoint coordRight(currentPosition.x() + (int)(width*0.5)  + 1, currentPosition.y());
+    QPoint coordUp(currentPosition.x(), currentPosition.y() + (int)(height*0.5) + 1);
+
+    if (obstacles[utilities.getIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordLeft, mapWidth)] != 1)
+	possibleActions->append(Ghosts::Action::Left);
+    if (obstacles[utilities.getIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordDown, mapWidth)] != 1)
+	possibleActions->append(Ghosts::Action::Down);
+    if (obstacles[utilities.getIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordRight, mapWidth)] != 1)
+	possibleActions->append(Ghosts::Action::Right);
+    if (obstacles[utilities.getIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordUp, mapWidth)] != 1)
+	possibleActions->append(Ghosts::Action::Up);
+}
+
+void Ghosts::printPossibleActions(QVector<Ghosts::Action>* possibleActions)
+{
+    for (int i = 0;i < possibleActions->size();i++)
+    {
+	if(possibleActions->at(i) == Ghosts::Action::Down)
+	    cout << "   Down at " << i << endl;
+	if(possibleActions->at(i) == Ghosts::Action::Left)
+	    cout << "   Left " << i << endl;
+	if(possibleActions->at(i) == Ghosts::Action::Up)
+	    cout << "   Up " << i << endl;
+	if(possibleActions->at(i) == Ghosts::Action::Right)
+	    cout << "   Right " << i << endl;
+    }
+}
+
+bool Ghosts::isPossibleAction(Ghosts::Action anAction, QVector<Ghosts::Action>* possibleActions)
+{
+    bool isPossible = false;
+    for (int i = 0;i < possibleActions->size();i++)
+    {
+	if (possibleActions->at(i) == anAction)
+	    isPossible |= true;
+    }
+    return isPossible;
 }

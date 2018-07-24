@@ -19,7 +19,6 @@ public:
     QPoint currentPosition;
     double orientation;
     Action action;
-    QString fileName;
     int height;
     int width;
 };

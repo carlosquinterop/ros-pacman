@@ -75,6 +75,7 @@ void Window::playSlot()
       maps->createMap(mapsList->currentText());
       mapsList->setEnabled(true);
     }
+    glWidget->togglePlaying();
 }
 void Window::updatePacmanPosSlot(QPoint pos)
 {

@@ -5,6 +5,8 @@
 #include <QObject>
 #include <QPoint>
 #include <math.h>
+#include "Utilities.h"
+#include <QVector>
 
 using namespace std;
 
@@ -16,21 +18,30 @@ public:
   enum class Mode {Chase, Scatter, Frightened};
     enum class Action {Up, Down, Right, Left, None};
     enum class Personality {Shadow, Speedy, Bashful, Pokey}; 
-    Ghosts(QPoint initialPosition, Ghosts::Personality character, int aHeight, int aWidth);
+    Ghosts(QPoint initialPosition, Ghosts::Personality character, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, int *cObstacles);
     int getTexId();
-    
+    void updateGhostPosition();
+    void calculateTargetPosition();
+    int getPossibleActions(QVector<Ghosts::Action> *possibleActions);
+    void printPossibleActions(QVector<Ghosts::Action>* possibleActions);
+    bool isPossibleAction(Ghosts::Action anAction, QVector<Ghosts::Action>* possibleActions);
+
     QPoint currentPosition;
     double orientation;
     Mode mode;
     QPoint targetPosition;
     Action action;
-    Action previousAction;
     QString name;
     Personality character;
-    QString upFileName, downFileName, rightFileName, leftFileName;
     int height;
     int width;
     int texId;
+    Utilities utilities;
+    
+    QPoint pacmanPosition;
+    int mapWidth, mapHeight;
+    int *obstacles;
+    
 };
 
 #endif

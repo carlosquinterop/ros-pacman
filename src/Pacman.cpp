@@ -6,6 +6,5 @@ Pacman::Pacman(QPoint initialPosition, double initialOrientation, int aHeight, i
     orientation = initialOrientation;
     height = aHeight;
     width = aWidth;
-    fileName = tr(":/resources/textures/pacman.jpeg");
     action = Pacman::Action::None;
 }
