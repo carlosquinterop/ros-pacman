@@ -262,13 +262,11 @@ void GLWidget::UpdateSimulationSlot()
     
     //Update ghost dynamics
     ghostsCoord = (QPoint*)malloc(sizeof(QPoint)*nGhosts);
-    if(allowToPlay)
+    for(int i = 0;i < nGhosts;i++)
     {
-	for(int i = 0;i < nGhosts;i++)
-	{
-	    ghostsArray[i]->UpdateGhostPosition();
-	    ghostsCoord[i] = ghostsArray[i]->currentPosition;
-	}	
+	if(allowToPlay)
+	  ghostsArray[i]->UpdateGhostPosition();
+	ghostsCoord[i] = ghostsArray[i]->currentPosition;
     }
     //TODO: emit signal here to send all ghost positions (transformed)
     emit UpdateGhostsPos(ghostsCoord, nGhosts);

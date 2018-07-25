@@ -43,7 +43,7 @@ Window::Window()
     int argc = 0;
     ros::init(argc, argv, "pacman_world");
     node = new ros::NodeHandle();
-    subscriber = node->subscribe("exampletopic", 100, &ListenMsgThread::callback, listenMsg);
+    subscriber = node->subscribe("pacmanActions", 100, &ListenMsgThread::callback, listenMsg);
     pacmanPublisher = node->advertise<pacman::pacmanPos>("pacmanCoord", 100);
     ghostPublisher = node->advertise<pacman::ghostsPos>("ghostsCoord",100);
     cookiesPublisher = node->advertise<pacman::cookiesPos>("cookiesCoord",100);
