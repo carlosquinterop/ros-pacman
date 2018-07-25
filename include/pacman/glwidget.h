@@ -12,6 +12,7 @@
 #include <QImage>
 #include "pacman/Ghosts.h"
 #include "pacman/Pacman.h"
+
 #include "Utilities.h"
 
 using namespace std;
@@ -59,12 +60,17 @@ private:
     Ghosts **ghostsArray;
     int sCookies;
     int sBonus;
+    QPoint *pacmanCoord;
     QPoint *cookiesCoord;
     QPoint *bonusCoord;
+    QPoint *ghostsCoord;
     Utilities utilities;
 
 signals:
-    void UpdatePacmanPos(QPoint coordPacman);
+    void UpdatePacmanPos(QPoint *pacmanCoord, int nPacman);
+    void UpdateGhostsPos(QPoint *ghostsCoord, int nGhosts);
+    void UpdateCookiesPos(QPoint *cookiesCoord, int sCookies);
+    void UpdateBonusPos(QPoint *bonusCoord, int sBonus);
 };
 
 #endif

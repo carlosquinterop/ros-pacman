@@ -20,7 +20,9 @@ FILES
 Num.msg
 pos.msg
 pacmanPos.msg
+ghostsPos.msg
 cookiesPos.msg
+bonusPos.msg
 )
 
 generate_messages(DEPENDENCIES std_msgs)
