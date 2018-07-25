@@ -1,1 +1,2 @@
-int32 cookiesPos
+int32 nCookies
+pos[] cookiesPos

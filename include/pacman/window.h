@@ -18,7 +18,11 @@
 #include "pacman/listenmsgthread.h"
 #include "ros/ros.h"
 #include "pacman/pacmanPos.h"
+#include "pacman/ghostsPos.h"
+#include "pacman/cookiesPos.h"
+#include "pacman/bonusPos.h"
 #include "pacman/pos.h"
+
 
 using namespace std;
 
@@ -43,7 +47,10 @@ protected:
 
 private slots:
     void PlaySlot();
-    void UpdatePacmanPosSlot(QPoint pos);
+    void UpdatePacmanPosSlot(QPoint* pos, int nPacman);
+    void UpdateGhostsPosSlot(QPoint* pos, int nGhosts);
+    void UpdateCookiesPosSlot(QPoint* pos, int nCookies);
+    void UpdateBonusPosSlot(QPoint* pos, int nBonus);
     
 private:
     GLWidget *glWidget;
@@ -59,8 +66,14 @@ private:
     ListenMsgThread *listenMsg;
     ros::NodeHandle *node;
     ros::Subscriber subscriber;
-    ros::Publisher publisher; 
-    pacman::pacmanPos msg;
+    ros::Publisher pacmanPublisher;
+    ros::Publisher ghostPublisher;
+    ros::Publisher cookiesPublisher;
+    ros::Publisher bonusPublisher;
+    pacman::pacmanPos msgPacman;
+    pacman::ghostsPos msgGhosts;
+    pacman::cookiesPos msgCookies;
+    pacman::bonusPos msgBonus;
     
 signals:
     void ArrowKey(int key);

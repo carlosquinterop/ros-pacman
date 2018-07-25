@@ -252,35 +252,40 @@ void GLWidget::resizeGL(int w, int h)
 void GLWidget::UpdateSimulationSlot()
 {
     //Update pacman dynamics
+    pacmanCoord = (QPoint*)malloc(sizeof(QPoint)*nPacman);
     for(int i = 0;i < nPacman;i++)
     {
 	UpdatePacmanPosition(i);
-	//TODO: change this signal to send all pacman positions (transformed)
-	emit UpdatePacmanPos(pacmanArray[i]->currentPosition);
+	pacmanCoord[i] = pacmanArray[i]->currentPosition;
     }
+    emit UpdatePacmanPos(pacmanCoord, nPacman);
     
     //Update ghost dynamics
+    ghostsCoord = (QPoint*)malloc(sizeof(QPoint)*nGhosts);
     if(allowToPlay)
     {
 	for(int i = 0;i < nGhosts;i++)
 	{
 	    ghostsArray[i]->UpdateGhostPosition();
-	}
-	//TODO: emit signal here to send all ghost positions (transformed)
+	    ghostsCoord[i] = ghostsArray[i]->currentPosition;
+	}	
     }
+    //TODO: emit signal here to send all ghost positions (transformed)
+    emit UpdateGhostsPos(ghostsCoord, nGhosts);
     
     //TODO
     //Update cookies
 	//For each cookie
 	  //Check if any pacman position equals the i-th cookie position and remove if necessary
 	//emit signal here to send all cookie positions (transformed)
-	
+    emit UpdateCookiesPos(cookiesCoord, sCookies);
+    
     //TODO
     //Update Bonuses
     //For each bonus
 	  //Check if any pacman position equals the i-th bonus position and remove if necessary
 	//emit signal here to send all bonus positions (transformed)
-    
+    emit UpdateBonusPos(bonusCoord, sBonus);
     //Schedule paintGL()
     update();
 }

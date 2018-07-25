@@ -24,7 +24,10 @@ Window::Window()
     connect(maps, SIGNAL(SendMapData(int, int, QImage*, int*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, int*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(UpdateSimulationSlot()));
     connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(SetPacmanCommand(int)));
-    connect(glWidget, SIGNAL(UpdatePacmanPos(QPoint)), this, SLOT(UpdatePacmanPosSlot(QPoint)));
+    connect(glWidget, SIGNAL(UpdatePacmanPos(QPoint*, int)), this, SLOT(UpdatePacmanPosSlot(QPoint*, int)));
+    connect(glWidget, SIGNAL(UpdateGhostsPos(QPoint*, int)), this, SLOT(UpdateGhostsPosSlot(QPoint*, int)));
+    connect(glWidget, SIGNAL(UpdateCookiesPos(QPoint*, int)), this, SLOT(UpdateCookiesPosSlot(QPoint*, int)));
+    connect(glWidget, SIGNAL(UpdateBonusPos(QPoint*, int)), this, SLOT(UpdateBonusPosSlot(QPoint*, int)));
     
     refreshTimer->start(refreshTimeMs);
     container->addWidget(glWidget);
@@ -41,8 +44,10 @@ Window::Window()
     ros::init(argc, argv, "pacman_world");
     node = new ros::NodeHandle();
     subscriber = node->subscribe("exampletopic", 100, &ListenMsgThread::callback, listenMsg);
-    publisher = node->advertise<pacman::pacmanPos>("pacmanCoord", 100);
-     
+    pacmanPublisher = node->advertise<pacman::pacmanPos>("pacmanCoord", 100);
+    ghostPublisher = node->advertise<pacman::ghostsPos>("ghostsCoord",100);
+    cookiesPublisher = node->advertise<pacman::cookiesPos>("cookiesCoord",100);
+    bonusPublisher = node->advertise<pacman::bonusPos>("bonusCoord",100); 
     listenMsg->start();  
 }
 
@@ -77,10 +82,48 @@ void Window::PlaySlot()
     }
     glWidget->TogglePlaying();
 }
-void Window::UpdatePacmanPosSlot(QPoint pos)
+void Window::UpdatePacmanPosSlot(QPoint* pos, int nPacman)
 {
-    msg.pacmanPos.x = pos.x();
-    msg.pacmanPos.y = pos.y();
-    publisher.publish(msg);
-    //ROS_INFO("%d", msg.pacmanPos.x);
+  msgPacman.pacmanPos.resize(nPacman);
+  for(int i = 0; i < nPacman; i++)
+  {
+    msgPacman.pacmanPos[i].x = pos[i].x(); 
+    msgPacman.pacmanPos[i].y = pos[i].y();
+  }
+  msgPacman.nPacman = nPacman;
+  pacmanPublisher.publish(msgPacman);
+}
+void Window::UpdateGhostsPosSlot(QPoint* pos, int nGhosts)
+{
+  msgGhosts.ghostsPos.resize(nGhosts);
+  for(int i = 0; i < nGhosts; i++)
+  {
+    msgGhosts.ghostsPos[i].x = pos[i].x(); 
+    msgGhosts.ghostsPos[i].y = pos[i].y();
+  }
+  msgGhosts.nGhosts = nGhosts;
+  ghostPublisher.publish(msgGhosts);
+}
+void Window::UpdateCookiesPosSlot(QPoint* pos, int nCookies)
+{
+  msgCookies.cookiesPos.resize(nCookies);
+  for(int i = 0; i < nCookies; i++)
+  {
+    msgCookies.cookiesPos[i].x = pos[i].x();
+    msgCookies.cookiesPos[i].y = pos[i].y();
+  }
+  msgCookies.nCookies = nCookies;
+  cookiesPublisher.publish(msgCookies);
+}
+void Window::UpdateBonusPosSlot(QPoint* pos, int nBonus)
+{
+  msgBonus.bonusPos.resize(nBonus);
+  for(int i = 0; i < nBonus; i++)
+  {
+    msgBonus.bonusPos[i].x = pos[i].x();
+    msgBonus.bonusPos[i].y = pos[i].y();
+  }
+  msgBonus.nBonus = nBonus;
+  bonusPublisher.publish(msgBonus);
+  //printf("nBonus : %d \n",nBonus);
 }

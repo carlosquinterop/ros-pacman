@@ -1,1 +1,2 @@
-pos pacmanPos
+int32 nPacman
+pos[] pacmanPos
