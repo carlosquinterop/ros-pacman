@@ -24,6 +24,8 @@ class Maps : public QWidget
 
 public:
     Maps(QWidget *parent = 0);
+    int getWidth();
+    int getHeight();
     
 private:
     QByteArray File2ArrayMap(QString fileName, int &colsText, int &rowsText);
@@ -31,6 +33,7 @@ private:
     void PrintObstaclesArray();
     void CreateImageFromObstaclesArray();
     void SaveImage(QString fileName);
+
    
 private:
     int rows, cols;

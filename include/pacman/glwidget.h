@@ -25,8 +25,6 @@ class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 public:
     GLWidget(QWidget *parent = 0);
     ~GLWidget();
-    QSize minimumSizeHint() const override;
-    QSize sizeHint() const override;
     void LoadTexture (QImage* img);
     void LoadNewTexture (QImage* img);
     void DrawMap();

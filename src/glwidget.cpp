@@ -22,16 +22,6 @@ GLWidget::~GLWidget()
 
 }
 
-QSize GLWidget::minimumSizeHint() const
-{
-    return QSize(50, 50);
-}
-
-QSize GLWidget::sizeHint() const
-{
-    return QSize(mapWidth, mapHeight);
-}
-
 void GLWidget::LoadTexture (QImage* img)
 {
     GLuint tex;
@@ -259,7 +249,7 @@ void GLWidget::paintGL()
 
 void GLWidget::resizeGL(int w, int h)
 {
-    glViewport(0, 0, w, h);
+    //glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(ortho[0], ortho[1], ortho[2], ortho[3], -10, 10);
@@ -390,7 +380,7 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     {
 	bonusCoord[i].setX(pBonus->at(i*2 + 1)*blockWidth+ortho[0]+blockWidth*0.5);
 	bonusCoord[i].setY(ortho[3]-(pBonus->at(i*2))*blockHeight-blockHeight*0.5);
-    }    
+    }
     update();
 }
 
