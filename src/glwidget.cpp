@@ -157,7 +157,7 @@ void GLWidget::DrawCircle(float x, float y, float radius, float red, float green
 }
 
 void GLWidget::TogglePlaying()
-{
+{/*
     if (allowToPlay)
     {
       allowToPlay = false;
@@ -169,7 +169,7 @@ void GLWidget::TogglePlaying()
       ghostModeTimer->start(ghostModeTimes[contGhostModePhases]);
       contGhostModePhases++;
       allowToPlay = true;
-    }
+    }*/
 }
 
 void GLWidget::UpdatePacmanPosition(int i)
