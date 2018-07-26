@@ -24,10 +24,10 @@ Window::Window()
     connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(UpdateSimulationSlot()));
     connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(SetPacmanCommand(int)));
-    connect(glWidget, SIGNAL(UpdatePacmanPos(QPoint*, int)), this, SLOT(UpdatePacmanPosSlot(QPoint*, int)));
-    connect(glWidget, SIGNAL(UpdateGhostsPos(QVector<QPoint>*, int)), this, SLOT(UpdateGhostsPosSlot(QVector<QPoint>*, int)));
-    connect(glWidget, SIGNAL(UpdateCookiesPos(QVector<QPoint>*, int)), this, SLOT(UpdateCookiesPosSlot(QVector<QPoint>*, int)));
-    connect(glWidget, SIGNAL(UpdateBonusPos(QVector<QPoint>*, int)), this, SLOT(UpdateBonusPosSlot(QVector<QPoint>*, int)));
+    connect(glWidget, SIGNAL(UpdatePacmanPos(QVector<QPoint>*)), this, SLOT(UpdatePacmanPosSlot(QVector<QPoint>*)));
+    connect(glWidget, SIGNAL(UpdateGhostsPos(QVector<QPoint>*)), this, SLOT(UpdateGhostsPosSlot(QVector<QPoint>*)));
+    connect(glWidget, SIGNAL(UpdateCookiesPos(QVector<QPoint>*)), this, SLOT(UpdateCookiesPosSlot(QVector<QPoint>*)));
+    connect(glWidget, SIGNAL(UpdateBonusPos(QVector<QPoint>*)), this, SLOT(UpdateBonusPosSlot(QVector<QPoint>*)));
     
     refreshTimer->start(refreshTimeMs);
     container->addWidget(glWidget);
@@ -82,48 +82,47 @@ void Window::PlaySlot()
     }
     glWidget->TogglePlaying();
 }
-void Window::UpdatePacmanPosSlot(QPoint* pos, int nPacman)
+void Window::UpdatePacmanPosSlot(QVector<QPoint>* pos)
 {
-  msgPacman.pacmanPos.resize(nPacman);
-  for(int i = 0; i < nPacman; i++)
+  msgPacman.pacmanPos.resize(pos->size());
+  for(int i = 0; i < pos->size(); i++)
   {
-    msgPacman.pacmanPos[i].x = pos[i].x(); 
-    msgPacman.pacmanPos[i].y = pos[i].y();
+    msgPacman.pacmanPos[i].x = pos->at(i).x(); 
+    msgPacman.pacmanPos[i].y = pos->at(i).y();
   }
-  msgPacman.nPacman = nPacman;
+  msgPacman.nPacman = pos->size();
   pacmanPublisher.publish(msgPacman);
 }
-void Window::UpdateGhostsPosSlot(QVector<QPoint>* pos, int nGhosts)
+void Window::UpdateGhostsPosSlot(QVector<QPoint>* pos)
 {
-  msgGhosts.ghostsPos.resize(nGhosts);
-  for(int i = 0; i < nGhosts; i++)
+  msgGhosts.ghostsPos.resize(pos->size());
+  for(int i = 0; i < pos->size(); i++)
   {
     msgGhosts.ghostsPos[i].x = pos->at(i).x(); 
     msgGhosts.ghostsPos[i].y = pos->at(i).y();
   }
-  msgGhosts.nGhosts = nGhosts;
+  msgGhosts.nGhosts = pos->size();
   ghostPublisher.publish(msgGhosts);
 }
-void Window::UpdateCookiesPosSlot(QVector<QPoint>* pos, int nCookies)
+void Window::UpdateCookiesPosSlot(QVector<QPoint>* pos)
 {
-  msgCookies.cookiesPos.resize(nCookies);
-  for(int i = 0; i < nCookies; i++)
+  msgCookies.cookiesPos.resize(pos->size());
+  for(int i = 0; i < pos->size(); i++)
   {
     msgCookies.cookiesPos[i].x = pos->at(i).x();
     msgCookies.cookiesPos[i].y = pos->at(i).y();
   }
-  msgCookies.nCookies = nCookies;
+  msgCookies.nCookies = pos->size();
   cookiesPublisher.publish(msgCookies);
 }
-void Window::UpdateBonusPosSlot(QVector<QPoint>* pos, int nBonus)
+void Window::UpdateBonusPosSlot(QVector<QPoint>* pos)
 {
-  msgBonus.bonusPos.resize(nBonus);
-  for(int i = 0; i < nBonus; i++)
+  msgBonus.bonusPos.resize(pos->size());
+  for(int i = 0; i < pos->size(); i++)
   {
     msgBonus.bonusPos[i].x = pos->at(i).x();
     msgBonus.bonusPos[i].y = pos->at(i).y();
   }
-  msgBonus.nBonus = nBonus;
+  msgBonus.nBonus = pos->size();
   bonusPublisher.publish(msgBonus);
-  //printf("nBonus : %d \n",nBonus);
 }

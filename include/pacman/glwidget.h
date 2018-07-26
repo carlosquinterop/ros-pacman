@@ -68,17 +68,17 @@ private:
     QTimer *frightenedGhostModeTimer;
     const int frightenedModeTimeMs = 10000;
     bool isInFrightenedMode;
-    QPoint *pacmanCoord;
+    QVector<QPoint> *pacmanCoord;
+    QVector<QPoint> *ghostsCoord;
     QVector<QPoint> *cookiesCoord;
     QVector<QPoint> *bonusCoord;
-    QVector<QPoint> *ghostsCoord;
     Utilities utilities;
 
 signals:
-    void UpdatePacmanPos(QPoint *pacmanCoord, int nPacman);
-    void UpdateGhostsPos(QVector<QPoint> *ghostsCoord, int nGhosts);
-    void UpdateCookiesPos(QVector<QPoint> *cookiesCoord, int sCookies);
-    void UpdateBonusPos(QVector<QPoint> *bonusCoord, int sBonus);
+    void UpdatePacmanPos(QVector<QPoint> *pacmanCoord);
+    void UpdateGhostsPos(QVector<QPoint> *ghostsCoord);
+    void UpdateCookiesPos(QVector<QPoint> *cookiesCoord);
+    void UpdateBonusPos(QVector<QPoint> *bonusCoord);
 };
 
 #endif

@@ -47,10 +47,10 @@ protected:
 
 private slots:
     void PlaySlot();
-    void UpdatePacmanPosSlot(QPoint* pos, int nPacman);
-    void UpdateGhostsPosSlot(QVector<QPoint>* pos, int nGhosts);
-    void UpdateCookiesPosSlot(QVector<QPoint>* pos, int nCookies);
-    void UpdateBonusPosSlot(QVector<QPoint>* pos, int nBonus);
+    void UpdatePacmanPosSlot(QVector<QPoint>* pos);
+    void UpdateGhostsPosSlot(QVector<QPoint>* pos);
+    void UpdateCookiesPosSlot(QVector<QPoint>* pos);
+    void UpdateBonusPosSlot(QVector<QPoint>* pos);
     
 private:
     GLWidget *glWidget;
