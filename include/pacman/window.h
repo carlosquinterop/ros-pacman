@@ -62,7 +62,7 @@ private:
     QHBoxLayout *container;
     bool allowPlay;
     QTimer *refreshTimer;
-    const int refreshTimeMs = 200;
+    const int refreshTimeMs = 150;
     ListenMsgThread *listenMsg;
     ros::NodeHandle *node;
     ros::Subscriber subscriber;

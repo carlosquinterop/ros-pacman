@@ -7,9 +7,14 @@ GLWidget::GLWidget(QWidget *parent)
     nPacman = 0;
     nGhosts = 0;
     ghostModeTimer = new QTimer();
+    frightenedGhostModeTimer = new QTimer();
     ghostModeTimer->setSingleShot(true);
+    frightenedGhostModeTimer->setSingleShot(true);
     connect(ghostModeTimer, SIGNAL(timeout()), this, SLOT(ToggleGhostModeSlot()));
+    connect(frightenedGhostModeTimer, SIGNAL(timeout()), this, SLOT(EndOfFrightenedGhostModeSlot()));
     contGhostModePhases = 0;
+    ghostRemainingTime = 0;
+    isInFrightenedMode = false;
 }
 
 GLWidget::~GLWidget()
@@ -47,7 +52,7 @@ void GLWidget::LoadNewTexture (QImage* img)
     QImage t = (img->convertToFormat(QImage::Format_RGBA8888)).mirrored();
     glGenTextures(1, &tex); // Obtain an id for the texture
     glBindTexture(GL_TEXTURE_2D, tex); // Set as the current texture
-    texIds[17] = tex;	
+    texIds[18] = tex;	
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.width(), t.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glDisable(GL_TEXTURE_2D);
@@ -57,7 +62,7 @@ void GLWidget::DrawMap()
 {
     glColor3f(0.7, 0.7, 0.7);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texIds[17]);
+    glBindTexture(GL_TEXTURE_2D, texIds[18]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0f, 0.0f);
     glVertex2f  (-0.5*mapWidth, -0.5*mapHeight);
@@ -232,6 +237,7 @@ void GLWidget::initializeGL()
     LoadTexture(new QImage(tr(":/resources/textures/orangeGhostDown.png")));
     LoadTexture(new QImage(tr(":/resources/textures/orangeGhostRight.png")));
     LoadTexture(new QImage(tr(":/resources/textures/orangeGhostLeft.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/frightenedGhost.png")));
     LoadTexture(_mapImage);
 }
 
@@ -294,8 +300,35 @@ void GLWidget::UpdateSimulationSlot()
     //Update Bonuses
     //For each bonus
 	  //Check if any pacman position equals the i-th bonus position and remove if necessary
-	//emit signal here to send all bonus positions (transformed)
+    bool enterFrigthenedMode = false;
+    for(int i = 0;i < sBonus;i++)
+    {
+	for(int j = 0;j < nPacman;j++)
+	{
+	    if (pacmanCoord[j] == bonusCoord[i])
+		enterFrigthenedMode |= true;
+	}      
+    }
+    
+    if (enterFrigthenedMode && !isInFrightenedMode)
+    {
+	isInFrightenedMode = true;
+	ghostRemainingTime = ghostModeTimer->remainingTime();
+	
+	if (ghostRemainingTime > 0)
+	    ghostModeTimer->stop();
+	
+	frightenedGhostModeTimer->start(frightenedModeTimeMs);
+	
+	for(int i = 0;i < nGhosts;i++)
+	    ghostsArray[i]->SetFrigthenedMode();
+    }
+    else if (enterFrigthenedMode && isInFrightenedMode)
+	frightenedGhostModeTimer->start(frightenedModeTimeMs);
+    
+    //emit signal here to send all bonus positions (transformed)
     emit UpdateBonusPos(bonusCoord, sBonus);
+    
     //Schedule paintGL()
     update();
 }
@@ -371,10 +404,22 @@ void GLWidget::ToggleGhostModeSlot()
 {
     for(int i = 0;i < nGhosts;i++)
 	ghostsArray[i]->ToggleMode();
- 
+    
     if (contGhostModePhases < 8)
     {
 	ghostModeTimer->start(ghostModeTimes[contGhostModePhases]);
 	contGhostModePhases++;
     }
+    isInFrightenedMode = false;
+}
+
+void GLWidget::EndOfFrightenedGhostModeSlot()
+{
+    for(int i = 0;i < nGhosts;i++)
+	ghostsArray[i]->RecoverFromFrigthenedMode();
+    
+    if ((contGhostModePhases < 8) && (ghostRemainingTime > 0))
+	ghostModeTimer->start(ghostRemainingTime);
+    
+    isInFrightenedMode = false;
 }

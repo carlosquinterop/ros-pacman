@@ -17,5 +17,6 @@
         <file>textures/orangeGhostDown.png</file>
         <file>textures/orangeGhostRight.png</file>
         <file>textures/orangeGhostLeft.png</file>
+	<file>textures/frightenedGhost.png</file>
     </qresource>
 </RCC>

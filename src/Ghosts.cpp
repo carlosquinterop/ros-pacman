@@ -3,6 +3,7 @@
 Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, int *cObstacles)
 {
     mode = Mode::Frightened;
+    previousMode = Mode::Frightened;
     currentPosition = initialPosition;
     character = aCharacter;
     orientation = 180.0;
@@ -41,7 +42,9 @@ Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeig
 
 int Ghosts::GetTexId()
 {
-    if (character == Ghosts::Personality::Shadow)
+    if (mode == Mode::Frightened)
+	texId = 17;
+    else if (character == Ghosts::Personality::Shadow)
     { 
 	if (orientation == 90)
 	    texId = 1;
@@ -159,22 +162,34 @@ void Ghosts::UpdateGhostPosition(QPoint newPacmanPosition, double newPacmanOrien
     if (action == Ghosts::Action::Left)
     {
 	currentPosition.setX(currentPosition.x() - stepX);
-	orientation = 180.0;
+	if (mode == Mode::Frightened)
+	    orientation = 0;
+	else
+	    orientation = 180.0;
     }
     else if (action == Ghosts::Action::Right)
     {
 	currentPosition.setX(currentPosition.x() + stepX);
-	orientation = 0.0;
+	if (mode == Mode::Frightened)
+	    orientation = 0;
+	else
+	    orientation = 0.0;
     }
     else if (action == Ghosts::Action::Up)
     {
 	currentPosition.setY(currentPosition.y() + stepY);
-	orientation = 90;
+	if (mode == Mode::Frightened)
+	    orientation = 0;
+	else
+	    orientation = 90;
     }
     else if (action == Ghosts::Action::Down)
     {
 	currentPosition.setY(currentPosition.y() - stepY);
-	orientation = 270;
+	if (mode == Mode::Frightened)
+	    orientation = 0;
+	else
+	    orientation = 270;
     }
 }
 
@@ -182,7 +197,7 @@ void Ghosts::CalculateTargetPosition()
 {
     if (mode == Mode::Scatter)
 	targetPosition = scatterTargetPosition;
-    else
+    else if (mode == Mode::Chase)
     {
 	if (character == Ghosts::Personality::Shadow)
 	    targetPosition = pacmanPosition;
@@ -309,15 +324,10 @@ void Ghosts::DeleteReverseAction(Ghosts::Action anAction, QVector< Ghosts::Actio
 void Ghosts::ToggleMode()
 {
     if (mode == Ghosts::Mode::Scatter)
-    {
 	mode = Ghosts::Mode::Chase;
-	//cout << "Chase" << endl;
-    }
     else
-    {
 	mode = Ghosts::Mode::Scatter;
-	//cout << "Scatter" << endl;
-    }
+    
     changedMode = true;
 }
 
@@ -354,4 +364,16 @@ void Ghosts::ComputeGhostDecision(QVector<Ghosts::Action> *possibleActions)
 	    minDist = utilities.ComputeDistanceBetweenPoints(futurePosition, targetPosition);
 	}
     }
+}
+
+void Ghosts::SetFrigthenedMode()
+{
+    if (mode != Mode::Frightened)
+	previousMode = mode;
+    mode = Mode::Frightened;
+}
+
+void Ghosts::RecoverFromFrigthenedMode()
+{
+    mode = previousMode;
 }

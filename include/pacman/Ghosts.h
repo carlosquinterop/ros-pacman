@@ -28,10 +28,13 @@ public:
     void DeleteReverseAction(Ghosts::Action anAction, QVector<Ghosts::Action>* possibleActions);
     void ToggleMode();
     void ComputeGhostDecision(QVector<Ghosts::Action> *possibleActions);
+    void SetFrigthenedMode();
+    void RecoverFromFrigthenedMode();
     
     QPoint currentPosition;
     double orientation;
     Mode mode;
+    Mode previousMode;
     QPoint targetPosition;
     QPoint scatterTargetPosition;
     Action action;

@@ -48,6 +48,7 @@ private slots:
     void ReceiveMapDataGL(int blockWidht, int blockHeight, QImage* mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
     void SetPacmanCommand(int aPacmanCommand);
     void ToggleGhostModeSlot();
+    void EndOfFrightenedGhostModeSlot();
     
 private:
     bool allowToPlay;
@@ -62,7 +63,11 @@ private:
     Ghosts **ghostsArray;
     QTimer *ghostModeTimer;
     const int ghostModeTimes[8] = {3000, 7000, 20000, 7000, 20000, 5000, 20000, 5000};
+    int ghostRemainingTime;
     int contGhostModePhases;
+    QTimer *frightenedGhostModeTimer;
+    const int frightenedModeTimeMs = 10000;
+    bool isInFrightenedMode;
     int sCookies;
     int sBonus;
     QPoint *pacmanCoord;
