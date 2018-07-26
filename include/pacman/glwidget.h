@@ -12,6 +12,7 @@
 #include <QImage>
 #include "pacman/Ghosts.h"
 #include "pacman/Pacman.h"
+#include <QTimer>
 
 #include "Utilities.h"
 
@@ -46,7 +47,8 @@ private slots:
     void UpdateSimulationSlot();
     void ReceiveMapDataGL(int blockWidht, int blockHeight, QImage* mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
     void SetPacmanCommand(int aPacmanCommand);
-   
+    void ToggleGhostModeSlot();
+    
 private:
     bool allowToPlay;
     QImage *_mapImage;  
@@ -58,6 +60,9 @@ private:
     Pacman **pacmanArray;
     int nGhosts;
     Ghosts **ghostsArray;
+    QTimer *ghostModeTimer;
+    const int ghostModeTimes[8] = {3000, 7000, 20000, 7000, 20000, 5000, 20000, 5000};
+    int contGhostModePhases;
     int sCookies;
     int sBonus;
     QPoint *pacmanCoord;

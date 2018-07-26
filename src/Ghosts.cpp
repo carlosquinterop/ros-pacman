@@ -2,7 +2,7 @@
 
 Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, int *cObstacles)
 {
-    mode = Mode::Scatter;
+    mode = Mode::Frightened;
     currentPosition = initialPosition;
     character = aCharacter;
     orientation = 180.0;
@@ -12,17 +12,30 @@ Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeig
     pacmanPosition = initialPacmanPosition;
     mapHeight = cMapHeight;
     mapWidth = cMapWidth;
+    changedMode = false;
     obstacles = new int[(mapHeight)*(mapWidth)];
     memcpy(obstacles, cObstacles, (mapHeight)*(mapWidth)*sizeof(int));
         
     if (character == Ghosts::Personality::Shadow)
+    {
 	name = "Blinky";
+	scatterTargetPosition = QPoint(0.5*mapWidth - width, 0.5*mapHeight + height);
+    }
     else if (character == Ghosts::Personality::Speedy)
+    {
 	name = "Pinky";
+	scatterTargetPosition = QPoint(-0.5*mapWidth + width, 0.5*mapHeight + height);
+    }
     else if (character == Ghosts::Personality::Bashful)
+    {
 	name = "Inky";
+	scatterTargetPosition = QPoint(0.5*mapWidth, -0.5*mapHeight - height);
+    }
     else if (character == Ghosts::Personality::Pokey)
+    {
 	name = "Clyde";
+	scatterTargetPosition = QPoint(-0.5*mapWidth, -0.5*mapHeight - height);
+    }
     GetTexId();
 }
 
@@ -78,10 +91,14 @@ int Ghosts::GetTexId()
     return texId;
 }
 
-void Ghosts::UpdateGhostPosition()
+void Ghosts::UpdateGhostPosition(QPoint newPacmanPosition, double newPacmanOrientation, QPoint newBlinkysPosition)
 {
     int stepX = width;
     int stepY = height;
+    pacmanPosition = newPacmanPosition;
+    pacmanOrientation = newPacmanOrientation;
+    blinkysPosition = newBlinkysPosition;
+    
     if (action == Ghosts::Action::None)
     {
 	QPoint coordLeft(currentPosition.x() - stepX, currentPosition.y());
@@ -89,32 +106,53 @@ void Ghosts::UpdateGhostPosition()
 	QPoint coordUp(currentPosition.x(), currentPosition.y() + stepY);
 	QPoint coordDown(currentPosition.x(), currentPosition.y() - stepY);
 	
-	if (obstacles[utilities.getIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordLeft, mapWidth)] != 1)
+	if (obstacles[utilities.GetIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordLeft, mapWidth)] != 1)
 	    action = Ghosts::Action::Left;
-	else if (obstacles[utilities.getIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordDown, mapWidth)] != 1)
+	else if (obstacles[utilities.GetIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordDown, mapWidth)] != 1)
 	    action = Ghosts::Action::Down;
-	else if (obstacles[utilities.getIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordRight, mapWidth)] != 1)
+	else if (obstacles[utilities.GetIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordRight, mapWidth)] != 1)
 	    action = Ghosts::Action::Right;
-	else if (obstacles[utilities.getIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordUp, mapWidth)] != 1)
+	else if (obstacles[utilities.GetIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordUp, mapWidth)] != 1)
 	    action = Ghosts::Action::Up;
     }
     else
-    {
-	QVector<Ghosts::Action> *possibleActions;
-	possibleActions = new QVector<Ghosts::Action>;
-	GetPossibleActions(possibleActions);
+    {	
+	if (!changedMode)
+	{
+	    QVector<Ghosts::Action> *possibleActions;
+	    possibleActions = new QVector<Ghosts::Action>;
+	    GetPossibleActions(possibleActions);
 
-	if (possibleActions->size() == 1)
-	    action = possibleActions->at(0);
-	else if (possibleActions->size() == 2)
-	{
-	    if (!IsPossibleAction(action, possibleActions))
-		action = possibleActions->at(rand() % possibleActions->size()); 
+	    if (possibleActions->size() == 1)
+		action = possibleActions->at(0);
+	    else if (possibleActions->size() == 2)
+	    {
+		DeleteReverseAction(action, possibleActions);
+		action = possibleActions->at(0); 
+	    }
+	    else if (possibleActions->size() > 2)
+	    {
+		DeleteReverseAction(action, possibleActions);
+		if (mode == Mode::Frightened)
+		    action = possibleActions->at(rand() % possibleActions->size());
+		else
+		{
+		    CalculateTargetPosition();
+		    ComputeGhostDecision(possibleActions);
+		}    
+	     }
 	}
-	else if (possibleActions->size() >= 3)
+	else
 	{
-	    CalculateTargetPosition();
-	    action = possibleActions->at(rand() % possibleActions->size());
+	    if(action == Ghosts::Action::Down)
+	       action = Ghosts::Action::Up;
+	    else if(action == Ghosts::Action::Up)
+		action = Ghosts::Action::Down;
+	    else if(action == Ghosts::Action::Right)
+		action = Ghosts::Action::Left;
+	    else if(action == Ghosts::Action::Left)
+		action = Ghosts::Action::Right;
+	    changedMode = false;
 	}
     }
     
@@ -142,23 +180,68 @@ void Ghosts::UpdateGhostPosition()
 
 void Ghosts::CalculateTargetPosition()
 {
-    /*
-    if (character == Ghosts::Personality::Shadow)
+    if (mode == Mode::Scatter)
+	targetPosition = scatterTargetPosition;
+    else
     {
-	targetPosition
+	if (character == Ghosts::Personality::Shadow)
+	    targetPosition = pacmanPosition;
+	else if (character == Ghosts::Personality::Speedy)
+	{
+	    if (pacmanOrientation == 0.0)
+	    {
+		targetPosition = pacmanPosition;
+		targetPosition.setX(targetPosition.x() + 4*width); 
+	    }
+	    else if (pacmanOrientation == 90.0)
+	    {
+		targetPosition = pacmanPosition;
+		targetPosition.setY(targetPosition.y() + 4*height); 
+	    }
+	    else if (pacmanOrientation == 180.0)
+	    {
+		targetPosition = pacmanPosition;
+		targetPosition.setX(targetPosition.x() - 4*width); 
+	    }
+	    else if (pacmanOrientation == 270.0)
+	    {
+		targetPosition = pacmanPosition;
+		targetPosition.setY(targetPosition.y() - 4*height); 
+	    }
+	}
+	else if (character == Ghosts::Personality::Bashful)
+	{
+	    if (pacmanOrientation == 0.0)
+	    {
+		targetPosition = pacmanPosition;
+		targetPosition.setX(targetPosition.x() + 2*width);
+	    }
+	    else if (pacmanOrientation == 90.0)
+	    {
+		targetPosition = pacmanPosition;
+		targetPosition.setY(targetPosition.y() + 2*height); 
+	    }
+	    else if (pacmanOrientation == 180.0)
+	    {
+		targetPosition = pacmanPosition;
+		targetPosition.setX(targetPosition.x() - 2*width); 
+	    }
+	    else if (pacmanOrientation == 270.0)
+	    {
+		targetPosition = pacmanPosition;
+		targetPosition.setY(targetPosition.y() - 2*height); 
+	    }
+	    targetPosition += QPoint(targetPosition.x() - blinkysPosition.x(), targetPosition.y() - blinkysPosition.y());
+	}
+	else if (character == Ghosts::Personality::Pokey)
+	{
+	    int distanceToPacman = utilities.ComputeDistanceBetweenPoints(pacmanPosition, currentPosition);
+	    if (distanceToPacman > 8*width)
+		targetPosition = pacmanPosition;
+	    else
+		targetPosition = scatterTargetPosition;
+	}
     }
-    else if (character == Ghosts::Personality::Speedy)
-    {
-	targetPosition
-    }
-    else if (character == Ghosts::Personality::Bashful)
-    {
-	targetPosition
-    }
-    else if (character == Ghosts::Personality::Pokey)
-    {
-	targetPosition
-    }*/
 }
 
 int Ghosts::GetPossibleActions(QVector<Ghosts::Action>* possibleActions)
@@ -168,13 +251,13 @@ int Ghosts::GetPossibleActions(QVector<Ghosts::Action>* possibleActions)
     QPoint coordRight(currentPosition.x() + (int)(width*0.5)  + 1, currentPosition.y());
     QPoint coordUp(currentPosition.x(), currentPosition.y() + (int)(height*0.5) + 1);
 
-    if (obstacles[utilities.getIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordLeft, mapWidth)] != 1)
+    if (obstacles[utilities.GetIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordLeft, mapWidth)] != 1)
 	possibleActions->append(Ghosts::Action::Left);
-    if (obstacles[utilities.getIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordDown, mapWidth)] != 1)
+    if (obstacles[utilities.GetIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordDown, mapWidth)] != 1)
 	possibleActions->append(Ghosts::Action::Down);
-    if (obstacles[utilities.getIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordRight, mapWidth)] != 1)
+    if (obstacles[utilities.GetIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordRight, mapWidth)] != 1)
 	possibleActions->append(Ghosts::Action::Right);
-    if (obstacles[utilities.getIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.getIndexColFromCoord(coordUp, mapWidth)] != 1)
+    if (obstacles[utilities.GetIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordUp, mapWidth)] != 1)
 	possibleActions->append(Ghosts::Action::Up);
 }
 
@@ -202,4 +285,73 @@ bool Ghosts::IsPossibleAction(Ghosts::Action anAction, QVector<Ghosts::Action>* 
 	    isPossible |= true;
     }
     return isPossible;
+}
+
+void Ghosts::DeleteReverseAction(Ghosts::Action anAction, QVector< Ghosts::Action >* possibleActions)
+{
+    Ghosts::Action reverseAction = Ghosts::Action::None;
+    if(action == Ghosts::Action::Down)
+	reverseAction = Ghosts::Action::Up;
+    else if(action == Ghosts::Action::Up)
+	reverseAction = Ghosts::Action::Down;
+    else if(action == Ghosts::Action::Right)
+	reverseAction = Ghosts::Action::Left;
+    else if(action == Ghosts::Action::Left)
+	reverseAction = Ghosts::Action::Right;
+    
+    for (int i = 0;i < possibleActions->size();i++)
+    {
+	if (possibleActions->at(i) == reverseAction)
+	    possibleActions->remove(i);
+    }
+}
+
+void Ghosts::ToggleMode()
+{
+    if (mode == Ghosts::Mode::Scatter)
+    {
+	mode = Ghosts::Mode::Chase;
+	//cout << "Chase" << endl;
+    }
+    else
+    {
+	mode = Ghosts::Mode::Scatter;
+	//cout << "Scatter" << endl;
+    }
+    changedMode = true;
+}
+
+void Ghosts::ComputeGhostDecision(QVector<Ghosts::Action> *possibleActions)
+{
+    int minDist = 1000000000;
+    QPoint futurePosition;
+    for (int i = 0;i < possibleActions->size();i++)
+    {
+	if (possibleActions->at(i) == Ghosts::Action::Left)
+	{
+	    futurePosition.setX(currentPosition.x() - (int)(width*0.5) - 1);
+	    futurePosition.setY(currentPosition.y());
+	}
+	else if (possibleActions->at(i) == Ghosts::Action::Right)
+	{
+	    futurePosition.setX(currentPosition.x() + (int)(width*0.5)  + 1);
+	    futurePosition.setY(currentPosition.y());
+	}
+	else if (possibleActions->at(i) == Ghosts::Action::Up)
+	{
+	    futurePosition.setX(currentPosition.x());
+	    futurePosition.setY(currentPosition.y() + (int)(height*0.5) + 1);
+	}
+	else if (possibleActions->at(i) == Ghosts::Action::Down)
+	{
+	    futurePosition.setX(currentPosition.x());
+	    futurePosition.setY(currentPosition.y() - (int)(height*0.5) - 1);
+	}
+	  
+	if (utilities.ComputeDistanceBetweenPoints(futurePosition, targetPosition) < minDist)
+	{
+	    action = possibleActions->at(i);
+	    minDist = utilities.ComputeDistanceBetweenPoints(futurePosition, targetPosition);
+	}
+    }
 }

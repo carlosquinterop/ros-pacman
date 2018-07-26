@@ -10,8 +10,9 @@ class Utilities
 
 public:
     Utilities();
-    int getIndexRowFromCoord(QPoint coord, int mapHeight);
-    int getIndexColFromCoord(QPoint coord, int mapWidth);
+    int GetIndexRowFromCoord(QPoint coord, int mapHeight);
+    int GetIndexColFromCoord(QPoint coord, int mapWidth);
+    int ComputeDistanceBetweenPoints(QPoint a, QPoint b);
 };
 
 #endif
