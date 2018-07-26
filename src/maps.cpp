@@ -53,12 +53,12 @@ void Maps::CreateObstaclesArray(QByteArray text, int colsText, int rowsText)
 {
     cols = colsText*BLOCK_SIZE;
     rows = rowsText*BLOCK_SIZE;
-    mObstacles = new int[(rows)*(cols)];
+    mObstacles = new bool[(rows)*(cols)];
     
     //Inicializacion matriz obstaculos
     for(int i = 0; i < rows; i++)
 	for(int j = 0; j < cols; j++)
-	    mObstacles[i*cols + j] = 0;
+	    mObstacles[i*cols + j] = false;
     
     pPacman = new QVector<int>;
     pGhosts = new QVector<int>;
@@ -70,44 +70,37 @@ void Maps::CreateObstaclesArray(QByteArray text, int colsText, int rowsText)
     {
 	for(int j = 0; j < colsText; j++)
 	{
-	    if(text[i*colsText + j] == '%' || (text[i*colsText + j] == '.') || (text[i*colsText + j] == 'o'))
+	    //Obstaculos
+	    if(text[i*colsText + j] == '%') 
 	    {
-		int aux = 0;
-		if(text[i*colsText + j] == '%') //Obstaculos
-		{
-		    aux = 1;
-		}
-		else if(text[i*colsText + j] == '.') //Galletas
-		{
-		    pCookies->append(i);
-		    pCookies->append(j);
-		    aux = 2;
-		}
-		else //Bonos
-		{
-		    pBonus->append(i);
-		    pBonus->append(j);
-		    aux = 3;
-		}
-		
 		for(int k = (i*BLOCK_SIZE); k < ((i*BLOCK_SIZE) + BLOCK_SIZE); k++)
 		{
 		    for(int l = (j*BLOCK_SIZE); l < ((j*BLOCK_SIZE) + BLOCK_SIZE); l++)
 		    {
-			mObstacles[k*cols + l] = aux;
+			mObstacles[k*cols + l] = true;
 		    }
 		}
 	    }
-	    	    	    
+	    //Galletas
+	    else if(text[i*colsText + j] == '.') 
+	    {
+		pCookies->append(i);
+		pCookies->append(j);
+	    }
+	    //Bonos
+	    else if(text[i*colsText + j] == 'o') 
+	    {
+		pBonus->append(i);
+		pBonus->append(j);
+	    }
 	    //Pacman
-	    if(text[i*colsText + j] == 'P')
+	    else if(text[i*colsText + j] == 'P')
 	    {
 		pPacman->append(i);
 		pPacman->append(j);	
 	    } 
-	    
 	    //Ghosts
-	    if(text[i*colsText + j] == 'G')
+	    else if(text[i*colsText + j] == 'G')
 	    {
 		pGhosts->append(i);
 		pGhosts->append(j);
@@ -137,14 +130,14 @@ void Maps::CreateImageFromObstaclesArray()
         for(int j = 0; j < cols; j++)
         {
             QRgb value;
-            if(mObstacles[i*cols + j] == 1)
+            if(mObstacles[i*cols + j]) //Obstacles
             {
-                value = qRgb(255,255,255);
+                value = qRgb(255,255,255); //White
 		image->setPixel(j, i, value);
             }
-            else
+            else //No Obstacles
             {
-		value = qRgb(0,0,0);
+		value = qRgb(0,0,0); //Black
 		image->setPixel(j, i, value);
             }
       }

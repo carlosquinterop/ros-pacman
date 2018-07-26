@@ -18,7 +18,7 @@ public:
     enum class Mode {Chase, Scatter, Frightened};
     enum class Action {Up, Down, Right, Left, None};
     enum class Personality {Shadow, Speedy, Bashful, Pokey}; 
-    Ghosts(QPoint initialPosition, Ghosts::Personality character, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, int *cObstacles);
+    Ghosts(QPoint initialPosition, Ghosts::Personality character, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, bool *cObstacles);
     int GetTexId();
     void UpdateGhostPosition(QPoint newPacmanPosition, double newPacmanOrientation, QPoint newBlinkysPosition);
     void CalculateTargetPosition();
@@ -50,7 +50,7 @@ public:
     QPoint blinkysPosition;
     double pacmanOrientation;
     int mapWidth, mapHeight;
-    int *obstacles;
+    bool *obstacles;
     
 };
 

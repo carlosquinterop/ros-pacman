@@ -45,7 +45,7 @@ protected:
     
 private slots:
     void UpdateSimulationSlot();
-    void ReceiveMapDataGL(int blockWidht, int blockHeight, QImage* mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
+    void ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
     void SetPacmanCommand(int aPacmanCommand);
     void ToggleGhostModeSlot();
     void EndOfFrightenedGhostModeSlot();
@@ -55,8 +55,8 @@ private:
     QImage *_mapImage;  
     double ortho[4];
     QVector<GLuint> texIds;   
-    int mapWidth, mapHeight;
-    int *obstacles, firstTime;
+    int _mapWidth, _mapHeight;
+    bool *_obstacles, firstTime;
     int nPacman;
     Pacman **pacmanArray;
     int nGhosts;
@@ -68,19 +68,17 @@ private:
     QTimer *frightenedGhostModeTimer;
     const int frightenedModeTimeMs = 10000;
     bool isInFrightenedMode;
-    int sCookies;
-    int sBonus;
     QPoint *pacmanCoord;
-    QPoint *cookiesCoord;
-    QPoint *bonusCoord;
-    QPoint *ghostsCoord;
+    QVector<QPoint> *cookiesCoord;
+    QVector<QPoint> *bonusCoord;
+    QVector<QPoint> *ghostsCoord;
     Utilities utilities;
 
 signals:
     void UpdatePacmanPos(QPoint *pacmanCoord, int nPacman);
-    void UpdateGhostsPos(QPoint *ghostsCoord, int nGhosts);
-    void UpdateCookiesPos(QPoint *cookiesCoord, int sCookies);
-    void UpdateBonusPos(QPoint *bonusCoord, int sBonus);
+    void UpdateGhostsPos(QVector<QPoint> *ghostsCoord, int nGhosts);
+    void UpdateCookiesPos(QVector<QPoint> *cookiesCoord, int sCookies);
+    void UpdateBonusPos(QVector<QPoint> *bonusCoord, int sBonus);
 };
 
 #endif

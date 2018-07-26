@@ -35,7 +35,7 @@ private:
 private:
     int rows, cols;
     int BLOCK_SIZE = 50;
-    int *mObstacles;
+    bool *mObstacles;
     
     QVector<int> *pPacman;
     QVector<int> *pGhosts;
@@ -47,8 +47,7 @@ public slots:
     void CreateMap(QString nameMap);
     
 signals:
-    //void sendMapData(int wPacman, int hPacman, QImage *mapImage, int *mObstacles, int rowPacman, int colPacman);
-    void SendMapData(int blockWidth, int blockHeight, QImage *mapImage, int *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
+    void SendMapData(int blockWidth, int blockHeight, QImage *mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
 };
 
 #endif
