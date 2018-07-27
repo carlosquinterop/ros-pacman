@@ -22,6 +22,7 @@ Window::Window()
     connect(playBtn, &QPushButton::clicked, this, &Window::PlaySlot);
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(CreateMap(QString)));
     connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)));
+    connect(maps, SIGNAL(SendMapData(int, int, QImage*, int*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), this, SLOT(UpdateSizeSlot()));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(UpdateSimulationSlot()));
     connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(SetPacmanCommand(int)));
     connect(glWidget, SIGNAL(UpdatePacmanPos(QVector<QPoint>*)), this, SLOT(UpdatePacmanPosSlot(QVector<QPoint>*)));
@@ -49,7 +50,18 @@ Window::Window()
     ghostPublisher = node->advertise<pacman::ghostsPos>("ghostsCoord",100);
     cookiesPublisher = node->advertise<pacman::cookiesPos>("cookiesCoord",100);
     bonusPublisher = node->advertise<pacman::bonusPos>("bonusCoord",100); 
-    listenMsg->start();  
+    listenMsg->start(); 
+    this->setMaximumSize(QSize(maxWidth, maxHeight));
+}
+
+QSize Window::sizeHint() const
+{
+    return QSize(maps->getWidth(), maps->getHeight());
+}
+
+QSize Window::minimumSizeHint() const
+{
+    return QSize(100, 100);
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -138,4 +150,9 @@ void Window::UpdateObstaclesPosSlot(QVector< QPoint >* pos)
   }
   msgObstacles.nObstacles = pos->size();
   obstaclesPublisher.publish(msgObstacles);*/
+}
+
+void Window::UpdateSizeSlot()
+{
+    this->resize(sizeHint());
 }

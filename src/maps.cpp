@@ -159,6 +159,18 @@ void Maps::SaveImage(QString fileName)
 	  cout << "No se pudo abrir" << endl;
    }
 }
+
+int Maps::getWidth()
+{
+    return cols;
+}
+
+int Maps::getHeight()
+{
+    return rows;
+}
+
+
 void Maps::CreateMap(QString nameMap)
 {
     //Lectura de archivo

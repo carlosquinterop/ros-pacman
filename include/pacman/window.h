@@ -38,6 +38,8 @@ class Window : public QWidget
 
 public:
     Window();
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 private:
     void ListArrayMap(QString path);
@@ -52,9 +54,12 @@ private slots:
     void UpdateCookiesPosSlot(QVector<QPoint>* pos);
     void UpdateBonusPosSlot(QVector<QPoint>* pos);
     void UpdateObstaclesPosSlot(QVector<QPoint>* pos);
+    void UpdateSizeSlot();
     
 private:
     GLWidget *glWidget;
+    const int maxWidth = 1000;
+    const int maxHeight = 700;
     QVBoxLayout *mainLayout;
     QPushButton *playBtn;
     MainWindow *mainWindow;
