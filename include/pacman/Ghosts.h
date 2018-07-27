@@ -15,7 +15,7 @@ class Ghosts: public QObject
     Q_OBJECT
 
 public:
-    enum class Mode {Chase, Scatter, Frightened};
+    enum class Mode {Chase, Scatter, Frightened, Initial};
     enum class Action {Up, Down, Right, Left, None};
     enum class Personality {Shadow, Speedy, Bashful, Pokey}; 
     Ghosts(QPoint initialPosition, Ghosts::Personality character, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, bool *cObstacles);
@@ -51,7 +51,6 @@ public:
     double pacmanOrientation;
     int mapWidth, mapHeight;
     bool *obstacles;
-    
 };
 
 #endif

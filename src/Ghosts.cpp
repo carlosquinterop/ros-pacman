@@ -2,8 +2,8 @@
 
 Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, bool *cObstacles)
 {
-    mode = Mode::Frightened;
-    previousMode = Mode::Frightened;
+    mode = Mode::Initial;
+    previousMode = Mode::Initial;
     currentPosition = initialPosition;
     character = aCharacter;
     orientation = 180.0;
@@ -136,7 +136,7 @@ void Ghosts::UpdateGhostPosition(QPoint newPacmanPosition, double newPacmanOrien
 	    else if (possibleActions->size() > 2)
 	    {
 		DeleteReverseAction(action, possibleActions);
-		if (mode == Mode::Frightened)
+		if (mode == Mode::Frightened || mode == Mode::Initial)
 		    action = possibleActions->at(rand() % possibleActions->size());
 		else
 		{
