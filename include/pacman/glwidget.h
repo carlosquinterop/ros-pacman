@@ -45,7 +45,7 @@ protected:
     
 private slots:
     void UpdateSimulationSlot();
-    void ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus);
+    void ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles);
     void SetPacmanCommand(int aPacmanCommand);
     void ToggleGhostModeSlot();
     void EndOfFrightenedGhostModeSlot();
@@ -73,6 +73,7 @@ private:
     QVector<QPoint> *ghostsCoord;
     QVector<QPoint> *cookiesCoord;
     QVector<QPoint> *bonusCoord;
+    QVector<QPoint> *obstaclesCoord;
     Utilities utilities;
 
 signals:
@@ -80,6 +81,7 @@ signals:
     void UpdateGhostsPos(QVector<QPoint> *ghostsCoord);
     void UpdateCookiesPos(QVector<QPoint> *cookiesCoord);
     void UpdateBonusPos(QVector<QPoint> *bonusCoord);
+    void UpdateObstaclesPos(QVector<QPoint> *obstaclesCoord);
 };
 
 #endif

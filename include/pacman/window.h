@@ -51,6 +51,7 @@ private slots:
     void UpdateGhostsPosSlot(QVector<QPoint>* pos);
     void UpdateCookiesPosSlot(QVector<QPoint>* pos);
     void UpdateBonusPosSlot(QVector<QPoint>* pos);
+    void UpdateObstaclesPosSlot(QVector<QPoint>* pos);
     
 private:
     GLWidget *glWidget;

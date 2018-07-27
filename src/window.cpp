@@ -21,13 +21,14 @@ Window::Window()
     
     connect(playBtn, &QPushButton::clicked, this, &Window::PlaySlot);
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(CreateMap(QString)));
-    connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)));
+    connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(UpdateSimulationSlot()));
     connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(SetPacmanCommand(int)));
     connect(glWidget, SIGNAL(UpdatePacmanPos(QVector<QPoint>*)), this, SLOT(UpdatePacmanPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(UpdateGhostsPos(QVector<QPoint>*)), this, SLOT(UpdateGhostsPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(UpdateCookiesPos(QVector<QPoint>*)), this, SLOT(UpdateCookiesPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(UpdateBonusPos(QVector<QPoint>*)), this, SLOT(UpdateBonusPosSlot(QVector<QPoint>*)));
+    connect(glWidget, SIGNAL(UpdateObstaclesPos(QVector<QPoint>*)), this, SLOT(UpdateObstaclesPosSlot(QVector<QPoint>*)));
     
     refreshTimer->start(refreshTimeMs);
     container->addWidget(glWidget);
@@ -125,4 +126,16 @@ void Window::UpdateBonusPosSlot(QVector<QPoint>* pos)
   }
   msgBonus.nBonus = pos->size();
   bonusPublisher.publish(msgBonus);
+}
+
+void Window::UpdateObstaclesPosSlot(QVector< QPoint >* pos)
+{
+  /*msgObstacles.obstaclesPos.resize(pos->size());
+  for(int i = 0; i < pos->size(); i++)
+  {
+    msgObstacles.obstaclesPos[i].x = pos->at(i).x();
+    msgObstacles.obstaclesPos[i].y = pos->at(i).y();
+  }
+  msgObstacles.nObstacles = pos->size();
+  obstaclesPublisher.publish(msgObstacles);*/
 }

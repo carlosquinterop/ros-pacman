@@ -64,6 +64,7 @@ void Maps::CreateObstaclesArray(QByteArray text, int colsText, int rowsText)
     pGhosts = new QVector<int>;
     pCookies = new QVector<int>;
     pBonus = new QVector<int>;
+    pObstacles = new QVector<int>;
     
     //Construccion matriz de obstaculos
     for(int i = 0; i < rowsText; i++)
@@ -80,6 +81,8 @@ void Maps::CreateObstaclesArray(QByteArray text, int colsText, int rowsText)
 			mObstacles[k*cols + l] = true;
 		    }
 		}
+		pObstacles->append(i);
+		pObstacles->append(j);
 	    }
 	    //Galletas
 	    else if(text[i*colsText + j] == '.') 
@@ -174,5 +177,5 @@ void Maps::CreateMap(QString nameMap)
     //Guardar imagen
     SaveImage(nameMap + ".png");
     
-    emit SendMapData(BLOCK_SIZE, BLOCK_SIZE, image, mObstacles, pPacman, pGhosts, pCookies, pBonus);
+    emit SendMapData(BLOCK_SIZE, BLOCK_SIZE, image, mObstacles, pPacman, pGhosts, pCookies, pBonus, pObstacles);
 }

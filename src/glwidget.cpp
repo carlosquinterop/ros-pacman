@@ -276,7 +276,7 @@ void GLWidget::UpdateSimulationSlot()
 	  ghostsArray[i]->UpdateGhostPosition(pacmanArray[0]->currentPosition, pacmanArray[0]->orientation, ghostsArray[0]->currentPosition);
 	ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
     }
-    emit UpdateGhostsPos(utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight));
+    emit UpdateGhostsPos( utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight) );
   
     //Update pacman dynamics
     for(int i = 0; i < nPacman; i++)
@@ -284,7 +284,7 @@ void GLWidget::UpdateSimulationSlot()
 	UpdatePacmanPosition(i);
 	pacmanCoord->replace(i, pacmanArray[i]->currentPosition);
     }
-    emit UpdatePacmanPos(utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight));
+    emit UpdatePacmanPos( utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight) );
         
     //Update cookies
     for(int i = 0;i < cookiesCoord->size();i++)
@@ -292,7 +292,7 @@ void GLWidget::UpdateSimulationSlot()
 	    if (pacmanCoord->at(j) == cookiesCoord->at(i))
 		cookiesCoord->remove(i);
 
-    emit UpdateCookiesPos(utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight));
+    emit UpdateCookiesPos( utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight) );
     
     //Update Bonuses
     bool enterFrigthenedMode = false;
@@ -325,13 +325,13 @@ void GLWidget::UpdateSimulationSlot()
     else if (enterFrigthenedMode && isInFrightenedMode)
 	frightenedGhostModeTimer->start(frightenedModeTimeMs);
     
-    emit UpdateBonusPos(utilities.ConvertImageCoordToLayoutCoord(bonusCoord, _blockWidth, _blockHeight));
+    emit UpdateBonusPos( utilities.ConvertImageCoordToLayoutCoord(bonusCoord, _blockWidth, _blockHeight) );
     
     //Schedule paintGL()
     update();
 }
 
-void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus)
+void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles)
 {
     if(!firstTime)
       LoadNewTexture(mapImage);
@@ -355,12 +355,11 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     nPacman = pPacman->size()/2;
     pacmanArray = (Pacman**) malloc(sizeof(Pacman)*nPacman);
     pacmanCoord = new QVector<QPoint>;
-    QPoint pacmanPositions;
+    QPoint *pacmanPositions;
     for(int i = 0; i < nPacman; i++)
     {
-	pacmanPositions.setX(pPacman->at(i*2 + 1)*blockWidth+ortho[0]+blockWidth*0.5);
-	pacmanPositions.setY(ortho[3]-(pPacman->at(i*2))*blockHeight-blockHeight*0.5);
-	pacmanArray[i] = new Pacman(pacmanPositions, (double)0, blockHeight, blockWidth);
+	pacmanPositions = utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, pPacman->at(i*2), pPacman->at(i*2 + 1));
+	pacmanArray[i] = new Pacman(*pacmanPositions, (double)0, blockHeight, blockWidth);
 	pacmanCoord->append(pacmanArray[i]->currentPosition);
     }
         
@@ -368,13 +367,12 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     nGhosts = pGhosts->size()/2;
     ghostsArray = (Ghosts**) malloc(sizeof(Ghosts)*nGhosts);
     ghostsCoord = new QVector<QPoint>;
-    QPoint ghostPositions;
+    QPoint *ghostPositions;
     Ghosts::Personality ghostsPersonality[4] = {Ghosts::Personality::Shadow, Ghosts::Personality::Speedy, Ghosts::Personality::Bashful, Ghosts::Personality::Pokey};
     for(int i = 0; i < nGhosts; i++)
     {
-	ghostPositions.setX(pGhosts->at(i*2 + 1)*blockWidth+ortho[0]+blockWidth*0.5);
-	ghostPositions.setY(ortho[3]-(pGhosts->at(i*2))*blockHeight-blockHeight*0.5);
-	ghostsArray[i] = new Ghosts(ghostPositions, ghostsPersonality[i], blockHeight, blockWidth, pacmanArray[0]->currentPosition, _mapHeight, _mapWidth, _obstacles);
+	ghostPositions = utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, pGhosts->at(i*2), pGhosts->at(i*2 + 1));
+	ghostsArray[i] = new Ghosts(*ghostPositions, ghostsPersonality[i], blockHeight, blockWidth, pacmanArray[0]->currentPosition, _mapHeight, _mapWidth, _obstacles);
 	ghostsCoord->append(ghostsArray[i]->currentPosition);
     }
     
@@ -387,6 +385,12 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     bonusCoord = new QVector<QPoint>;
     for(int i = 0; i < pBonus->size()/2; i++)
 	bonusCoord->append( *utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, pBonus->at(i*2), pBonus->at(i*2 + 1)) );
+    
+    //Set obstacles
+    obstaclesCoord = new QVector<QPoint>;
+    for(int i = 0; i < pObstacles->size()/2; i++)
+	obstaclesCoord->append( *utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, pObstacles->at(i*2), pObstacles->at(i*2 + 1)) );
+    emit UpdateObstaclesPos( utilities.ConvertImageCoordToLayoutCoord(obstaclesCoord, _blockWidth, _blockHeight) );
     
     update();
 }
