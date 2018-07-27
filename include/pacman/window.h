@@ -49,10 +49,11 @@ protected:
 
 private slots:
     void PlaySlot();
-    void UpdatePacmanPosSlot(QPoint* pos, int nPacman);
-    void UpdateGhostsPosSlot(QPoint* pos, int nGhosts);
-    void UpdateCookiesPosSlot(QPoint* pos, int nCookies);
-    void UpdateBonusPosSlot(QPoint* pos, int nBonus);
+    void UpdatePacmanPosSlot(QVector<QPoint>* pos);
+    void UpdateGhostsPosSlot(QVector<QPoint>* pos);
+    void UpdateCookiesPosSlot(QVector<QPoint>* pos);
+    void UpdateBonusPosSlot(QVector<QPoint>* pos);
+    void UpdateObstaclesPosSlot(QVector<QPoint>* pos);
     void UpdateSizeSlot();
     
 private:

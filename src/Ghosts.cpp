@@ -1,6 +1,6 @@
 #include "pacman/Ghosts.h"
 
-Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, int *cObstacles)
+Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeight, int aWidth, QPoint initialPacmanPosition, int cMapHeight, int cMapWidth, bool *cObstacles)
 {
     mode = Mode::Frightened;
     previousMode = Mode::Frightened;
@@ -14,8 +14,8 @@ Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeig
     mapHeight = cMapHeight;
     mapWidth = cMapWidth;
     changedMode = false;
-    obstacles = new int[(mapHeight)*(mapWidth)];
-    memcpy(obstacles, cObstacles, (mapHeight)*(mapWidth)*sizeof(int));
+    obstacles = new bool[(mapHeight)*(mapWidth)];
+    memcpy(obstacles, cObstacles, (mapHeight)*(mapWidth)*sizeof(bool));
         
     if (character == Ghosts::Personality::Shadow)
     {
@@ -109,13 +109,13 @@ void Ghosts::UpdateGhostPosition(QPoint newPacmanPosition, double newPacmanOrien
 	QPoint coordUp(currentPosition.x(), currentPosition.y() + stepY);
 	QPoint coordDown(currentPosition.x(), currentPosition.y() - stepY);
 	
-	if (obstacles[utilities.GetIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordLeft, mapWidth)] != 1)
+	if (!obstacles[utilities.GetIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordLeft, mapWidth)])
 	    action = Ghosts::Action::Left;
-	else if (obstacles[utilities.GetIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordDown, mapWidth)] != 1)
+	else if (!obstacles[utilities.GetIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordDown, mapWidth)])
 	    action = Ghosts::Action::Down;
-	else if (obstacles[utilities.GetIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordRight, mapWidth)] != 1)
+	else if (!obstacles[utilities.GetIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordRight, mapWidth)])
 	    action = Ghosts::Action::Right;
-	else if (obstacles[utilities.GetIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordUp, mapWidth)] != 1)
+	else if (!obstacles[utilities.GetIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordUp, mapWidth)])
 	    action = Ghosts::Action::Up;
     }
     else
@@ -266,13 +266,13 @@ int Ghosts::GetPossibleActions(QVector<Ghosts::Action>* possibleActions)
     QPoint coordRight(currentPosition.x() + (int)(width*0.5)  + 1, currentPosition.y());
     QPoint coordUp(currentPosition.x(), currentPosition.y() + (int)(height*0.5) + 1);
 
-    if (obstacles[utilities.GetIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordLeft, mapWidth)] != 1)
+    if (!obstacles[utilities.GetIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordLeft, mapWidth)])
 	possibleActions->append(Ghosts::Action::Left);
-    if (obstacles[utilities.GetIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordDown, mapWidth)] != 1)
+    if (!obstacles[utilities.GetIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordDown, mapWidth)])
 	possibleActions->append(Ghosts::Action::Down);
-    if (obstacles[utilities.GetIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordRight, mapWidth)] != 1)
+    if (!obstacles[utilities.GetIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordRight, mapWidth)])
 	possibleActions->append(Ghosts::Action::Right);
-    if (obstacles[utilities.GetIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordUp, mapWidth)] != 1)
+    if (!obstacles[utilities.GetIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordUp, mapWidth)])
 	possibleActions->append(Ghosts::Action::Up);
 }
 
