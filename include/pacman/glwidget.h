@@ -56,6 +56,7 @@ private:
     double ortho[4];
     QVector<GLuint> texIds;   
     int _mapWidth, _mapHeight;
+    int _blockWidth, _blockHeight;
     bool *_obstacles, firstTime;
     int nPacman;
     Pacman **pacmanArray;

@@ -268,43 +268,44 @@ void GLWidget::resizeGL(int w, int h)
 }
 
 void GLWidget::UpdateSimulationSlot()
-{
+{    
     //Update ghost dynamics (it has be done first to use current pacman position)
-    for(int i = 0;i < nGhosts;i++)
+    for(int i = 0;i < nGhosts; i++)
     {
 	if(allowToPlay)
 	  ghostsArray[i]->UpdateGhostPosition(pacmanArray[0]->currentPosition, pacmanArray[0]->orientation, ghostsArray[0]->currentPosition);
 	ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
     }
-    //TODO: emit signal here to send all ghost positions (transformed)
-    emit UpdateGhostsPos(ghostsCoord);
+    emit UpdateGhostsPos(utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight));
   
     //Update pacman dynamics
-    for(int i = 0;i < nPacman;i++)
+    for(int i = 0; i < nPacman; i++)
     {
 	UpdatePacmanPosition(i);
 	pacmanCoord->replace(i, pacmanArray[i]->currentPosition);
     }
-    emit UpdatePacmanPos(pacmanCoord);
+    emit UpdatePacmanPos(utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight));
         
-    //TODO
     //Update cookies
-	//For each cookie
-	  //Check if any pacman position equals the i-th cookie position and remove if necessary
-	//emit signal here to send all cookie positions (transformed)
-    emit UpdateCookiesPos(cookiesCoord);
+    for(int i = 0;i < cookiesCoord->size();i++)
+	for(int j = 0;j < nPacman;j++)
+	    if (pacmanCoord->at(j) == cookiesCoord->at(i))
+		cookiesCoord->remove(i);
+
+    emit UpdateCookiesPos(utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight));
     
-    //TODO
     //Update Bonuses
-    //For each bonus
-	  //Check if any pacman position equals the i-th bonus position and remove if necessary
     bool enterFrigthenedMode = false;
     for(int i = 0;i < bonusCoord->size();i++)
     {
 	for(int j = 0;j < nPacman;j++)
 	{
 	    if (pacmanCoord->at(j) == bonusCoord->at(i))
+	    {
 		enterFrigthenedMode |= true;
+		bonusCoord->remove(i);
+		
+	    }
 	}      
     }
     
@@ -324,8 +325,7 @@ void GLWidget::UpdateSimulationSlot()
     else if (enterFrigthenedMode && isInFrightenedMode)
 	frightenedGhostModeTimer->start(frightenedModeTimeMs);
     
-    //emit signal here to send all bonus positions (transformed)
-    emit UpdateBonusPos(bonusCoord);
+    emit UpdateBonusPos(utilities.ConvertImageCoordToLayoutCoord(bonusCoord, _blockWidth, _blockHeight));
     
     //Schedule paintGL()
     update();
@@ -342,6 +342,8 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     _mapImage = new QImage(*mapImage);
     _mapWidth = mapImage->width();
     _mapHeight = mapImage->height();
+    _blockWidth = blockWidth;
+    _blockHeight = blockHeight;
     _obstacles = new bool[(_mapHeight)*(_mapWidth)];
     memcpy(_obstacles, mObstacles, (_mapHeight)*(_mapWidth)*sizeof(bool));
     ortho[0] = -_mapWidth*0.5;
@@ -379,12 +381,12 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     //Set cookies
     cookiesCoord = new QVector<QPoint>;
     for(int i = 0; i < pCookies->size()/2; i++)
-	cookiesCoord->append( *utilities.GetCoordFromIndex(blockWidth, blockHeight, ortho, pCookies->at(i*2), pCookies->at(i*2 + 1)) );
+	cookiesCoord->append( *utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, pCookies->at(i*2), pCookies->at(i*2 + 1)) );
     
     //Set bonuses
     bonusCoord = new QVector<QPoint>;
     for(int i = 0; i < pBonus->size()/2; i++)
-	bonusCoord->append( *utilities.GetCoordFromIndex(blockWidth, blockHeight, ortho, pBonus->at(i*2), pBonus->at(i*2 + 1)) );
+	bonusCoord->append( *utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, pBonus->at(i*2), pBonus->at(i*2 + 1)) );
     
     update();
 }

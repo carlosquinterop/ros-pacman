@@ -1,4 +1,5 @@
 #include "pacman/Utilities.h"
+#include <QtCore/qfiledevice.h>
 
 Utilities::Utilities()
 {
@@ -22,6 +23,20 @@ QPoint* Utilities::GetCoordFromIndex(int blockWidth, int blockHeight, double ort
     p->setY(ortho[3]-iRow*blockHeight-blockHeight*0.5);
     
     return p;
+}
+
+QVector<QPoint>* Utilities::ConvertImageCoordToLayoutCoord(QVector<QPoint>* coordsImage, int blockWidth, int blockHeight)
+{
+    QVector<QPoint>* coordsLayout = new QVector<QPoint>;
+    QPoint p;
+    for(int i = 0; i < coordsImage->size(); i++)
+    {
+	p.setX(coordsImage->at(i).x() / blockWidth); 
+	p.setY(coordsImage->at(i).y() / blockHeight);
+	coordsLayout->append(p);
+    }
+    
+    return coordsLayout;
 }
 
 int Utilities::ComputeDistanceBetweenPoints(QPoint a, QPoint b)
