@@ -8,10 +8,13 @@ GLWidget::GLWidget(QWidget *parent)
     nGhosts = 0;
     ghostModeTimer = new QTimer();
     frightenedGhostModeTimer = new QTimer();
+    deadPacmanTimer = new QTimer();
     ghostModeTimer->setSingleShot(true);
     frightenedGhostModeTimer->setSingleShot(true);
+    deadPacmanTimer->setSingleShot(true);
     connect(ghostModeTimer, SIGNAL(timeout()), this, SLOT(ToggleGhostModeSlot()));
     connect(frightenedGhostModeTimer, SIGNAL(timeout()), this, SLOT(EndOfFrightenedGhostModeSlot()));
+    connect(deadPacmanTimer, SIGNAL(timeout()), this, SLOT(EndOfDeadPacmanSlot()));
     contGhostModePhases = 0;
     ghostRemainingTime = 0;
     isInFrightenedMode = false;
@@ -259,46 +262,43 @@ void GLWidget::resizeGL(int w, int h)
 
 void GLWidget::UpdateSimulationSlot()
 {    
-    //Update ghost dynamics (it has be done first to use current pacman position)
+    //Update ghost dynamics (it has be done before changing pacman position)
     for(int i = 0;i < nGhosts; i++)
     {
 	if(allowToPlay)
-	  ghostsArray[i]->UpdateGhostPosition(pacmanArray[0]->currentPosition, pacmanArray[0]->orientation, ghostsArray[0]->currentPosition);
+	   ghostsArray[i]->UpdateGhostPosition(pacmanArray[0]->currentPosition, pacmanArray[0]->orientation, ghostsArray[0]->currentPosition);
 	ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
     }
-    emit UpdateGhostsPos( utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight) );
-  
+    
     //Update pacman dynamics
     for(int i = 0; i < nPacman; i++)
     {
 	UpdatePacmanPosition(i);
 	pacmanCoord->replace(i, pacmanArray[i]->currentPosition);
     }
-    emit UpdatePacmanPos( utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight) );
-        
+            
     //Update cookies
     for(int i = 0;i < cookiesCoord->size();i++)
 	for(int j = 0;j < nPacman;j++)
 	    if (pacmanCoord->at(j) == cookiesCoord->at(i))
 		cookiesCoord->remove(i);
 
-    emit UpdateCookiesPos( utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight) );
-    
-    //Update Bonuses
+        
+    //Remove Bonuses if necessary and detect Frightened mode
     bool enterFrigthenedMode = false;
-    for(int i = 0;i < bonusCoord->size();i++)
-    {
-	for(int j = 0;j < nPacman;j++)
+    for(int j = 0;j < nPacman;j++)
+    {	
+	for(int i = 0;i < bonusCoord->size();i++)
 	{
 	    if (pacmanCoord->at(j) == bonusCoord->at(i))
 	    {
 		enterFrigthenedMode |= true;
 		bonusCoord->remove(i);
-		
 	    }
 	}      
     }
     
+    //If Frightened mode was detected, pause the current timer (if any) and start or restart the frigthened timer
     if (enterFrigthenedMode && !isInFrightenedMode)
     {
 	isInFrightenedMode = true;
@@ -315,6 +315,33 @@ void GLWidget::UpdateSimulationSlot()
     else if (enterFrigthenedMode && isInFrightenedMode)
 	frightenedGhostModeTimer->start(frightenedModeTimeMs);
     
+    //Check for dead ghosts and dead pacman
+    for(int j = 0;j < nPacman;j++)
+    {
+	//Update Bonuses and detect Frightened mode
+	for(int i = 0;i < ghostsCoord->size();i++)
+	{
+	    if (pacmanCoord->at(j) == ghostsCoord->at(i))
+	    {
+		if (ghostsArray[i]->isFrightened())
+		{
+		    ghostsArray[i]->deadGhost = true;
+		    ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
+		    deadGhostTimers[i]->start(deadGhostTimeMs);  
+		}
+		else
+		{
+		    //Poner pacman muerto (imagen)
+		    emit DeadPacmanSignal();
+		    deadPacmanTimer->start(deadPacmanTimeMs);
+		}
+	    }
+	}      
+    }
+        
+    emit UpdateGhostsPos( utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight) );
+    emit UpdatePacmanPos( utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight) );
+    emit UpdateCookiesPos( utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight) );
     emit UpdateBonusPos( utilities.ConvertImageCoordToLayoutCoord(bonusCoord, _blockWidth, _blockHeight) );
     
     //Schedule paintGL()
@@ -356,6 +383,7 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     //Set Ghosts
     nGhosts = pGhosts->size()/2;
     ghostsArray = (Ghosts**) malloc(sizeof(Ghosts)*nGhosts);
+    deadGhostTimers = (QTimer**) malloc(sizeof(QTimer)*nGhosts);
     ghostsCoord = new QVector<QPoint>;
     QPoint *ghostPositions;
     Ghosts::Personality ghostsPersonality[4] = {Ghosts::Personality::Shadow, Ghosts::Personality::Speedy, Ghosts::Personality::Bashful, Ghosts::Personality::Pokey};
@@ -364,6 +392,17 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
 	ghostPositions = utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, pGhosts->at(i*2), pGhosts->at(i*2 + 1));
 	ghostsArray[i] = new Ghosts(*ghostPositions, ghostsPersonality[i], blockHeight, blockWidth, pacmanArray[0]->currentPosition, _mapHeight, _mapWidth, _obstacles);
 	ghostsCoord->append(ghostsArray[i]->currentPosition);
+	
+	deadGhostTimers[i] = new QTimer();
+	deadGhostTimers[i]->setSingleShot(true);
+	if (i == 0)
+	    connect(deadGhostTimers[i], SIGNAL(timeout()), this, SLOT(reviveGhost0Slot()));
+	else if (i == 1)
+	    connect(deadGhostTimers[i], SIGNAL(timeout()), this, SLOT(reviveGhost1Slot()));
+	else if (i == 2)
+	    connect(deadGhostTimers[i], SIGNAL(timeout()), this, SLOT(reviveGhost2Slot()));
+	else if (i == 3)
+	    connect(deadGhostTimers[i], SIGNAL(timeout()), this, SLOT(reviveGhost3Slot()));
     }
     
     //Set cookies
@@ -413,4 +452,34 @@ void GLWidget::EndOfFrightenedGhostModeSlot()
 	ghostModeTimer->start(ghostRemainingTime);
     
     isInFrightenedMode = false;
+}
+
+void GLWidget::reviveGhost0Slot()
+{
+    ghostsArray[0]->deadGhost = false;
+}
+
+void GLWidget::reviveGhost1Slot()
+{
+    ghostsArray[1]->deadGhost = false;
+}
+
+void GLWidget::reviveGhost2Slot()
+{
+    ghostsArray[2]->deadGhost = false;
+}
+
+void GLWidget::reviveGhost3Slot()
+{
+    ghostsArray[3]->deadGhost = false;
+}
+
+void GLWidget::EndOfDeadPacmanSlot()
+{
+    for(int j = 0;j < nPacman;j++)
+    {
+	pacmanArray[j]->currentPosition = pacmanArray[j]->_initialPosition;
+	pacmanCoord->replace(j, pacmanArray[j]->currentPosition);
+    }
+    emit EndOfDeadPacmanSignal();
 }

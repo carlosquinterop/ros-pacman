@@ -47,6 +47,11 @@ private slots:
     void SetPacmanCommand(int aPacmanCommand);
     void ToggleGhostModeSlot();
     void EndOfFrightenedGhostModeSlot();
+    void reviveGhost0Slot();
+    void reviveGhost1Slot();
+    void reviveGhost2Slot();
+    void reviveGhost3Slot();
+    void EndOfDeadPacmanSlot();
     
 private:
     bool allowToPlay;
@@ -67,11 +72,16 @@ private:
     QTimer *frightenedGhostModeTimer;
     const int frightenedModeTimeMs = 10000;
     bool isInFrightenedMode;
+    QTimer **deadGhostTimers;
+    const int deadGhostTimeMs = 3000;
+    QTimer *deadPacmanTimer;
+    const int deadPacmanTimeMs = 3000;
     QVector<QPoint> *pacmanCoord;
     QVector<QPoint> *ghostsCoord;
     QVector<QPoint> *cookiesCoord;
     QVector<QPoint> *bonusCoord;
     QVector<QPoint> *obstaclesCoord;
+    QVector<QPoint> *pacmanInitialCoord;
     Utilities utilities;
 
 signals:
@@ -80,6 +90,8 @@ signals:
     void UpdateCookiesPos(QVector<QPoint> *cookiesCoord);
     void UpdateBonusPos(QVector<QPoint> *bonusCoord);
     void UpdateObstaclesPos(QVector<QPoint> *obstaclesCoord);
+    void EndOfDeadPacmanSignal();
+    void DeadPacmanSignal();
 };
 
 #endif

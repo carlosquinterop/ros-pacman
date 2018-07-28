@@ -5,6 +5,7 @@ Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeig
     mode = Mode::Initial;
     previousMode = Mode::Initial;
     currentPosition = initialPosition;
+    _initialPosition = initialPosition;
     character = aCharacter;
     orientation = 180.0;
     height = aHeight;
@@ -15,6 +16,7 @@ Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeig
     mapWidth = cMapWidth;
     changedMode = false;
     obstacles = new bool[(mapHeight)*(mapWidth)];
+    deadGhost = false;
     memcpy(obstacles, cObstacles, (mapHeight)*(mapWidth)*sizeof(bool));
         
     if (character == Ghosts::Personality::Shadow)
@@ -159,38 +161,49 @@ void Ghosts::UpdateGhostPosition(QPoint newPacmanPosition, double newPacmanOrien
 	}
     }
     
-    if (action == Ghosts::Action::Left)
+    if (deadGhost)
     {
-	currentPosition.setX(currentPosition.x() - stepX);
-	if (mode == Mode::Frightened)
-	    orientation = 0;
-	else
-	    orientation = 180.0;
+	mode = Mode::Initial;
+	previousMode = Mode::Initial;
+	currentPosition = _initialPosition;
+        orientation = 180.0;
     }
-    else if (action == Ghosts::Action::Right)
+    else
     {
-	currentPosition.setX(currentPosition.x() + stepX);
-	if (mode == Mode::Frightened)
-	    orientation = 0;
-	else
-	    orientation = 0.0;
+	if (action == Ghosts::Action::Left)
+	{
+	    currentPosition.setX(currentPosition.x() - stepX);
+	    if (mode == Mode::Frightened)
+		orientation = 0;
+	    else
+		orientation = 180.0;
+	}
+	else if (action == Ghosts::Action::Right)
+	{
+	    currentPosition.setX(currentPosition.x() + stepX);
+	    if (mode == Mode::Frightened)
+		orientation = 0;
+	    else
+		orientation = 0.0;
+	}
+	else if (action == Ghosts::Action::Up)
+	{
+	    currentPosition.setY(currentPosition.y() + stepY);
+	    if (mode == Mode::Frightened)
+		orientation = 0;
+	    else
+		orientation = 90;
+	}
+	else if (action == Ghosts::Action::Down)
+	{
+	    currentPosition.setY(currentPosition.y() - stepY);
+	    if (mode == Mode::Frightened)
+		orientation = 0;
+	    else
+		orientation = 270;
+	}
     }
-    else if (action == Ghosts::Action::Up)
-    {
-	currentPosition.setY(currentPosition.y() + stepY);
-	if (mode == Mode::Frightened)
-	    orientation = 0;
-	else
-	    orientation = 90;
-    }
-    else if (action == Ghosts::Action::Down)
-    {
-	currentPosition.setY(currentPosition.y() - stepY);
-	if (mode == Mode::Frightened)
-	    orientation = 0;
-	else
-	    orientation = 270;
-    }
+    
 }
 
 void Ghosts::CalculateTargetPosition()
@@ -376,4 +389,12 @@ void Ghosts::SetFrigthenedMode()
 void Ghosts::RecoverFromFrigthenedMode()
 {
     mode = previousMode;
+}
+
+bool Ghosts::isFrightened()
+{
+    if (mode == Mode::Frightened)
+	return true;
+    else
+	return false;
 }

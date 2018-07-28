@@ -17,6 +17,7 @@ public:
     Pacman(QPoint initialPosition, double initialOrientation, int aHeight, int aWidth);
         
     QPoint currentPosition;
+    QPoint _initialPosition;
     double orientation;
     Action action;
     int height;

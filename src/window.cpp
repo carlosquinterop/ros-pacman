@@ -9,7 +9,7 @@ Window::Window()
     mainLayout = new QVBoxLayout;
     container = new QHBoxLayout;
     listenMsg = new ListenMsgThread();
-       
+         
     QWidget *w = new QWidget;
     w->setLayout(container);
     mainLayout->addWidget(w);
@@ -30,6 +30,8 @@ Window::Window()
     connect(glWidget, SIGNAL(UpdateCookiesPos(QVector<QPoint>*)), this, SLOT(UpdateCookiesPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(UpdateBonusPos(QVector<QPoint>*)), this, SLOT(UpdateBonusPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(UpdateObstaclesPos(QVector<QPoint>*)), this, SLOT(UpdateObstaclesPosSlot(QVector<QPoint>*)));
+    connect(glWidget, SIGNAL(DeadPacmanSignal()), this, SLOT(DeadPacmanSlot()));
+    connect(glWidget, SIGNAL(EndOfDeadPacmanSignal()), this, SLOT(EndOfDeadPacmanSlot()));
     
     refreshTimer->start(refreshTimeMs);
     container->addWidget(glWidget);
@@ -155,4 +157,14 @@ void Window::UpdateObstaclesPosSlot(QVector< QPoint >* pos)
 void Window::UpdateSizeSlot()
 {
     this->resize(sizeHint());
+}
+
+void Window::DeadPacmanSlot()
+{
+    refreshTimer->stop();
+}
+
+void Window::EndOfDeadPacmanSlot()
+{
+    refreshTimer->start(refreshTimeMs);
 }

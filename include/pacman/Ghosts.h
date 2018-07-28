@@ -30,8 +30,10 @@ public:
     void ComputeGhostDecision(QVector<Ghosts::Action> *possibleActions);
     void SetFrigthenedMode();
     void RecoverFromFrigthenedMode();
+    bool isFrightened();
     
     QPoint currentPosition;
+    QPoint _initialPosition;
     double orientation;
     Mode mode;
     Mode previousMode;
@@ -45,6 +47,7 @@ public:
     int texId;
     bool changedMode;
     Utilities utilities;
+    bool deadGhost;
     
     QPoint pacmanPosition;
     QPoint blinkysPosition;

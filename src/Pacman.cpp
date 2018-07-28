@@ -7,4 +7,5 @@ Pacman::Pacman(QPoint initialPosition, double initialOrientation, int aHeight, i
     height = aHeight;
     width = aWidth;
     action = Pacman::Action::None;
+    _initialPosition = initialPosition;
 }

@@ -55,6 +55,8 @@ private slots:
     void UpdateBonusPosSlot(QVector<QPoint>* pos);
     void UpdateObstaclesPosSlot(QVector<QPoint>* pos);
     void UpdateSizeSlot();
+    void DeadPacmanSlot();
+    void EndOfDeadPacmanSlot();
     
 private:
     GLWidget *glWidget;
