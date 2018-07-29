@@ -15,6 +15,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QTimer>
+#include <QList>  //GED
 #include "pacman/listenmsgthread.h"
 #include "ros/ros.h"
 #include "pacman/pacmanPos.h"
@@ -37,7 +38,8 @@ class Window : public QWidget
     Q_OBJECT
 
 public:
-    Window();
+    Window(QStringList args);		//GED Jul-27: Se recibe QStringList args con  argumentos
+    int getArguments(QStringList args);	//GED Jul-28
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
@@ -46,6 +48,9 @@ private:
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
+
+public slots: 			//GED Jul-27
+    void timerFunction();	//Jul-27
 
 private slots:
     void PlaySlot();
@@ -64,12 +69,14 @@ private:
     const int maxHeight = 700;
     QVBoxLayout *mainLayout;
     QPushButton *playBtn;
+    QPushButton *counterBtn;	//GED Jul-27
     MainWindow *mainWindow;
     Maps *maps;
     QComboBox *mapsList;
     QHBoxLayout *container;
     bool allowPlay;
     QTimer *refreshTimer;
+    QTimer *counterTimer; 	//GED Jul-27
     const int refreshTimeMs = 150;
     ListenMsgThread *listenMsg;
     ros::NodeHandle *node;
@@ -85,6 +92,7 @@ private:
     
 signals:
     void ArrowKey(int key);
+    void StartedGame();		//GED Jul-27
 };
 
 #endif

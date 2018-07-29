@@ -1,7 +1,7 @@
 #include "pacman/window.h"
 
 
-Window::Window()
+Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  argumentos
 {
     maps = new Maps;
     glWidget = new GLWidget;
@@ -9,12 +9,30 @@ Window::Window()
     mainLayout = new QVBoxLayout;
     container = new QHBoxLayout;
     listenMsg = new ListenMsgThread();
+    counterTimer = new QTimer(this);	//GED Jul-27
          
     QWidget *w = new QWidget;
     w->setLayout(container);
-    mainLayout->addWidget(w);
     playBtn = new QPushButton(tr("Play"));
-    mainLayout->addWidget(playBtn);
+    counterBtn = new QPushButton(tr("Ready player one?")); //GED Jul-27: PushButton label for reverse counter
+    
+    int pacmanMode = getArguments(args);//GED Jul-28
+    if(pacmanMode == 2)  		//GED Jul-27: if Test mode
+    {
+      mainLayout->addWidget(w);
+      mainLayout->addWidget(counterBtn);//GED Jul-27
+    }
+    else if(pacmanMode == 1) 		//GED Jul-27: if Game mode
+    {
+      mainLayout->addWidget(w);
+      mainLayout->addWidget(playBtn);
+      //FALTA VERIFICACIÓN DE MAPAS
+    }
+    else  				//GED Jul-27
+    {
+      cout<<"Error: Pacman mode argument missing."<<endl;
+      exit(0);
+    }
     
     mapsList = new QComboBox;    
     ListArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
@@ -32,11 +50,27 @@ Window::Window()
     connect(glWidget, SIGNAL(UpdateObstaclesPos(QVector<QPoint>*)), this, SLOT(UpdateObstaclesPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(DeadPacmanSignal()), this, SLOT(DeadPacmanSlot()));
     connect(glWidget, SIGNAL(EndOfDeadPacmanSignal()), this, SLOT(EndOfDeadPacmanSlot()));
+    connect(counterTimer, SIGNAL(timeout()), this, SLOT(timerFunction()));	//GED Jul-27
     
     refreshTimer->start(refreshTimeMs);
     container->addWidget(glWidget);
-    maps->CreateMap(mapsList->currentText());
-    mainLayout->addWidget(mapsList);
+    counterTimer->start(1000);		//GED Jul-27
+    
+    if(pacmanMode == 1)  		//GED Jul-27: if Test mode
+    {
+      mainLayout->addWidget(mapsList);
+      maps->CreateMap(mapsList->currentText());
+    }
+    else if(pacmanMode == 2)
+    {
+      QString nameMap1 = args.at(2); 
+      maps->CreateMap(nameMap1);
+    }
+    else
+    {
+      cout<<"Error: Pacman mode argument missing."<<endl;
+      exit(0);
+    }
 
     setLayout(mainLayout);
     
@@ -64,6 +98,64 @@ QSize Window::sizeHint() const
 QSize Window::minimumSizeHint() const
 {
     return QSize(100, 100);
+}
+
+int Window::getArguments(QStringList args)				//GED Jul-28
+{
+    int pacmanMode = 0;
+    int pacmanGameMode =1, pacmanTestMode = -1;
+    for (QStringList::iterator it = args.begin(); it != args.end(); ++it)//GED Jul-28
+    {
+      QString current = *it;
+      QString pacmanModeG="game";
+      QString pacmanModeT="test";
+      pacmanGameMode = QString::compare(pacmanModeG, current, Qt::CaseInsensitive)*pacmanGameMode;
+      pacmanTestMode = QString::compare(pacmanModeT, current, Qt::CaseInsensitive)*pacmanTestMode;
+    }
+    //cout<<endl<<"pacmanGameMode: "<<pacmanGameMode;
+    //cout<<endl<<"pacmanTestMode: "<<pacmanTestMode;
+    if(pacmanGameMode == 0)
+    {
+      pacmanMode = 1; //GED Jul-28: Game mode
+    }  
+    else if(pacmanTestMode == 0)
+    {
+      pacmanMode = 2; //GED Jul-28: Test mode
+    }
+    else
+    {
+      pacmanMode = 0;
+    }
+    //cout<<endl<<"Function pacmanMode: "<<pacmanMode<<endl;    
+    return pacmanMode;
+}
+
+void Window::timerFunction() 				//GED Jul-27
+{
+  counterBtn->setStyleSheet("background-color: black;"
+                            "font: bold 28px;"
+			    "color: yellow;"
+			   );      
+  if(counterBtn->text() == "Ready player one?")
+    {
+      counterBtn->setText("Playing in... 3");
+    }
+  else if(counterBtn->text() == "Playing in... 3")
+    {
+      counterBtn->setText("Playing in... 2");
+    }
+    
+  else if(counterBtn->text() == "Playing in... 2")
+    {
+      counterBtn->setText("Playing in... 1");
+    }
+  else
+    {
+      counterBtn->setText("Play!");
+      allowPlay = true;
+      emit StartedGame();
+    }
+    glWidget->TogglePlaying();
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
