@@ -45,7 +45,7 @@ void GLWidget::LoadNewTexture (QImage* img)
     QImage t = (img->convertToFormat(QImage::Format_RGBA8888)).mirrored();
     glGenTextures(1, &tex); // Obtain an id for the texture
     glBindTexture(GL_TEXTURE_2D, tex); // Set as the current texture
-    texIds[18] = tex;	
+    texIds[18] = tex;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.width(), t.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glDisable(GL_TEXTURE_2D);
@@ -261,8 +261,10 @@ void GLWidget::resizeGL(int w, int h)
 void GLWidget::UpdateSimulationSlot()
 {      
     //Update ghost dynamics (it has be done before changing pacman position)
+    QVector<QPoint> previousGhostsCoord, previousPacmanCoord;    
     for(int i = 0;i < nGhosts; i++)
     {
+	previousGhostsCoord.append(ghostsArray[i]->currentPosition);
 	if(allowToPlay)
 	   ghostsArray[i]->UpdateGhostPosition(pacmanArray[0]->currentPosition, pacmanArray[0]->orientation, ghostsArray[0]->currentPosition);
 	ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
@@ -271,6 +273,7 @@ void GLWidget::UpdateSimulationSlot()
     //Update pacman dynamics
     for(int i = 0; i < nPacman; i++)
     {
+	previousPacmanCoord.append(pacmanArray[i]->currentPosition);
 	UpdatePacmanPosition(i);
 	pacmanCoord->replace(i, pacmanArray[i]->currentPosition);
     }
@@ -281,7 +284,7 @@ void GLWidget::UpdateSimulationSlot()
 	    if (pacmanCoord->at(j) == cookiesCoord->at(i))
 		cookiesCoord->remove(i);
        
-    //Remove Bonuses if necessary and detect Frightened mode
+    //Update Bonuses and detect Frightened mode
     bool enterFrigthenedMode = false;
     for(int j = 0;j < nPacman;j++)
     {
@@ -295,7 +298,7 @@ void GLWidget::UpdateSimulationSlot()
 	}      
     }
     
-    //If Frightened mode was detected, pause the current timer (if any) and start or restart the frigthened timer
+    //If Frightened mode was detected, pause the current timer (if any) and start or restart the frigthened timer. Set ghosts to frigthened mode
     if (enterFrigthenedMode)
     {
 	ghostRemainingTime = ghostModeTimer->remainingTime();
@@ -314,7 +317,7 @@ void GLWidget::UpdateSimulationSlot()
     {
 	for(int i = 0;i < ghostsCoord->size();i++)
 	{
-	    if (pacmanCoord->at(j) == ghostsCoord->at(i))
+	    if ((pacmanCoord->at(j) == ghostsCoord->at(i)) || ((previousPacmanCoord.at(j) == ghostsCoord->at(i)) && (previousGhostsCoord.at(i) == pacmanCoord->at(j))))
 	    {
 		if (ghostsArray[i]->isFrightened())
 		{
@@ -324,19 +327,17 @@ void GLWidget::UpdateSimulationSlot()
 		}
 		else
 		{
-		    //Poner pacman muerto (imagen)
 		    emit DeadPacmanSignal();
 		    deadPacmanTimer->start(deadPacmanTimeMs);
 		}
-		
 	    }
 	}      
     }
     
-    emit UpdateGhostsPos( utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight) );
-    emit UpdatePacmanPos( utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight) );
-    emit UpdateCookiesPos( utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight) );
-    emit UpdateBonusPos( utilities.ConvertImageCoordToLayoutCoord(bonusCoord, _blockWidth, _blockHeight) );
+    emit UpdateGhostsPos(utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight));
+    emit UpdatePacmanPos(utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight));
+    emit UpdateCookiesPos(utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight));
+    emit UpdateBonusPos(utilities.ConvertImageCoordToLayoutCoord(bonusCoord, _blockWidth, _blockHeight));
     
     //Schedule paintGL()
     update();
