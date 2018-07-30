@@ -72,6 +72,7 @@ private:
     QPushButton *counterBtn;	//GED Jul-27
     MainWindow *mainWindow;
     Maps *maps;
+    int mode;
     QComboBox *mapsList;
     QHBoxLayout *container;
     bool allowPlay;

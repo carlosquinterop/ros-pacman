@@ -163,8 +163,8 @@ void Ghosts::UpdateGhostPosition(QPoint newPacmanPosition, double newPacmanOrien
     
     if (deadGhost)
     {
-	mode = Mode::Initial;
-	previousMode = Mode::Initial;
+	mode = previousMode;
+	//previousMode = Mode::Initial;
 	currentPosition = _initialPosition;
         orientation = 180.0;
     }
@@ -203,7 +203,6 @@ void Ghosts::UpdateGhostPosition(QPoint newPacmanPosition, double newPacmanOrien
 		orientation = 270;
 	}
     }
-    
 }
 
 void Ghosts::CalculateTargetPosition()

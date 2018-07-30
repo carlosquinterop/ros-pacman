@@ -206,8 +206,7 @@ void GLWidget::UpdatePacmanPosition(int i)
       if (!_obstacles[utilities.GetIndexRowFromCoord(coord, _mapHeight)*_mapWidth + utilities.GetIndexColFromCoord(coord, _mapWidth)])
 	  pacmanArray[i]->currentPosition.setY(pacmanArray[i]->currentPosition.y() - stepY);
       pacmanArray[i]->orientation = 270.0;
-    }
-    pacmanArray[i]->action = Pacman::Action::None;    
+    }    
 }
 
 void GLWidget::initializeGL()
@@ -252,7 +251,6 @@ void GLWidget::paintGL()
 
 void GLWidget::resizeGL(int w, int h)
 {
-    //glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(ortho[0], ortho[1], ortho[2], ortho[3], -10, 10);
@@ -261,7 +259,7 @@ void GLWidget::resizeGL(int w, int h)
 }
 
 void GLWidget::UpdateSimulationSlot()
-{    
+{      
     //Update ghost dynamics (it has be done before changing pacman position)
     for(int i = 0;i < nGhosts; i++)
     {
@@ -276,18 +274,17 @@ void GLWidget::UpdateSimulationSlot()
 	UpdatePacmanPosition(i);
 	pacmanCoord->replace(i, pacmanArray[i]->currentPosition);
     }
-            
+    
     //Update cookies
     for(int i = 0;i < cookiesCoord->size();i++)
 	for(int j = 0;j < nPacman;j++)
 	    if (pacmanCoord->at(j) == cookiesCoord->at(i))
 		cookiesCoord->remove(i);
-
-        
+       
     //Remove Bonuses if necessary and detect Frightened mode
     bool enterFrigthenedMode = false;
     for(int j = 0;j < nPacman;j++)
-    {	
+    {
 	for(int i = 0;i < bonusCoord->size();i++)
 	{
 	    if (pacmanCoord->at(j) == bonusCoord->at(i))
@@ -299,9 +296,8 @@ void GLWidget::UpdateSimulationSlot()
     }
     
     //If Frightened mode was detected, pause the current timer (if any) and start or restart the frigthened timer
-    if (enterFrigthenedMode && !isInFrightenedMode)
+    if (enterFrigthenedMode)
     {
-	isInFrightenedMode = true;
 	ghostRemainingTime = ghostModeTimer->remainingTime();
 	
 	if (ghostRemainingTime > 0)
@@ -312,13 +308,10 @@ void GLWidget::UpdateSimulationSlot()
 	for(int i = 0;i < nGhosts;i++)
 	    ghostsArray[i]->SetFrigthenedMode();
     }
-    else if (enterFrigthenedMode && isInFrightenedMode)
-	frightenedGhostModeTimer->start(frightenedModeTimeMs);
     
     //Check for dead ghosts and dead pacman
     for(int j = 0;j < nPacman;j++)
     {
-	//Update Bonuses and detect Frightened mode
 	for(int i = 0;i < ghostsCoord->size();i++)
 	{
 	    if (pacmanCoord->at(j) == ghostsCoord->at(i))
@@ -335,10 +328,11 @@ void GLWidget::UpdateSimulationSlot()
 		    emit DeadPacmanSignal();
 		    deadPacmanTimer->start(deadPacmanTimeMs);
 		}
+		
 	    }
 	}      
     }
-        
+    
     emit UpdateGhostsPos( utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight) );
     emit UpdatePacmanPos( utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight) );
     emit UpdateCookiesPos( utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight) );
@@ -482,4 +476,16 @@ void GLWidget::EndOfDeadPacmanSlot()
 	pacmanCoord->replace(j, pacmanArray[j]->currentPosition);
     }
     emit EndOfDeadPacmanSignal();
+}
+
+void GLWidget::receiveArrowKey(int key)
+{
+    if(key == Qt::Key_D)
+	pacmanArray[0]->action = static_cast<Pacman::Action>(2);
+    else if(key == Qt::Key_A)
+	pacmanArray[0]->action = static_cast<Pacman::Action>(3);
+    else if(key == Qt::Key_W)
+	pacmanArray[0]->action = static_cast<Pacman::Action>(0);
+    else if(key == Qt::Key_S)
+	pacmanArray[0]->action = static_cast<Pacman::Action>(1);
 }

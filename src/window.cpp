@@ -3,39 +3,53 @@
 
 Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  argumentos
 {
-    maps = new Maps;
-    glWidget = new GLWidget;
+    char **argv;
+    int argc = 0;
+    ros::init(argc, argv, "pacman_world");
+    QString mapName;
+    QWidget *w = new QWidget();
+    maps = new Maps();
+    glWidget = new GLWidget();
     refreshTimer = new QTimer();
-    mainLayout = new QVBoxLayout;
-    container = new QHBoxLayout;
+    mainLayout = new QVBoxLayout();
+    container = new QHBoxLayout();
     listenMsg = new ListenMsgThread();
-    counterTimer = new QTimer(this);	//GED Jul-27
-         
-    QWidget *w = new QWidget;
-    w->setLayout(container);
+    mapsList = new QComboBox();
+    counterTimer = new QTimer();	//GED Jul-27
     playBtn = new QPushButton(tr("Play"));
     counterBtn = new QPushButton(tr("Ready player one?")); //GED Jul-27: PushButton label for reverse counter
+    node = new ros::NodeHandle();    
     
-    int pacmanMode = getArguments(args);//GED Jul-28
-    if(pacmanMode == 2)  		//GED Jul-27: if Test mode
+    w->setLayout(container);
+    mainLayout->addWidget(w);
+    counterBtn->setEnabled(false);
+    container->addWidget(glWidget);    
+    ListArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
+    allowPlay = false;
+   
+    mode = getArguments(args);//GED Jul-28
+    if(mode == 1)  		//GED Jul-27: if Game mode
     {
-      mainLayout->addWidget(w);
-      mainLayout->addWidget(counterBtn);//GED Jul-27
-    }
-    else if(pacmanMode == 1) 		//GED Jul-27: if Game mode
-    {
-      mainLayout->addWidget(w);
       mainLayout->addWidget(playBtn);
-      //FALTA VERIFICACIÓN DE MAPAS
+      mainLayout->addWidget(mapsList);
+      mapName = mapsList->currentText();
+      connect(this, SIGNAL(ArrowKey(int)), glWidget, SLOT(receiveArrowKey(int)));
     }
-    else  				//GED Jul-27
+    else if(mode == 2)
     {
-      cout<<"Error: Pacman mode argument missing."<<endl;
+      mainLayout->addWidget(counterBtn);
+      counterTimer->start(1000);		//GED Jul-27
+      mapName = args.at(2);
+    }
+    else
+    {
+      cout << "Error: Pacman mode argument missing" << endl;
+      cout << "Usage: rosrun pacman pacman_world [pacmanMode] {opt:mapName}" << endl;
+      cout << "     pacmanMode : test" << endl;
+      cout << "                : game" << endl;
+      cout << "     mapName    : file name of the map" << endl;
       exit(0);
     }
-    
-    mapsList = new QComboBox;    
-    ListArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
     
     connect(playBtn, &QPushButton::clicked, this, &Window::PlaySlot);
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(CreateMap(QString)));
@@ -51,43 +65,18 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(glWidget, SIGNAL(DeadPacmanSignal()), this, SLOT(DeadPacmanSlot()));
     connect(glWidget, SIGNAL(EndOfDeadPacmanSignal()), this, SLOT(EndOfDeadPacmanSlot()));
     connect(counterTimer, SIGNAL(timeout()), this, SLOT(timerFunction()));	//GED Jul-27
-    
-    refreshTimer->start(refreshTimeMs);
-    container->addWidget(glWidget);
-    counterTimer->start(1000);		//GED Jul-27
-    
-    if(pacmanMode == 1)  		//GED Jul-27: if Test mode
-    {
-      mainLayout->addWidget(mapsList);
-      maps->CreateMap(mapsList->currentText());
-    }
-    else if(pacmanMode == 2)
-    {
-      QString nameMap1 = args.at(2); 
-      maps->CreateMap(nameMap1);
-    }
-    else
-    {
-      cout<<"Error: Pacman mode argument missing."<<endl;
-      exit(0);
-    }
-
+       
     setLayout(mainLayout);
+    this->setMaximumSize(QSize(maxWidth, maxHeight));
+    maps->CreateMap(mapName);
     
-    allowPlay = false;
-    
-    //Initialize ROS node, suscriptions and advertisements
-    char **argv;
-    int argc = 0;
-    ros::init(argc, argv, "pacman_world");
-    node = new ros::NodeHandle();
     subscriber = node->subscribe("pacmanActions", 100, &ListenMsgThread::callback, listenMsg);
     pacmanPublisher = node->advertise<pacman::pacmanPos>("pacmanCoord", 100);
     ghostPublisher = node->advertise<pacman::ghostsPos>("ghostsCoord",100);
     cookiesPublisher = node->advertise<pacman::cookiesPos>("cookiesCoord",100);
     bonusPublisher = node->advertise<pacman::bonusPos>("bonusCoord",100); 
-    listenMsg->start(); 
-    this->setMaximumSize(QSize(maxWidth, maxHeight));
+    listenMsg->start();
+    refreshTimer->start(refreshTimeMs);
 }
 
 QSize Window::sizeHint() const
@@ -103,7 +92,8 @@ QSize Window::minimumSizeHint() const
 int Window::getArguments(QStringList args)				//GED Jul-28
 {
     int pacmanMode = 0;
-    int pacmanGameMode =1, pacmanTestMode = -1;
+    int pacmanGameMode = 1, pacmanTestMode = -1;
+    
     for (QStringList::iterator it = args.begin(); it != args.end(); ++it)//GED Jul-28
     {
       QString current = *it;
@@ -112,21 +102,14 @@ int Window::getArguments(QStringList args)				//GED Jul-28
       pacmanGameMode = QString::compare(pacmanModeG, current, Qt::CaseInsensitive)*pacmanGameMode;
       pacmanTestMode = QString::compare(pacmanModeT, current, Qt::CaseInsensitive)*pacmanTestMode;
     }
-    //cout<<endl<<"pacmanGameMode: "<<pacmanGameMode;
-    //cout<<endl<<"pacmanTestMode: "<<pacmanTestMode;
+    
     if(pacmanGameMode == 0)
-    {
       pacmanMode = 1; //GED Jul-28: Game mode
-    }  
     else if(pacmanTestMode == 0)
-    {
       pacmanMode = 2; //GED Jul-28: Test mode
-    }
     else
-    {
       pacmanMode = 0;
-    }
-    //cout<<endl<<"Function pacmanMode: "<<pacmanMode<<endl;    
+    
     return pacmanMode;
 }
 
@@ -149,18 +132,21 @@ void Window::timerFunction() 				//GED Jul-27
     {
       counterBtn->setText("Playing in... 1");
     }
-  else
+  else if(counterBtn->text() == "Playing in... 1")
     {
+      counterTimer->stop();
       counterBtn->setText("Play!");
-      allowPlay = true;
+      listenMsg->setWorkingThread(true);
+      glWidget->TogglePlaying();
       emit StartedGame();
     }
-    glWidget->TogglePlaying();
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
 {
-    
+    //if (mode == 1 && allowPlay)
+    if (allowPlay)
+      emit ArrowKey(e->key());
 }
 
 void Window::ListArrayMap(QString path)
@@ -179,6 +165,7 @@ void Window::PlaySlot()
       listenMsg->setWorkingThread(true);
       playBtn->setText("Stop");
       mapsList->setEnabled(false);
+      allowPlay = true;
     }
     else
     {
@@ -186,6 +173,7 @@ void Window::PlaySlot()
       playBtn->setText("Play");
       maps->CreateMap(mapsList->currentText());
       mapsList->setEnabled(true);
+      allowPlay = false;
     }
     glWidget->TogglePlaying();
 }

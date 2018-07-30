@@ -52,6 +52,7 @@ private slots:
     void reviveGhost2Slot();
     void reviveGhost3Slot();
     void EndOfDeadPacmanSlot();
+    void receiveArrowKey(int key);
     
 private:
     bool allowToPlay;
