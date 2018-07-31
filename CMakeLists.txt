@@ -10,9 +10,11 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   std_msgs
   message_generation
+  actionlib_msgs
   Qt5Widgets
   Qt5Gui
   Qt5Core
+  geometry_msgs
 )
 
 add_message_files(
@@ -23,9 +25,19 @@ pacmanPos.msg
 ghostsPos.msg
 cookiesPos.msg
 bonusPos.msg
+game.msg
 )
 
-generate_messages(DEPENDENCIES std_msgs)
+add_service_files(
+  FILES
+  mapService.srv
+)
+
+generate_messages(
+DEPENDENCIES 
+std_msgs
+geometry_msgs
+)
 
 #openGL
 find_package(OpenGL REQUIRED)
