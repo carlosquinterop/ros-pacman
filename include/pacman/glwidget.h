@@ -77,6 +77,7 @@ private:
     const int deadGhostTimeMs = 3000;
     QTimer *deadPacmanTimer;
     const int deadPacmanTimeMs = 3000;
+    bool *ghostsMode;
     QVector<QPoint> *pacmanCoord;
     QVector<QPoint> *ghostsCoord;
     QVector<QPoint> *cookiesCoord;
@@ -87,12 +88,13 @@ private:
 
 signals:
     void UpdatePacmanPos(QVector<QPoint> *pacmanCoord);
-    void UpdateGhostsPos(QVector<QPoint> *ghostsCoord);
+    void UpdateGhostsPos(QVector<QPoint> *ghostsCoord, bool* ghostsMode);
     void UpdateCookiesPos(QVector<QPoint> *cookiesCoord);
     void UpdateBonusPos(QVector<QPoint> *bonusCoord);
     void UpdateObstaclesPos(QVector<QPoint> *obstaclesCoord);
     void EndOfDeadPacmanSignal();
     void DeadPacmanSignal();
+    void updateGameState();	
 };
 
 #endif

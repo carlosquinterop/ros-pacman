@@ -311,7 +311,6 @@ void GLWidget::UpdateSimulationSlot()
 	for(int i = 0;i < nGhosts;i++)
 	    ghostsArray[i]->SetFrigthenedMode();
     }
-    
     //Check for dead ghosts and dead pacman
     for(int j = 0;j < nPacman;j++)
     {
@@ -333,12 +332,21 @@ void GLWidget::UpdateSimulationSlot()
 	    }
 	}      
     }
+    ghostsMode = (bool*)malloc(sizeof(bool)*nGhosts);
+    for(int i = 0;i < nGhosts;i++)
+    {
+	if (ghostsArray[i]->isFrightened())
+	    ghostsMode[i] = true;
+	else
+	    ghostsMode[i] = false;
+    }
+	    
     
-    emit UpdateGhostsPos(utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight));
+    emit UpdateGhostsPos(utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight), ghostsMode);
     emit UpdatePacmanPos(utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight));
     emit UpdateCookiesPos(utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight));
     emit UpdateBonusPos(utilities.ConvertImageCoordToLayoutCoord(bonusCoord, _blockWidth, _blockHeight));
-    
+    emit updateGameState();	
     //Schedule paintGL()
     update();
 }

@@ -58,14 +58,14 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(UpdateSimulationSlot()));
     connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(SetPacmanCommand(int)));
     connect(glWidget, SIGNAL(UpdatePacmanPos(QVector<QPoint>*)), this, SLOT(UpdatePacmanPosSlot(QVector<QPoint>*)));
-    connect(glWidget, SIGNAL(UpdateGhostsPos(QVector<QPoint>*)), this, SLOT(UpdateGhostsPosSlot(QVector<QPoint>*)));
+    connect(glWidget, SIGNAL(UpdateGhostsPos(QVector<QPoint>*, bool*)), this, SLOT(UpdateGhostsPosSlot(QVector<QPoint>*, bool*)));
     connect(glWidget, SIGNAL(UpdateCookiesPos(QVector<QPoint>*)), this, SLOT(UpdateCookiesPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(UpdateBonusPos(QVector<QPoint>*)), this, SLOT(UpdateBonusPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(UpdateObstaclesPos(QVector<QPoint>*)), this, SLOT(UpdateObstaclesPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(DeadPacmanSignal()), this, SLOT(DeadPacmanSlot()));
     connect(glWidget, SIGNAL(EndOfDeadPacmanSignal()), this, SLOT(EndOfDeadPacmanSlot()));
     connect(counterTimer, SIGNAL(timeout()), this, SLOT(timerFunction()));	//GED Jul-27
-       
+    connect(glWidget, SIGNAL(updateGameState()), this, SLOT(UpdateGameStateSlot()));   
     setLayout(mainLayout);
     this->setMaximumSize(QSize(maxWidth, maxHeight));
     maps->CreateMap(mapName);
@@ -75,6 +75,9 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     ghostPublisher = node->advertise<pacman::ghostsPos>("ghostsCoord",100);
     cookiesPublisher = node->advertise<pacman::cookiesPos>("cookiesCoord",100);
     bonusPublisher = node->advertise<pacman::bonusPos>("bonusCoord",100); 
+    gameStatePublisher = node->advertise<pacman::game>("gameState",100);
+    mapResponseServer = node->advertiseService("pacman_world", &Window::obsService, this);
+    
     listenMsg->start();
     refreshTimer->start(refreshTimeMs);
 }
@@ -138,7 +141,7 @@ void Window::timerFunction() 				//GED Jul-27
       counterBtn->setText("Play!");
       listenMsg->setWorkingThread(true);
       glWidget->TogglePlaying();
-      emit StartedGame();
+      gameState = true;
     }
 }
 
@@ -188,13 +191,15 @@ void Window::UpdatePacmanPosSlot(QVector<QPoint>* pos)
   msgPacman.nPacman = pos->size();
   pacmanPublisher.publish(msgPacman);
 }
-void Window::UpdateGhostsPosSlot(QVector<QPoint>* pos)
+void Window::UpdateGhostsPosSlot(QVector<QPoint>* pos, bool* ghostsMode)
 {
   msgGhosts.ghostsPos.resize(pos->size());
+  msgGhosts.mode.resize(pos->size());
   for(int i = 0; i < pos->size(); i++)
   {
     msgGhosts.ghostsPos[i].x = pos->at(i).x(); 
     msgGhosts.ghostsPos[i].y = pos->at(i).y();
+    msgGhosts.mode[i] = (int)ghostsMode[i];
   }
   msgGhosts.nGhosts = pos->size();
   ghostPublisher.publish(msgGhosts);
@@ -224,15 +229,13 @@ void Window::UpdateBonusPosSlot(QVector<QPoint>* pos)
 
 void Window::UpdateObstaclesPosSlot(QVector< QPoint >* pos)
 {
-  /*msgObstacles.obstaclesPos.resize(pos->size());
-  for(int i = 0; i < pos->size(); i++)
-  {
-    msgObstacles.obstaclesPos[i].x = pos->at(i).x();
-    msgObstacles.obstaclesPos[i].y = pos->at(i).y();
-  }
-  msgObstacles.nObstacles = pos->size();
-  obstaclesPublisher.publish(msgObstacles);*/
+  posObstacles = pos;
+  minX = -4;
+  maxX = 4;
+  minY = -5;
+  maxY = 5;
 }
+
 
 void Window::UpdateSizeSlot()
 {
@@ -247,4 +250,25 @@ void Window::DeadPacmanSlot()
 void Window::EndOfDeadPacmanSlot()
 {
     refreshTimer->start(refreshTimeMs);
+}
+
+void Window::UpdateGameStateSlot()
+{
+  msgState.state = (int)gameState; 
+  gameStatePublisher.publish(msgState);
+}
+bool Window::obsService(pacman::mapService::Request& req, pacman::mapService::Response& res)
+{
+  res.minX = minX;
+  res.maxX = maxX;
+  res.minY = minY;
+  res.maxY = maxY;
+  res.nObs = posObstacles->size();
+  res.obs.resize(posObstacles->size());
+  for(int i = 0; i < posObstacles->size(); i++)
+  {
+    res.obs[i].x = posObstacles->at(i).x();
+    res.obs[i].y = posObstacles->at(i).y();
+  }
+  return true;
 }
