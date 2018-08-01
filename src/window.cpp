@@ -15,9 +15,9 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     container = new QHBoxLayout();
     listenMsg = new ListenMsgThread();
     mapsList = new QComboBox();
-    counterTimer = new QTimer();	//GED Jul-27
+    counterTimer = new QTimer();					//GED Jul-27
     playBtn = new QPushButton(tr("Play"));
-    counterBtn = new QPushButton(tr("Ready player one?")); //GED Jul-27: PushButton label for reverse counter
+    counterBtn = new QPushButton(tr("Ready player one?"));		//GED Jul-27: PushButton label for reverse counter
     node = new ros::NodeHandle();    
     
     w->setLayout(container);
@@ -25,10 +25,10 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     counterBtn->setEnabled(false);
     container->addWidget(glWidget);    
     ListArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
+    mode = getArguments(args);						//GED Jul-28
     allowPlay = false;
    
-    mode = getArguments(args);//GED Jul-28
-    if(mode == 1)  		//GED Jul-27: if Game mode
+    if(mode == 1)  							//GED Jul-27: if Game mode
     {
       mainLayout->addWidget(playBtn);
       mainLayout->addWidget(mapsList);
@@ -38,8 +38,9 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     else if(mode == 2)
     {
       mainLayout->addWidget(counterBtn);
-      counterTimer->start(1000);		//GED Jul-27
-      mapName = args.at(2);
+      counterTimer->start(1000);					//GED Jul-27
+      mapName = verifyMapArgument(args, mapsList, mode); 		//GED Jul-30
+      //cout <<"Selected map: "<<mapName.toStdString() << endl; 		//GED Jul-30
     }
     else
     {
@@ -252,11 +253,45 @@ void Window::EndOfDeadPacmanSlot()
     refreshTimer->start(refreshTimeMs);
 }
 
+QString Window::verifyMapArgument(QStringList args, QComboBox *mapsList, int pacmanMode)	//GED Jul-30
+{
+  QString mapArgument = "", Listmaps;
+  bool mapFound = false;
+  if(pacmanMode == 2)	//If test mode
+  {
+    for (QStringList::iterator it = args.begin(); it != args.end(); ++it) //GED Jul-30
+    {
+      QString current = *it;
+      if(mapsList->findText(current) == -1 && !mapFound)
+      {
+      }
+      else
+      {
+	mapArgument = mapsList->itemText(mapsList->findText(current));
+	mapFound = true;
+      }
+    }      
+    if(mapFound == false)
+    {
+      
+      QDir dir(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
+      dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
+      QStringList list = dir.entryList();
+      cout<<"No valid argument for map"<<endl;
+      cout << "Maps List:" << endl;
+      for(int i = 0; i < list.size(); i++)
+	cout << list.at(i).toLocal8Bit().constData() << " -- ";
+      exit(0);
+    }
+  }
+  return QString(mapArgument);
+
 void Window::UpdateGameStateSlot()
 {
   msgState.state = (int)gameState; 
   gameStatePublisher.publish(msgState);
 }
+  
 bool Window::obsService(pacman::mapService::Request& req, pacman::mapService::Response& res)
 {
   res.minX = minX;

@@ -44,7 +44,7 @@ public:
     int getArguments(QStringList args);	//GED Jul-28
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
-    
+    QString verifyMapArgument(QStringList args, QComboBox *mapsList, int pacmanMode);	//GED Jul-30
 private:
     void ListArrayMap(QString path);
     bool obsService(pacman::mapService::Request& req, pacman::mapService::Response &res);
