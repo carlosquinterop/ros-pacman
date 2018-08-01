@@ -22,7 +22,9 @@
 #include "pacman/ghostsPos.h"
 #include "pacman/cookiesPos.h"
 #include "pacman/bonusPos.h"
+#include "pacman/game.h"
 #include "pacman/pos.h"
+#include "pacman/mapService.h"
 
 
 using namespace std;
@@ -43,9 +45,9 @@ public:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
     QString verifyMapArgument(QStringList args, QComboBox *mapsList, int pacmanMode);	//GED Jul-30
-
 private:
     void ListArrayMap(QString path);
+    bool obsService(pacman::mapService::Request& req, pacman::mapService::Response &res);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -56,13 +58,14 @@ public slots: 			//GED Jul-27
 private slots:
     void PlaySlot();
     void UpdatePacmanPosSlot(QVector<QPoint>* pos);
-    void UpdateGhostsPosSlot(QVector<QPoint>* pos);
+    void UpdateGhostsPosSlot(QVector<QPoint>* pos, bool* ghostsMode);
     void UpdateCookiesPosSlot(QVector<QPoint>* pos);
     void UpdateBonusPosSlot(QVector<QPoint>* pos);
     void UpdateObstaclesPosSlot(QVector<QPoint>* pos);
     void UpdateSizeSlot();
     void DeadPacmanSlot();
     void EndOfDeadPacmanSlot();
+    void UpdateGameStateSlot();
     
 private:
     GLWidget *glWidget;
@@ -74,6 +77,7 @@ private:
     MainWindow *mainWindow;
     Maps *maps;
     int mode;
+    bool gameState = false;
     QComboBox *mapsList;
     QHBoxLayout *container;
     bool allowPlay;
@@ -87,14 +91,19 @@ private:
     ros::Publisher ghostPublisher;
     ros::Publisher cookiesPublisher;
     ros::Publisher bonusPublisher;
+    ros::Publisher gameStatePublisher;
+    ros::ServiceServer mapResponseServer;
     pacman::pacmanPos msgPacman;
     pacman::ghostsPos msgGhosts;
     pacman::cookiesPos msgCookies;
     pacman::bonusPos msgBonus;
+    pacman::game msgState;
+    QVector<QPoint> *posObstacles;
+    int minX, maxX, minY, maxY;
     
 signals:
     void ArrowKey(int key);
-    void StartedGame();		//GED Jul-27
+    
 };
 
 #endif
