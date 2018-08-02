@@ -298,6 +298,7 @@ void GLWidget::UpdateSimulationSlot()
 		enterFrigthenedMode |= true;
 		bonusCoord->remove(i);
 		score += BONUS_SCORE;
+		scoreGhosts = GHOSTS_BASE_SCORE;
 	    }
 	}      
     }
@@ -311,7 +312,7 @@ void GLWidget::UpdateSimulationSlot()
 	    ghostModeTimer->stop();
 	
 	frightenedGhostModeTimer->start(frightenedModeTimeMs);
-	
+	scoreGhosts = GHOSTS_BASE_SCORE;
 	for(int i = 0;i < nGhosts;i++)
 	    ghostsArray[i]->SetFrigthenedMode();
     }
@@ -422,7 +423,7 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
 	else if (i == 3)
 	    connect(deadGhostTimers[i], SIGNAL(timeout()), this, SLOT(reviveGhost3Slot()));
     }
-    
+    scoreGhosts = GHOSTS_BASE_SCORE;
     //Set cookies
     cookiesCoord = new QVector<QPoint>;
     for(int i = 0; i < pCookies->size()/2; i++)
@@ -470,7 +471,6 @@ void GLWidget::ToggleGhostModeSlot()
 
 void GLWidget::EndOfFrightenedGhostModeSlot()
 {
-    scoreGhosts = GHOSTS_BASE_SCORE;
     for(int i = 0;i < nGhosts;i++)
 	ghostsArray[i]->RecoverFromFrigthenedMode();
     
