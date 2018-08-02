@@ -285,6 +285,7 @@ QString Window::verifyMapArgument(QStringList args, QComboBox *mapsList, int pac
     }
   }
   return QString(mapArgument);
+}
 
 void Window::UpdateGameStateSlot()
 {
