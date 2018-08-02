@@ -51,7 +51,7 @@ public slots:
     void CreateMap(QString nameMap);
     
 signals:
-    void SendMapData(int blockWidth, int blockHeight, QImage *mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles);
+    void SendMapData(int blockWidth, int blockHeight, QImage *mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles, int maxIndexRow, int maxIndexCol);
 };
 
 #endif

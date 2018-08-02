@@ -8,11 +8,20 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     ros::init(argc, argv, "pacman_world");
     QString mapName;
     QWidget *w = new QWidget();
+    QWidget *wScores = new QWidget();
+    wScores->setFixedSize(460, 60);
     maps = new Maps();
+    
+    scoreName = new QLabel("Score: ");
+    scoreLabel = new QLabel();
+    livesName = new QLabel("Lives: ");
+    livesLabel = new QLabel();
+    
     glWidget = new GLWidget();
     refreshTimer = new QTimer();
     mainLayout = new QVBoxLayout();
     container = new QHBoxLayout();
+    containerScores = new QHBoxLayout();
     listenMsg = new ListenMsgThread();
     mapsList = new QComboBox();
     counterTimer = new QTimer();	//GED Jul-27
@@ -21,9 +30,15 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     node = new ros::NodeHandle();    
     
     w->setLayout(container);
+    wScores->setLayout(containerScores);
+    mainLayout->addWidget(wScores);
     mainLayout->addWidget(w);
     counterBtn->setEnabled(false);
-    container->addWidget(glWidget);    
+    container->addWidget(glWidget);
+    containerScores->addWidget(scoreName);  
+    containerScores->addWidget(scoreLabel);
+    containerScores->addWidget(livesName);
+    containerScores->addWidget(livesLabel);
     ListArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
     allowPlay = false;
    
@@ -53,23 +68,23 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     
     connect(playBtn, &QPushButton::clicked, this, &Window::PlaySlot);
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(CreateMap(QString)));
-    connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)));
-    connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*)), this, SLOT(UpdateSizeSlot()));
+    connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)));
+    connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)), this, SLOT(UpdateSizeSlot()));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(UpdateSimulationSlot()));
     connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(SetPacmanCommand(int)));
     connect(glWidget, SIGNAL(UpdatePacmanPos(QVector<QPoint>*)), this, SLOT(UpdatePacmanPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(UpdateGhostsPos(QVector<QPoint>*, bool*)), this, SLOT(UpdateGhostsPosSlot(QVector<QPoint>*, bool*)));
     connect(glWidget, SIGNAL(UpdateCookiesPos(QVector<QPoint>*)), this, SLOT(UpdateCookiesPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(UpdateBonusPos(QVector<QPoint>*)), this, SLOT(UpdateBonusPosSlot(QVector<QPoint>*)));
-    connect(glWidget, SIGNAL(UpdateObstaclesPos(QVector<QPoint>*)), this, SLOT(UpdateObstaclesPosSlot(QVector<QPoint>*)));
+    connect(glWidget, SIGNAL(UpdateObstaclesPos(QVector<QPoint>*, int, int, int, int)), this, SLOT(UpdateObstaclesPosSlot(QVector<QPoint>*, int, int, int, int)));
     connect(glWidget, SIGNAL(DeadPacmanSignal()), this, SLOT(DeadPacmanSlot()));
     connect(glWidget, SIGNAL(EndOfDeadPacmanSignal()), this, SLOT(EndOfDeadPacmanSlot()));
+    connect(glWidget, SIGNAL(UpdateScores(int, int)), this, SLOT(UpdateScoresSlot(int, int)));
     connect(counterTimer, SIGNAL(timeout()), this, SLOT(timerFunction()));	//GED Jul-27
     connect(glWidget, SIGNAL(updateGameState()), this, SLOT(UpdateGameStateSlot()));   
     setLayout(mainLayout);
     this->setMaximumSize(QSize(maxWidth, maxHeight));
     maps->CreateMap(mapName);
-    
     subscriber = node->subscribe("pacmanActions", 100, &ListenMsgThread::callback, listenMsg);
     pacmanPublisher = node->advertise<pacman::pacmanPos>("pacmanCoord", 100);
     ghostPublisher = node->advertise<pacman::ghostsPos>("ghostsCoord",100);
@@ -227,13 +242,13 @@ void Window::UpdateBonusPosSlot(QVector<QPoint>* pos)
   bonusPublisher.publish(msgBonus);
 }
 
-void Window::UpdateObstaclesPosSlot(QVector< QPoint >* pos)
+void Window::UpdateObstaclesPosSlot(QVector< QPoint >* pos, int xMin, int xMax, int yMin, int yMax)
 {
   posObstacles = pos;
-  minX = -4;
-  maxX = 4;
-  minY = -5;
-  maxY = 5;
+  minX = xMin;
+  maxX = xMax;
+  minY = yMin;
+  maxY = yMax;
 }
 
 
@@ -257,6 +272,14 @@ void Window::UpdateGameStateSlot()
   msgState.state = (int)gameState; 
   gameStatePublisher.publish(msgState);
 }
+
+void Window::UpdateScoresSlot(int score, int lives)
+{
+  scoreLabel->setText(QString::number(score));
+  livesLabel->setText(QString::number(lives));
+}
+
+
 bool Window::obsService(pacman::mapService::Request& req, pacman::mapService::Response& res)
 {
   res.minX = minX;

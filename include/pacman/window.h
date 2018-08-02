@@ -34,7 +34,6 @@ class QPushButton;
 
 class GLWidget;
 class MainWindow;
-
 class Window : public QWidget
 {
     Q_OBJECT
@@ -61,11 +60,12 @@ private slots:
     void UpdateGhostsPosSlot(QVector<QPoint>* pos, bool* ghostsMode);
     void UpdateCookiesPosSlot(QVector<QPoint>* pos);
     void UpdateBonusPosSlot(QVector<QPoint>* pos);
-    void UpdateObstaclesPosSlot(QVector<QPoint>* pos);
+    void UpdateObstaclesPosSlot(QVector<QPoint>* pos, int xMin, int xMax, int yMin, int yMax);
     void UpdateSizeSlot();
     void DeadPacmanSlot();
     void EndOfDeadPacmanSlot();
     void UpdateGameStateSlot();
+    void UpdateScoresSlot(int score, int lives);
     
 private:
     GLWidget *glWidget;
@@ -100,6 +100,11 @@ private:
     pacman::game msgState;
     QVector<QPoint> *posObstacles;
     int minX, maxX, minY, maxY;
+    QHBoxLayout *containerScores;
+    QLabel *scoreName;
+    QLabel *scoreLabel;
+    QLabel *livesName;
+    QLabel *livesLabel;
     
 signals:
     void ArrowKey(int key);

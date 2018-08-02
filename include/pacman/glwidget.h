@@ -43,7 +43,7 @@ protected:
     
 private slots:
     void UpdateSimulationSlot();
-    void ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles);
+    void ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles, int maxIndexRow, int maxIndexCol);
     void SetPacmanCommand(int aPacmanCommand);
     void ToggleGhostModeSlot();
     void EndOfFrightenedGhostModeSlot();
@@ -85,16 +85,19 @@ private:
     QVector<QPoint> *obstaclesCoord;
     QVector<QPoint> *pacmanInitialCoord;
     Utilities utilities;
+    int COOKIES_SCORE = 10, BONUS_SCORE = 50, GHOSTS_BASE_SCORE = 100, LIVES_BASE = 3, SCORE_BASE = 0;
+    int score, lives, scoreGhosts;
 
 signals:
     void UpdatePacmanPos(QVector<QPoint> *pacmanCoord);
     void UpdateGhostsPos(QVector<QPoint> *ghostsCoord, bool* ghostsMode);
     void UpdateCookiesPos(QVector<QPoint> *cookiesCoord);
     void UpdateBonusPos(QVector<QPoint> *bonusCoord);
-    void UpdateObstaclesPos(QVector<QPoint> *obstaclesCoord);
+    void UpdateObstaclesPos(QVector<QPoint> *obstaclesCoord, int xMin, int xMax, int yMin, int yMax);
     void EndOfDeadPacmanSignal();
     void DeadPacmanSignal();
-    void updateGameState();	
+    void updateGameState();
+    void UpdateScores(int score, int lives);
 };
 
 #endif
