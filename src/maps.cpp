@@ -189,5 +189,5 @@ void Maps::CreateMap(QString nameMap)
     //Guardar imagen
     SaveImage(nameMap + ".png");
     
-    emit SendMapData(BLOCK_SIZE, BLOCK_SIZE, image, mObstacles, pPacman, pGhosts, pCookies, pBonus, pObstacles);
+    emit SendMapData(BLOCK_SIZE, BLOCK_SIZE, image, mObstacles, pPacman, pGhosts, pCookies, pBonus, pObstacles, rowsText-1, colsText-1);
 }

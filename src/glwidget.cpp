@@ -282,7 +282,10 @@ void GLWidget::UpdateSimulationSlot()
     for(int i = 0;i < cookiesCoord->size();i++)
 	for(int j = 0;j < nPacman;j++)
 	    if (pacmanCoord->at(j) == cookiesCoord->at(i))
+	    {
 		cookiesCoord->remove(i);
+		score += COOKIES_SCORE;
+	    }
        
     //Update Bonuses and detect Frightened mode
     bool enterFrigthenedMode = false;
@@ -294,6 +297,8 @@ void GLWidget::UpdateSimulationSlot()
 	    {
 		enterFrigthenedMode |= true;
 		bonusCoord->remove(i);
+		score += BONUS_SCORE;
+		scoreGhosts = GHOSTS_BASE_SCORE;
 	    }
 	}      
     }
@@ -307,7 +312,7 @@ void GLWidget::UpdateSimulationSlot()
 	    ghostModeTimer->stop();
 	
 	frightenedGhostModeTimer->start(frightenedModeTimeMs);
-	
+	scoreGhosts = GHOSTS_BASE_SCORE;
 	for(int i = 0;i < nGhosts;i++)
 	    ghostsArray[i]->SetFrigthenedMode();
     }
@@ -320,12 +325,15 @@ void GLWidget::UpdateSimulationSlot()
 	    {
 		if (ghostsArray[i]->isFrightened())
 		{
+		    scoreGhosts *= 2;
+		    score += scoreGhosts;
 		    ghostsArray[i]->deadGhost = true;
 		    ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
 		    deadGhostTimers[i]->start(deadGhostTimeMs);  
 		}
 		else
 		{
+		    lives--;
 		    emit DeadPacmanSignal();
 		    deadPacmanTimer->start(deadPacmanTimeMs);
 		}
@@ -347,16 +355,24 @@ void GLWidget::UpdateSimulationSlot()
     emit UpdateCookiesPos(utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight));
     emit UpdateBonusPos(utilities.ConvertImageCoordToLayoutCoord(bonusCoord, _blockWidth, _blockHeight));
     emit updateGameState();	
+    
+    emit UpdateScores(score, lives);
     //Schedule paintGL()
     update();
 }
 
-void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles)
+void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles, int maxIndexRow, int maxIndexCol)
 {
     if(!firstTime)
       LoadNewTexture(mapImage);
     else
       firstTime = false;
+    
+    //Set Scores
+    score = SCORE_BASE;
+    lives = LIVES_BASE;
+    scoreGhosts = GHOSTS_BASE_SCORE;
+    emit UpdateScores(score, lives);
 
     //Set Map
     _mapImage = new QImage(*mapImage);
@@ -407,7 +423,7 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
 	else if (i == 3)
 	    connect(deadGhostTimers[i], SIGNAL(timeout()), this, SLOT(reviveGhost3Slot()));
     }
-    
+    scoreGhosts = GHOSTS_BASE_SCORE;
     //Set cookies
     cookiesCoord = new QVector<QPoint>;
     for(int i = 0; i < pCookies->size()/2; i++)
@@ -422,7 +438,14 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     obstaclesCoord = new QVector<QPoint>;
     for(int i = 0; i < pObstacles->size()/2; i++)
 	obstaclesCoord->append( *utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, pObstacles->at(i*2), pObstacles->at(i*2 + 1)) );
-    emit UpdateObstaclesPos( utilities.ConvertImageCoordToLayoutCoord(obstaclesCoord, _blockWidth, _blockHeight) );
+   
+    //Set boundaries
+    QVector<QPoint>* boundaries = new QVector<QPoint>;
+    boundaries->append( *utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, 0, 0) ); //Upper Left Boundary
+    boundaries->append( *utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, maxIndexRow, maxIndexCol) ); //Lower Right Boundary
+    boundaries = utilities.ConvertImageCoordToLayoutCoord(boundaries, _blockWidth, _blockHeight);
+    
+    emit UpdateObstaclesPos( utilities.ConvertImageCoordToLayoutCoord(obstaclesCoord, _blockWidth, _blockHeight), boundaries->at(0).x(), boundaries->at(1).x(), boundaries->at(1).y(), boundaries->at(0).y() );
     
     update();
 }
