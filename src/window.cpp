@@ -9,7 +9,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     QString mapName;
     QWidget *w = new QWidget();
     QWidget *wScores = new QWidget();
-    wScores->setFixedSize(460, 60);
+    wScores->setFixedSize(scoreWidth, scoreHeight);
     maps = new Maps();
     
     scoreName = new QLabel("Score: ");
@@ -100,12 +100,12 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
 
 QSize Window::sizeHint() const
 {
-    return QSize(maps->getWidth(), maps->getHeight());
+    return QSize(maps->getWidth()+scoreWidth, maps->getHeight()+scoreHeight);
 }
 
 QSize Window::minimumSizeHint() const
 {
-    return QSize(100, 100);
+    return QSize(150, 150);
 }
 
 int Window::getArguments(QStringList args)				//GED Jul-28
@@ -139,26 +139,19 @@ void Window::timerFunction() 				//GED Jul-27
 			    "color: yellow;"
 			   );      
   if(counterBtn->text() == "Ready player one?")
-    {
       counterBtn->setText("Playing in... 3");
-    }
   else if(counterBtn->text() == "Playing in... 3")
-    {
-      counterBtn->setText("Playing in... 2");
-    }
-    
+      counterBtn->setText("Playing in... 2");    
   else if(counterBtn->text() == "Playing in... 2")
-    {
       counterBtn->setText("Playing in... 1");
-    }
   else if(counterBtn->text() == "Playing in... 1")
-    {
+  {
       counterTimer->stop();
       counterBtn->setText("Play!");
       listenMsg->setWorkingThread(true);
       glWidget->TogglePlaying();
       gameState = true;
-    }
+  }
 }
 
 void Window::keyPressEvent(QKeyEvent *e)

@@ -71,6 +71,8 @@ private:
     GLWidget *glWidget;
     const int maxWidth = 1000;
     const int maxHeight = 700;
+    const int scoreWidth = 460;
+    const int scoreHeight = 60;
     QVBoxLayout *mainLayout;
     QPushButton *playBtn;
     QPushButton *counterBtn;	//GED Jul-27
