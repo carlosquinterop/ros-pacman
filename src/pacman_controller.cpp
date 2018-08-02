@@ -84,7 +84,7 @@ int main(int argc, char **argv)
       pacman::Num msg;
       msg.num = rand() % 5;
       //ROS_INFO("%d", msg.num);
-      //chatter_pub.publish(msg);
+      chatter_pub.publish(msg);
       ros::spinOnce();
       loop_rate.sleep();
       ++count;

@@ -156,7 +156,6 @@ void Window::timerFunction() 				//GED Jul-27
 
 void Window::keyPressEvent(QKeyEvent *e)
 {
-    //if (mode == 1 && allowPlay)
     if (allowPlay)
       emit ArrowKey(e->key());
 }

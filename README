@@ -14,10 +14,19 @@ COMPILATION
 	- catkin_make
 	
 EXECUTION
-	- roscore
-	- Open a new terminal and source devel/setup.bash
-	- rosrun pacman pacman_world
-	- Open a new terminal and source devel/setup.bash
+	- Open a new terminal
+	- Run: roscore
+	- Open a new terminal
+	- source devel/setup.bash
+	- rosrun pacman pacman_world [pacmanMode] {optional:mapName}
+	      pacmanMode : test
+                         : game
+              mapName    : file name of the map (only required in 'test' mode)
+	- Example 1: rosrun pacman pacman_world test originalClassic
+	- Example 2: rosrun pacman pacman_world game
+	- In test mode, a controller node must be executed
+	- Open a new terminal
+	- source devel/setup.bash
 	- rosrun pacman pacman_controller
 
 FOR DEVELOPMENT (Recommended)
