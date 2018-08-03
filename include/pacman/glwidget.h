@@ -65,6 +65,7 @@ private:
     int nPacman;
     Pacman **pacmanArray;
     int nGhosts;
+    //int CountPacmanDeads = 0;	/GED Ag-01
     Ghosts **ghostsArray;
     QTimer *ghostModeTimer;
     const int ghostModeTimes[8] = {3000, 7000, 20000, 7000, 20000, 5000, 20000, 5000};
@@ -98,6 +99,7 @@ signals:
     void DeadPacmanSignal();
     void updateGameState();
     void UpdateScores(int score, int lives);
+    void EndGameSignal();	//GED Ag-01
 };
 
 #endif
