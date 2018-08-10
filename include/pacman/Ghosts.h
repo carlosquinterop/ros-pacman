@@ -31,6 +31,7 @@ public:
     void SetFrigthenedMode();
     void RecoverFromFrigthenedMode();
     bool isFrightened();
+    void SetInitialMode();
     
     QPoint currentPosition;
     QPoint _initialPosition;

@@ -397,3 +397,8 @@ bool Ghosts::isFrightened()
     else
 	return false;
 }
+
+void Ghosts::SetInitialMode()
+{
+    mode = Mode::Initial;
+}

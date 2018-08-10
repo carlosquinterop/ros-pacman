@@ -87,6 +87,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(counterTimer, SIGNAL(timeout()), this, SLOT(timerFunction()));	//GED Jul-27
     connect(glWidget, SIGNAL(updateGameState()), this, SLOT(UpdateGameStateSlot()));
     connect(glWidget, SIGNAL(EndGameSignal()), this, SLOT(EndGame()));	//GED Ag-01
+    
     setLayout(mainLayout);
     this->setMaximumSize(QSize(maxWidth, maxHeight));
     maps->CreateMap(mapName);

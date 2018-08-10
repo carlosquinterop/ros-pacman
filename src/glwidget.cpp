@@ -337,9 +337,10 @@ void GLWidget::UpdateSimulationSlot()
 		{
 		    lives--;
 		    emit DeadPacmanSignal();
-		    deadPacmanTimer->start(deadPacmanTimeMs);
 		    if(lives == 0)	//GED Ago-01
 		      emit EndGameSignal();
+		    else
+		      deadPacmanTimer->start(deadPacmanTimeMs);
 		}
 	    }
 	}      
@@ -358,8 +359,7 @@ void GLWidget::UpdateSimulationSlot()
     emit UpdatePacmanPos(utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight));
     emit UpdateCookiesPos(utilities.ConvertImageCoordToLayoutCoord(cookiesCoord, _blockWidth, _blockHeight));
     emit UpdateBonusPos(utilities.ConvertImageCoordToLayoutCoord(bonusCoord, _blockWidth, _blockHeight));
-    emit updateGameState();	
-    
+    emit updateGameState();
     emit UpdateScores(score, lives);
     //Schedule paintGL()
     update();
@@ -450,7 +450,6 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     boundaries = utilities.ConvertImageCoordToLayoutCoord(boundaries, _blockWidth, _blockHeight);
     
     emit UpdateObstaclesPos( utilities.ConvertImageCoordToLayoutCoord(obstaclesCoord, _blockWidth, _blockHeight), boundaries->at(0).x(), boundaries->at(1).x(), boundaries->at(1).y(), boundaries->at(0).y() );
-    
     update();
 }
 
@@ -509,8 +508,19 @@ void GLWidget::EndOfDeadPacmanSlot()
     for(int j = 0;j < nPacman;j++)
     {
 	pacmanArray[j]->currentPosition = pacmanArray[j]->_initialPosition;
-	pacmanCoord->replace(j, pacmanArray[j]->currentPosition);
+	pacmanArray[j]->action = Pacman::Action::None;
     }
+    
+    for(int k = 0;k < ghostsCoord->size();k++)
+    {
+	ghostsArray[k]->currentPosition = ghostsArray[k]->_initialPosition;
+	ghostsArray[k]->SetInitialMode();
+    }
+    
+    contGhostModePhases = 0;
+    ghostRemainingTime = 0;    
+    ghostModeTimer->start(ghostModeTimes[contGhostModePhases]);
+    
     emit EndOfDeadPacmanSignal();
 }
 
