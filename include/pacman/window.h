@@ -3,10 +3,6 @@
 
 #include <QWidget>
 #include <QObject>
-#include "maps.h"
-#include <iostream>
-#include <ros/package.h>
-#include "pacman/glwidget.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -15,9 +11,15 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QTimer>
+#include <QTime>
 #include <QList>  //GED
-#include "pacman/listenmsgthread.h"
+#include <QLCDNumber>
+#include <iostream>
+#include "ros/package.h"
 #include "ros/ros.h"
+#include "maps.h"
+#include "pacman/glwidget.h"
+#include "pacman/listenmsgthread.h"
 #include "pacman/pacmanPos.h"
 #include "pacman/ghostsPos.h"
 #include "pacman/cookiesPos.h"
@@ -26,11 +28,7 @@
 #include "pacman/pos.h"
 #include "pacman/mapService.h"
 
-
 using namespace std;
-
-class QSlider;
-class QPushButton;
 
 class GLWidget;
 class MainWindow;
@@ -47,12 +45,10 @@ public:
 private:
     void ListArrayMap(QString path);
     bool obsService(pacman::mapService::Request& req, pacman::mapService::Response &res);
+    //bool InitializeService(pacman::initializeService::Request& req, pacman::initializeService::Response &res);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
-
-public slots: 			//GED Jul-27
-    void timerFunction();	//Jul-27
 
 private slots:
     void PlaySlot();
@@ -67,6 +63,7 @@ private slots:
     void UpdateGameStateSlot();
     void UpdateScoresSlot(int score, int lives);
     void EndGame();	//GED Ag-01
+    void InitializeCounterTimerSlot();	//Jul-27
     
 private:
     GLWidget *glWidget;
@@ -110,6 +107,11 @@ private:
     QLabel *scoreLabel;
     QLabel *livesName;
     QLabel *livesLabel;
+    QLCDNumber *gameTimeRemainingLCD;
+    QTimer *remainingTimeTimer;
+    QTime *gameTime;
+    const int initialGameTimeMins = 3;
+    const int initialGameTimeSecs = 0;
     
 signals:
     void ArrowKey(int key);
