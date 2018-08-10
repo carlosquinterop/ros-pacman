@@ -64,8 +64,8 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     {
       cout << "Error: Pacman mode argument missing" << endl;
       cout << "Usage: rosrun pacman pacman_world [pacmanMode] {opt:mapName}" << endl;
-      cout << "     pacmanMode : test" << endl;
-      cout << "                : game" << endl;
+      cout << "     pacmanMode : --c" << endl;
+      cout << "                : --g" << endl;
       cout << "     mapName    : file name of the map" << endl;
       exit(0);
     }
@@ -116,21 +116,21 @@ QSize Window::minimumSizeHint() const
 int Window::getArguments(QStringList args)				//GED Jul-28
 {
     int pacmanMode = 0;
-    int pacmanGameMode = 1, pacmanTestMode = -1;
+    int pacmanGameMode = 1, pacmanChallengeMode = -1;
     
     for (QStringList::iterator it = args.begin(); it != args.end(); ++it)//GED Jul-28
     {
       QString current = *it;
-      QString pacmanModeG="game";
-      QString pacmanModeT="test";
+      QString pacmanModeG="--g";
+      QString pacmanModeC="--c";
       pacmanGameMode = QString::compare(pacmanModeG, current, Qt::CaseInsensitive)*pacmanGameMode;
-      pacmanTestMode = QString::compare(pacmanModeT, current, Qt::CaseInsensitive)*pacmanTestMode;
+      pacmanChallengeMode = QString::compare(pacmanModeC, current, Qt::CaseInsensitive)*pacmanChallengeMode;
     }
     
     if(pacmanGameMode == 0)
       pacmanMode = 1; //GED Jul-28: Game mode
-    else if(pacmanTestMode == 0)
-      pacmanMode = 2; //GED Jul-28: Test mode
+    else if(pacmanChallengeMode == 0)
+      pacmanMode = 2; //GED Jul-28: Challenge mode
     else
       pacmanMode = 0;
     
