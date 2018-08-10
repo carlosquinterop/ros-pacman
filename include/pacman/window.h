@@ -66,6 +66,7 @@ private slots:
     void EndOfDeadPacmanSlot();
     void UpdateGameStateSlot();
     void UpdateScoresSlot(int score, int lives);
+    void EndGame();	//GED Ag-01
     
 private:
     GLWidget *glWidget;
@@ -76,6 +77,8 @@ private:
     QVBoxLayout *mainLayout;
     QPushButton *playBtn;
     QPushButton *counterBtn;	//GED Jul-27
+    QPushButton *EndGameBtn1;	//GED Ag-01
+    QPushButton *EndGameBtn2;	//GED Ag-01
     MainWindow *mainWindow;
     Maps *maps;
     int mode;

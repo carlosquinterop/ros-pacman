@@ -24,9 +24,12 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     containerScores = new QHBoxLayout();
     listenMsg = new ListenMsgThread();
     mapsList = new QComboBox();
-    counterTimer = new QTimer();					//GED Jul-27
+    counterTimer = new QTimer();				//GED Jul-27
     playBtn = new QPushButton(tr("Play"));
-    counterBtn = new QPushButton(tr("Ready player one?"));		//GED Jul-27: PushButton label for reverse counter
+    counterBtn = new QPushButton(tr("Ready player one?"));	//GED Jul-27: PushButton label for reverse counter
+    EndGameBtn1 = new QPushButton(tr("Game Over"));		//GED Ag-01
+    EndGameBtn2 = new QPushButton(tr("Finished Test"));		//GED Ag-01
+
     node = new ros::NodeHandle();    
     
     w->setLayout(container);
@@ -82,7 +85,8 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(glWidget, SIGNAL(EndOfDeadPacmanSignal()), this, SLOT(EndOfDeadPacmanSlot()));
     connect(glWidget, SIGNAL(UpdateScores(int, int)), this, SLOT(UpdateScoresSlot(int, int)));
     connect(counterTimer, SIGNAL(timeout()), this, SLOT(timerFunction()));	//GED Jul-27
-    connect(glWidget, SIGNAL(updateGameState()), this, SLOT(UpdateGameStateSlot()));   
+    connect(glWidget, SIGNAL(updateGameState()), this, SLOT(UpdateGameStateSlot()));
+    connect(glWidget, SIGNAL(EndGameSignal()), this, SLOT(EndGame()));	//GED Ag-01
     setLayout(mainLayout);
     this->setMaximumSize(QSize(maxWidth, maxHeight));
     maps->CreateMap(mapName);
@@ -258,6 +262,33 @@ void Window::DeadPacmanSlot()
 void Window::EndOfDeadPacmanSlot()
 {
     refreshTimer->start(refreshTimeMs);
+}
+
+void Window::EndGame()	//GED Ag-01
+{
+    EndGameBtn1->setStyleSheet("background-color: black;"
+                               "font: bold 28px;"
+			       "color: yellow;"
+			      );
+    EndGameBtn2->setStyleSheet("background-color: black;"
+                               "font: bold 28px;"
+			       "color: yellow;"
+			      );
+    if(mode == 1)
+    {
+      mapsList->setVisible(false);
+      playBtn->setVisible(false);
+      mainLayout->addWidget(EndGameBtn1);
+    }
+    else if(mode == 2)
+    {
+      counterBtn->setVisible(false);
+      mainLayout->addWidget(EndGameBtn2);
+    }
+    refreshTimer->stop();
+    listenMsg->setWorkingThread(false);
+    glWidget->TogglePlaying();
+    allowPlay = false;
 }
 
 QString Window::verifyMapArgument(QStringList args, QComboBox *mapsList, int pacmanMode)	//GED Jul-30
