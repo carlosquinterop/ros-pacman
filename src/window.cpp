@@ -63,7 +63,6 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     else if(mode == 2)
     {
       mainLayout->addWidget(counterBtn);
-      counterTimer->start(1000);//Temporary to test
       mapName = verifyMapArgument(args, mapsList, mode); 		//GED Jul-30
     }
     else
@@ -147,7 +146,7 @@ void Window::InitializeCounterTimerSlot() 				//GED Jul-27
   QTime zeroTime;
   if (mode == 1)
   {
-      *gameTime = gameTime->addMSecs(-1000);
+      *gameTime = gameTime->addMSecs(-oneSecondTimeMilisecs);
       QString time = gameTime->toString();
       gameTimeRemainingLCD->display(time);
   }
@@ -172,7 +171,7 @@ void Window::InitializeCounterTimerSlot() 				//GED Jul-27
       }
       else if (counterBtn->text() == "Play!")
       {
-	  *gameTime = gameTime->addMSecs(-1000);
+	  *gameTime = gameTime->addMSecs(-oneSecondTimeMilisecs);
 	  QString time = gameTime->toString();
 	  gameTimeRemainingLCD->display(time);
       }
@@ -180,7 +179,6 @@ void Window::InitializeCounterTimerSlot() 				//GED Jul-27
   
   if (*gameTime == QTime(0,0,0))
       EndGame();
-   
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -206,7 +204,7 @@ void Window::PlaySlot()
       playBtn->setText("Stop");
       mapsList->setEnabled(false);
       allowPlay = true;
-      counterTimer->start(1000);//Temporary to test
+      counterTimer->start(oneSecondTimeMilisecs);
     }
     else
     {
@@ -386,7 +384,7 @@ bool Window::obsService(pacman::mapService::Request& req, pacman::mapService::Re
 
 /*bool Window::InitializeService(pacman::initializeService::Request& req, pacman::initializeService::Response &res)
 {
-    counterTimer->start(1000);
+    counterTimer->start(oneSecondTimeMilisecs);
     //Devolver alguna confirmación de que empieza el conteo?
     return true;
 }*/

@@ -112,6 +112,7 @@ private:
     QTime *gameTime;
     const int initialGameTimeMins = 3;
     const int initialGameTimeSecs = 0;
+    const int oneSecondTimeMilisecs = 1000;
     
 signals:
     void ArrowKey(int key);
