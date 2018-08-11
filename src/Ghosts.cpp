@@ -17,6 +17,8 @@ Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeig
     changedMode = false;
     obstacles = new bool[(mapHeight)*(mapWidth)];
     deadGhost = false;
+    frightenedMode = 1;
+    frightenedCount = 1;
     memcpy(obstacles, cObstacles, (mapHeight)*(mapWidth)*sizeof(bool));
         
     if (character == Ghosts::Personality::Shadow)
@@ -45,7 +47,12 @@ Ghosts::Ghosts(QPoint initialPosition, Ghosts::Personality aCharacter, int aHeig
 int Ghosts::GetTexId()
 {
     if (mode == Mode::Frightened)
-	texId = 17;
+    {
+	if (frightenedMode == 1)
+	    texId = 17;
+	else
+	    texId = 18;
+    }
     else if (character == Ghosts::Personality::Shadow)
     { 
 	if (orientation == 90)
@@ -104,104 +111,110 @@ void Ghosts::UpdateGhostPosition(QPoint newPacmanPosition, double newPacmanOrien
     pacmanOrientation = newPacmanOrientation;
     blinkysPosition = newBlinkysPosition;
     
-    if (action == Ghosts::Action::None)
-    {
-	QPoint coordLeft(currentPosition.x() - stepX, currentPosition.y());
-	QPoint coordRight(currentPosition.x() + stepX, currentPosition.y());
-	QPoint coordUp(currentPosition.x(), currentPosition.y() + stepY);
-	QPoint coordDown(currentPosition.x(), currentPosition.y() - stepY);
-	
-	if (!obstacles[utilities.GetIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordLeft, mapWidth)])
-	    action = Ghosts::Action::Left;
-	else if (!obstacles[utilities.GetIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordDown, mapWidth)])
-	    action = Ghosts::Action::Down;
-	else if (!obstacles[utilities.GetIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordRight, mapWidth)])
-	    action = Ghosts::Action::Right;
-	else if (!obstacles[utilities.GetIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordUp, mapWidth)])
-	    action = Ghosts::Action::Up;
-    }
+    if ((mode == Ghosts::Mode::Frightened) && (frightenedCount == 1))
+	frightenedCount++;
     else
-    {	
-	if (!changedMode)
+    {
+    
+	if (action == Ghosts::Action::None)
 	{
-	    QVector<Ghosts::Action> *possibleActions;
-	    possibleActions = new QVector<Ghosts::Action>;
-	    GetPossibleActions(possibleActions);
+	    QPoint coordLeft(currentPosition.x() - stepX, currentPosition.y());
+	    QPoint coordRight(currentPosition.x() + stepX, currentPosition.y());
+	    QPoint coordUp(currentPosition.x(), currentPosition.y() + stepY);
+	    QPoint coordDown(currentPosition.x(), currentPosition.y() - stepY);
+	    
+	    if (!obstacles[utilities.GetIndexRowFromCoord(coordLeft, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordLeft, mapWidth)])
+		action = Ghosts::Action::Left;
+	    else if (!obstacles[utilities.GetIndexRowFromCoord(coordDown, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordDown, mapWidth)])
+		action = Ghosts::Action::Down;
+	    else if (!obstacles[utilities.GetIndexRowFromCoord(coordRight, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordRight, mapWidth)])
+		action = Ghosts::Action::Right;
+	    else if (!obstacles[utilities.GetIndexRowFromCoord(coordUp, mapHeight)*mapWidth + utilities.GetIndexColFromCoord(coordUp, mapWidth)])
+		action = Ghosts::Action::Up;
+	}
+	else
+	{	
+	    if (!changedMode)
+	    {
+		QVector<Ghosts::Action> *possibleActions;
+		possibleActions = new QVector<Ghosts::Action>;
+		GetPossibleActions(possibleActions);
 
-	    if (possibleActions->size() == 1)
-		action = possibleActions->at(0);
-	    else if (possibleActions->size() == 2)
-	    {
-		DeleteReverseAction(action, possibleActions);
-		action = possibleActions->at(0); 
-	    }
-	    else if (possibleActions->size() > 2)
-	    {
-		DeleteReverseAction(action, possibleActions);
-		if (mode == Mode::Frightened || mode == Mode::Initial)
-		    action = possibleActions->at(rand() % possibleActions->size());
-		else
+		if (possibleActions->size() == 1)
+		    action = possibleActions->at(0);
+		else if (possibleActions->size() == 2)
 		{
-		    CalculateTargetPosition();
-		    ComputeGhostDecision(possibleActions);
-		}    
-	     }
+		    DeleteReverseAction(action, possibleActions);
+		    action = possibleActions->at(0); 
+		}
+		else if (possibleActions->size() > 2)
+		{
+		    DeleteReverseAction(action, possibleActions);
+		    if (mode == Mode::Frightened || mode == Mode::Initial)
+			action = possibleActions->at(rand() % possibleActions->size());
+		    else
+		    {
+			CalculateTargetPosition();
+			ComputeGhostDecision(possibleActions);
+		    }    
+		}
+	    }
+	    else
+	    {
+		if(action == Ghosts::Action::Down)
+		  action = Ghosts::Action::Up;
+		else if(action == Ghosts::Action::Up)
+		    action = Ghosts::Action::Down;
+		else if(action == Ghosts::Action::Right)
+		    action = Ghosts::Action::Left;
+		else if(action == Ghosts::Action::Left)
+		    action = Ghosts::Action::Right;
+		changedMode = false;
+	    }
+	}
+	
+	if (deadGhost)
+	{
+	    mode = previousMode;
+	    currentPosition = _initialPosition;
+	    orientation = 180.0;
 	}
 	else
 	{
-	    if(action == Ghosts::Action::Down)
-	       action = Ghosts::Action::Up;
-	    else if(action == Ghosts::Action::Up)
-		action = Ghosts::Action::Down;
-	    else if(action == Ghosts::Action::Right)
-		action = Ghosts::Action::Left;
-	    else if(action == Ghosts::Action::Left)
-		action = Ghosts::Action::Right;
-	    changedMode = false;
+	    if (action == Ghosts::Action::Left)
+	    {
+		currentPosition.setX(currentPosition.x() - stepX);
+		if (mode == Mode::Frightened)
+		    orientation = 0;
+		else
+		    orientation = 180.0;
+	    }
+	    else if (action == Ghosts::Action::Right)
+	    {
+		currentPosition.setX(currentPosition.x() + stepX);
+		if (mode == Mode::Frightened)
+		    orientation = 0;
+		else
+		    orientation = 0.0;
+	    }
+	    else if (action == Ghosts::Action::Up)
+	    {
+		currentPosition.setY(currentPosition.y() + stepY);
+		if (mode == Mode::Frightened)
+		    orientation = 0;
+		else
+		    orientation = 90;
+	    }
+	    else if (action == Ghosts::Action::Down)
+	    {
+		currentPosition.setY(currentPosition.y() - stepY);
+		if (mode == Mode::Frightened)
+		    orientation = 0;
+		else
+		    orientation = 270;
+	    }
 	}
-    }
-    
-    if (deadGhost)
-    {
-	mode = previousMode;
-	//previousMode = Mode::Initial;
-	currentPosition = _initialPosition;
-        orientation = 180.0;
-    }
-    else
-    {
-	if (action == Ghosts::Action::Left)
-	{
-	    currentPosition.setX(currentPosition.x() - stepX);
-	    if (mode == Mode::Frightened)
-		orientation = 0;
-	    else
-		orientation = 180.0;
-	}
-	else if (action == Ghosts::Action::Right)
-	{
-	    currentPosition.setX(currentPosition.x() + stepX);
-	    if (mode == Mode::Frightened)
-		orientation = 0;
-	    else
-		orientation = 0.0;
-	}
-	else if (action == Ghosts::Action::Up)
-	{
-	    currentPosition.setY(currentPosition.y() + stepY);
-	    if (mode == Mode::Frightened)
-		orientation = 0;
-	    else
-		orientation = 90;
-	}
-	else if (action == Ghosts::Action::Down)
-	{
-	    currentPosition.setY(currentPosition.y() - stepY);
-	    if (mode == Mode::Frightened)
-		orientation = 0;
-	    else
-		orientation = 270;
-	}
+	frightenedCount = 1;
     }
 }
 
@@ -388,6 +401,7 @@ void Ghosts::SetFrigthenedMode()
 void Ghosts::RecoverFromFrigthenedMode()
 {
     mode = previousMode;
+    frightenedMode = 1;
 }
 
 bool Ghosts::isFrightened()

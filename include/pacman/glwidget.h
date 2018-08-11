@@ -54,6 +54,7 @@ private slots:
     void reviveGhost3Slot();
     void EndOfDeadPacmanSlot();
     void receiveArrowKey(int key);
+    void ChangeFrightenedFigSlot();
     
 private:
     bool allowToPlay;
@@ -74,9 +75,12 @@ private:
     int contGhostModePhases;
     QTimer *frightenedGhostModeTimer;
     const int frightenedModeTimeMs = 10000;
+    QTimer *frightenedGhostAlmostModeTimer;
+    const int almostFrightenedTimeRateMs = 500;
+    const int almostFrightenedTimeMs = 3000;
     bool isInFrightenedMode;
     QTimer **deadGhostTimers;
-    const int deadGhostTimeMs = 3000;
+    const int deadGhostTimeMs = 3500;
     QTimer *deadPacmanTimer;
     const int deadPacmanTimeMs = 3000;
     bool *ghostsMode;

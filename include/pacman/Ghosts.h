@@ -55,6 +55,9 @@ public:
     double pacmanOrientation;
     int mapWidth, mapHeight;
     bool *obstacles;
+    
+    int frightenedMode;
+    int frightenedCount;
 };
 
 #endif

@@ -17,13 +17,14 @@
         <file>textures/orangeGhostDown.png</file>
         <file>textures/orangeGhostRight.png</file>
         <file>textures/orangeGhostLeft.png</file>
+        <file>textures/frightenedGhost1.png</file>
+		<file>textures/frightenedGhost2.png</file>
         <file>audio/cookies.wav</file>
         <file>audio/ghosts.wav</file>
         <file>audio/normal.wav</file>
         <file>audio/frightened.wav</file>
         <file>audio/returnHome.wav</file>
         <file>audio/miss.wav</file>
-	<file>textures/frightenedGhost.png</file>
-	<file>textures/cover.png</file>
+        <file>audio/start.wav</file>
     </qresource>
 </RCC>

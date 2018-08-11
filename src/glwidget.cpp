@@ -9,6 +9,7 @@ GLWidget::GLWidget(QWidget *parent)
     ghostModeTimer = new QTimer();
     frightenedGhostModeTimer = new QTimer();
     deadPacmanTimer = new QTimer();
+    frightenedGhostAlmostModeTimer = new QTimer();
     cookiesSound = new QSound(tr(":/resources/audio/cookies.wav"));
     normalSound = new QSound(tr(":/resources/audio/normal.wav"));
     frightenedSound = new QSound(tr(":/resources/audio/frightened.wav"));
@@ -19,9 +20,11 @@ GLWidget::GLWidget(QWidget *parent)
     ghostModeTimer->setSingleShot(true);
     frightenedGhostModeTimer->setSingleShot(true);
     deadPacmanTimer->setSingleShot(true);
+    frightenedGhostAlmostModeTimer->setSingleShot(true);
     connect(ghostModeTimer, SIGNAL(timeout()), this, SLOT(ToggleGhostModeSlot()));
     connect(frightenedGhostModeTimer, SIGNAL(timeout()), this, SLOT(EndOfFrightenedGhostModeSlot()));
     connect(deadPacmanTimer, SIGNAL(timeout()), this, SLOT(EndOfDeadPacmanSlot()));
+    connect(frightenedGhostAlmostModeTimer, SIGNAL(timeout()), this, SLOT(ChangeFrightenedFigSlot()));
     contGhostModePhases = 0;
     ghostRemainingTime = 0;
     isInFrightenedMode = false;
@@ -52,7 +55,7 @@ void GLWidget::LoadNewTexture (QImage* img)
     QImage t = (img->convertToFormat(QImage::Format_RGBA8888)).mirrored();
     glGenTextures(1, &tex); // Obtain an id for the texture
     glBindTexture(GL_TEXTURE_2D, tex); // Set as the current texture
-    texIds[18] = tex;
+    texIds[19] = tex;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.width(), t.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glDisable(GL_TEXTURE_2D);
@@ -62,7 +65,7 @@ void GLWidget::DrawMap()
 {
     glColor3f(0.7, 0.7, 0.7);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texIds[18]);
+    glBindTexture(GL_TEXTURE_2D, texIds[19]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0f, 0.0f);
     glVertex2f  (-0.5*_mapWidth, -0.5*_mapHeight);
@@ -238,7 +241,8 @@ void GLWidget::initializeGL()
     LoadTexture(new QImage(tr(":/resources/textures/orangeGhostDown.png")));
     LoadTexture(new QImage(tr(":/resources/textures/orangeGhostRight.png")));
     LoadTexture(new QImage(tr(":/resources/textures/orangeGhostLeft.png")));
-    LoadTexture(new QImage(tr(":/resources/textures/frightenedGhost.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/frightenedGhost1.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/frightenedGhost2.png")));
     LoadTexture(_mapImage);
 }
 
@@ -270,7 +274,6 @@ void GLWidget::resizeGL(int w, int h)
 void GLWidget::UpdateSimulationSlot()
 {      
     bool scaredGhosts = false;
-    
     //Update ghost dynamics (it has be done before changing pacman position)
     QVector<QPoint> previousGhostsCoord, previousPacmanCoord;    
     for(int i = 0;i < nGhosts; i++)
@@ -279,7 +282,6 @@ void GLWidget::UpdateSimulationSlot()
 	if(allowToPlay)
 	   ghostsArray[i]->UpdateGhostPosition(pacmanArray[0]->currentPosition, pacmanArray[0]->orientation, ghostsArray[0]->currentPosition);
 	ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
-	
 	scaredGhosts |= ghostsArray[i]->isFrightened();
     }
         
@@ -287,9 +289,15 @@ void GLWidget::UpdateSimulationSlot()
 	normalSound->play();
     else if (frightenedSound->isFinished() && scaredGhosts)
 	frightenedSound->play();
+
+    if ((frightenedGhostModeTimer->remainingTime() < almostFrightenedTimeMs) && (frightenedGhostModeTimer->remainingTime() > 0))
+    {
+	if (frightenedGhostAlmostModeTimer->remainingTime() <= 0)
+	    frightenedGhostAlmostModeTimer->start();
+    }
+	
 	
   
-    
     //Update pacman dynamics
     for(int i = 0; i < nPacman; i++)
     {
@@ -558,4 +566,16 @@ void GLWidget::receiveArrowKey(int key)
 	pacmanArray[0]->action = static_cast<Pacman::Action>(0);
     else if(key == Qt::Key_S)
 	pacmanArray[0]->action = static_cast<Pacman::Action>(1);
+}
+
+void GLWidget::ChangeFrightenedFigSlot()
+{
+    for(int i = 0;i < nGhosts;i++)
+    {
+	if(ghostsArray[i]->isFrightened() && ghostsArray[i]->frightenedMode == 1)
+	    ghostsArray[i]->frightenedMode = 2;
+	else if (ghostsArray[i]->isFrightened() && ghostsArray[i]->frightenedMode == 2)
+	    ghostsArray[i]->frightenedMode = 1;
+    }
+
 }

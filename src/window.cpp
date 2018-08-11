@@ -31,6 +31,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     EndGameBtn2 = new QPushButton(tr("Finished Test"));		//GED Ag-01
     gameTimeRemainingLCD = new QLCDNumber(4);
     gameTime = new QTime(0, initialGameTimeMins, initialGameTimeSecs);
+    initSound = new QSound(tr(":/resources/audio/start.wav"));
 
     node = new ros::NodeHandle();    
     
@@ -205,6 +206,7 @@ void Window::PlaySlot()
       mapsList->setEnabled(false);
       allowPlay = true;
       counterTimer->start(oneSecondTimeMilisecs);
+      initSound->play();
     }
     else
     {

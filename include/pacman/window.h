@@ -14,6 +14,7 @@
 #include <QTime>
 #include <QList>  //GED
 #include <QLCDNumber>
+#include <QSound>
 #include <iostream>
 #include "ros/package.h"
 #include "ros/ros.h"
@@ -113,6 +114,7 @@ private:
     const int initialGameTimeMins = 3;
     const int initialGameTimeSecs = 0;
     const int oneSecondTimeMilisecs = 1000;
+    QSound *initSound;
     
 signals:
     void ArrowKey(int key);
