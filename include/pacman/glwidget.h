@@ -13,6 +13,7 @@
 #include "pacman/Ghosts.h"
 #include "pacman/Pacman.h"
 #include <QTimer>
+#include <QSound>
 
 #include "Utilities.h"
 

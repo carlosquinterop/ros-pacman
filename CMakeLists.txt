@@ -3,6 +3,7 @@ project(pacman)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 set(Qt5Widgets_DIR "/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets")
+set(Qt5Multimedia_DIR "/usr/lib/x86_64-linux-gnu/cmake/Qt5Multimedia")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -14,8 +15,10 @@ find_package(catkin REQUIRED COMPONENTS
   Qt5Widgets
   Qt5Gui
   Qt5Core
+  Qt5Multimedia
   geometry_msgs
 )
+list(APPEND libs Qt5::Multimedia)
 
 add_message_files(
 FILES 
@@ -45,7 +48,7 @@ list(APPEND libs ${OPENGL_LIBRARIES})
 
 catkin_package(
    CATKIN_DEPENDS roscpp rospy roslib message_runtime
-   DEPENDS Qt5Widgets Qt5Gui Qt5Core OpenGL
+   DEPENDS Qt5Widgets Qt5Gui Qt5Core Qt5Multimedia OpenGL
 )
 
 include_directories(include

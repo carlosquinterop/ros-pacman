@@ -285,6 +285,7 @@ void GLWidget::UpdateSimulationSlot()
 	for(int j = 0;j < nPacman;j++)
 	    if (pacmanCoord->at(j) == cookiesCoord->at(i))
 	    {
+		QSound::play(tr(":/resources/audio/cookie.wav"));
 		cookiesCoord->remove(i);
 		score += COOKIES_SCORE;
 	    }
