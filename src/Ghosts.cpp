@@ -112,10 +112,9 @@ void Ghosts::UpdateGhostPosition(QPoint newPacmanPosition, double newPacmanOrien
     blinkysPosition = newBlinkysPosition;
     
     if ((mode == Ghosts::Mode::Frightened) && (frightenedCount == 1))
-	frightenedCount++;
+	frightenedCount = 2;
     else
     {
-    
 	if (action == Ghosts::Action::None)
 	{
 	    QPoint coordLeft(currentPosition.x() - stepX, currentPosition.y());
@@ -396,12 +395,13 @@ void Ghosts::SetFrigthenedMode()
     if (mode != Mode::Frightened)
 	previousMode = mode;
     mode = Mode::Frightened;
+    frightenedCount = 1;
+    frightenedMode = 1;
 }
 
 void Ghosts::RecoverFromFrigthenedMode()
 {
     mode = previousMode;
-    frightenedMode = 1;
 }
 
 bool Ghosts::isFrightened()

@@ -296,8 +296,6 @@ void GLWidget::UpdateSimulationSlot()
 	    frightenedGhostAlmostModeTimer->start();
     }
 	
-	
-  
     //Update pacman dynamics
     for(int i = 0; i < nPacman; i++)
     {
@@ -341,8 +339,12 @@ void GLWidget::UpdateSimulationSlot()
 	if (ghostRemainingTime > 0)
 	    ghostModeTimer->stop();
 	
+	if (frightenedGhostAlmostModeTimer->remainingTime() > 0)
+	    frightenedGhostAlmostModeTimer->stop();
+	
 	frightenedGhostModeTimer->start(frightenedModeTimeMs);
 	scoreGhosts = GHOSTS_BASE_SCORE;
+	
 	for(int i = 0;i < nGhosts;i++)
 	    ghostsArray[i]->SetFrigthenedMode();
     }
@@ -385,7 +387,6 @@ void GLWidget::UpdateSimulationSlot()
 	else
 	    ghostsMode[i] = false;
     }
-	    
     
     emit UpdateGhostsPos(utilities.ConvertImageCoordToLayoutCoord(ghostsCoord, _blockWidth, _blockHeight), ghostsMode);
     emit UpdatePacmanPos(utilities.ConvertImageCoordToLayoutCoord(pacmanCoord, _blockWidth, _blockHeight));
@@ -393,7 +394,7 @@ void GLWidget::UpdateSimulationSlot()
     emit UpdateBonusPos(utilities.ConvertImageCoordToLayoutCoord(bonusCoord, _blockWidth, _blockHeight));
     emit updateGameState();
     emit UpdateScores(score, lives);
-    //Schedule paintGL()
+    
     update();
 }
 
@@ -572,10 +573,9 @@ void GLWidget::ChangeFrightenedFigSlot()
 {
     for(int i = 0;i < nGhosts;i++)
     {
-	if(ghostsArray[i]->isFrightened() && ghostsArray[i]->frightenedMode == 1)
+	if((ghostsArray[i]->isFrightened()) && (ghostsArray[i]->frightenedMode == 1))
 	    ghostsArray[i]->frightenedMode = 2;
-	else if (ghostsArray[i]->isFrightened() && ghostsArray[i]->frightenedMode == 2)
+	else if ((ghostsArray[i]->isFrightened()) && (ghostsArray[i]->frightenedMode == 2))
 	    ghostsArray[i]->frightenedMode = 1;
     }
-
 }
