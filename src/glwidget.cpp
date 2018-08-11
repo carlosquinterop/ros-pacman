@@ -9,6 +9,13 @@ GLWidget::GLWidget(QWidget *parent)
     ghostModeTimer = new QTimer();
     frightenedGhostModeTimer = new QTimer();
     deadPacmanTimer = new QTimer();
+    cookiesSound = new QSound(tr(":/resources/audio/cookies.wav"));
+    normalSound = new QSound(tr(":/resources/audio/normal.wav"));
+    frightenedSound = new QSound(tr(":/resources/audio/frightened.wav"));
+    ghostSound = new QSound(tr(":/resources/audio/ghosts.wav"));
+    returnHomeSound = new QSound(tr(":/resources/audio/returnHome.wav"));
+    missSound = new QSound(tr(":/resources/audio/miss.wav"));
+    
     ghostModeTimer->setSingleShot(true);
     frightenedGhostModeTimer->setSingleShot(true);
     deadPacmanTimer->setSingleShot(true);
@@ -262,6 +269,8 @@ void GLWidget::resizeGL(int w, int h)
 
 void GLWidget::UpdateSimulationSlot()
 {      
+    bool scaredGhosts = false;
+    
     //Update ghost dynamics (it has be done before changing pacman position)
     QVector<QPoint> previousGhostsCoord, previousPacmanCoord;    
     for(int i = 0;i < nGhosts; i++)
@@ -270,7 +279,16 @@ void GLWidget::UpdateSimulationSlot()
 	if(allowToPlay)
 	   ghostsArray[i]->UpdateGhostPosition(pacmanArray[0]->currentPosition, pacmanArray[0]->orientation, ghostsArray[0]->currentPosition);
 	ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
+	
+	scaredGhosts |= ghostsArray[i]->isFrightened();
     }
+        
+    if (normalSound->isFinished() && allowToPlay && !scaredGhosts)
+	normalSound->play();
+    else if (frightenedSound->isFinished() && scaredGhosts)
+	frightenedSound->play();
+	
+  
     
     //Update pacman dynamics
     for(int i = 0; i < nPacman; i++)
@@ -285,7 +303,8 @@ void GLWidget::UpdateSimulationSlot()
 	for(int j = 0;j < nPacman;j++)
 	    if (pacmanCoord->at(j) == cookiesCoord->at(i))
 	    {
-		QSound::play(tr(":/resources/audio/cookie.wav"));
+		if (cookiesSound->isFinished())
+		    cookiesSound->play();
 		cookiesCoord->remove(i);
 		score += COOKIES_SCORE;
 	    }
@@ -319,6 +338,7 @@ void GLWidget::UpdateSimulationSlot()
 	for(int i = 0;i < nGhosts;i++)
 	    ghostsArray[i]->SetFrigthenedMode();
     }
+    
     //Check for dead ghosts and dead pacman
     for(int j = 0;j < nPacman;j++)
     {
@@ -332,11 +352,14 @@ void GLWidget::UpdateSimulationSlot()
 		    score += scoreGhosts;
 		    ghostsArray[i]->deadGhost = true;
 		    ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
-		    deadGhostTimers[i]->start(deadGhostTimeMs);  
+		    deadGhostTimers[i]->start(deadGhostTimeMs);
+		    ghostSound->play();
+		    returnHomeSound->play();
 		}
 		else
 		{
 		    lives--;
+		    missSound->play();
 		    emit DeadPacmanSignal();
 		    if(lives == 0)	//GED Ago-01
 		      emit EndGameSignal();

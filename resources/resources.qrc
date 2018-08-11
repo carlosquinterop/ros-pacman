@@ -18,6 +18,11 @@
         <file>textures/orangeGhostRight.png</file>
         <file>textures/orangeGhostLeft.png</file>
         <file>audio/cookies.wav</file>
+        <file>audio/ghosts.wav</file>
+        <file>audio/normal.wav</file>
+        <file>audio/frightened.wav</file>
+        <file>audio/returnHome.wav</file>
+        <file>audio/miss.wav</file>
 	<file>textures/frightenedGhost.png</file>
 	<file>textures/cover.png</file>
     </qresource>
