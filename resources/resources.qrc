@@ -19,5 +19,6 @@
         <file>textures/orangeGhostLeft.png</file>
         <file>audio/cookies.wav</file>
 	<file>textures/frightenedGhost.png</file>
+	<file>textures/cover.png</file>
     </qresource>
 </RCC>

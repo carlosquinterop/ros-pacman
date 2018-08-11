@@ -74,7 +74,6 @@ int main(int argc, char **argv)
 	  printf("Pos obstacles [%d] :  x = [%d]  y = [%d] \n",i ,srv.response.obs[i].x, srv.response.obs[i].y );
 	}*/
       }
-      //si no se establece conexion con el servidor
       else
       {
 	printf("Error al llamar al servicio \n");

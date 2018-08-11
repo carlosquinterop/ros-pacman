@@ -26,9 +26,11 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     mapsList = new QComboBox();
     counterTimer = new QTimer();				//GED Jul-27
     playBtn = new QPushButton(tr("Play"));
-    counterBtn = new QPushButton(tr("Ready player one?"));	//GED Jul-27: PushButton label for reverse counter
+    counterBtn = new QPushButton(tr("Waiting for initialization request"));	//GED Jul-27: PushButton label for reverse counter
     EndGameBtn1 = new QPushButton(tr("Game Over"));		//GED Ag-01
     EndGameBtn2 = new QPushButton(tr("Finished Test"));		//GED Ag-01
+    gameTimeRemainingLCD = new QLCDNumber(4);
+    gameTime = new QTime(0, initialGameTimeMins, initialGameTimeSecs);
 
     node = new ros::NodeHandle();    
     
@@ -42,10 +44,15 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     containerScores->addWidget(scoreLabel);
     containerScores->addWidget(livesName);
     containerScores->addWidget(livesLabel);
+    containerScores->addWidget(gameTimeRemainingLCD);
     ListArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
     mode = getArguments(args);						//GED Jul-28
     allowPlay = false;
-   
+    gameState = false;
+    gameTimeRemainingLCD->setSegmentStyle(QLCDNumber::Filled);
+    QString time = gameTime->toString();
+    gameTimeRemainingLCD->display(time);
+    
     if(mode == 1)  							//GED Jul-27: if Game mode
     {
       mainLayout->addWidget(playBtn);
@@ -56,16 +63,14 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     else if(mode == 2)
     {
       mainLayout->addWidget(counterBtn);
-      counterTimer->start(1000);					//GED Jul-27
       mapName = verifyMapArgument(args, mapsList, mode); 		//GED Jul-30
-      //cout <<"Selected map: "<<mapName.toStdString() << endl; 		//GED Jul-30
     }
     else
     {
       cout << "Error: Pacman mode argument missing" << endl;
       cout << "Usage: rosrun pacman pacman_world [pacmanMode] {opt:mapName}" << endl;
-      cout << "     pacmanMode : test" << endl;
-      cout << "                : game" << endl;
+      cout << "     pacmanMode : --c" << endl;
+      cout << "                : --g" << endl;
       cout << "     mapName    : file name of the map" << endl;
       exit(0);
     }
@@ -84,7 +89,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(glWidget, SIGNAL(DeadPacmanSignal()), this, SLOT(DeadPacmanSlot()));
     connect(glWidget, SIGNAL(EndOfDeadPacmanSignal()), this, SLOT(EndOfDeadPacmanSlot()));
     connect(glWidget, SIGNAL(UpdateScores(int, int)), this, SLOT(UpdateScoresSlot(int, int)));
-    connect(counterTimer, SIGNAL(timeout()), this, SLOT(timerFunction()));	//GED Jul-27
+    connect(counterTimer, SIGNAL(timeout()), this, SLOT(InitializeCounterTimerSlot()));	//GED Jul-27
     connect(glWidget, SIGNAL(updateGameState()), this, SLOT(UpdateGameStateSlot()));
     connect(glWidget, SIGNAL(EndGameSignal()), this, SLOT(EndGame()));	//GED Ag-01
     
@@ -98,7 +103,6 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     bonusPublisher = node->advertise<pacman::bonusPos>("bonusCoord",100); 
     gameStatePublisher = node->advertise<pacman::game>("gameState",100);
     mapResponseServer = node->advertiseService("pacman_world", &Window::obsService, this);
-    
     listenMsg->start();
     refreshTimer->start(refreshTimeMs);
 }
@@ -116,47 +120,65 @@ QSize Window::minimumSizeHint() const
 int Window::getArguments(QStringList args)				//GED Jul-28
 {
     int pacmanMode = 0;
-    int pacmanGameMode = 1, pacmanTestMode = -1;
+    int pacmanGameMode = 1, pacmanChallengeMode = -1;
     
     for (QStringList::iterator it = args.begin(); it != args.end(); ++it)//GED Jul-28
     {
       QString current = *it;
-      QString pacmanModeG="game";
-      QString pacmanModeT="test";
+      QString pacmanModeG="--g";
+      QString pacmanModeC="--c";
       pacmanGameMode = QString::compare(pacmanModeG, current, Qt::CaseInsensitive)*pacmanGameMode;
-      pacmanTestMode = QString::compare(pacmanModeT, current, Qt::CaseInsensitive)*pacmanTestMode;
+      pacmanChallengeMode = QString::compare(pacmanModeC, current, Qt::CaseInsensitive)*pacmanChallengeMode;
     }
     
     if(pacmanGameMode == 0)
       pacmanMode = 1; //GED Jul-28: Game mode
-    else if(pacmanTestMode == 0)
-      pacmanMode = 2; //GED Jul-28: Test mode
+    else if(pacmanChallengeMode == 0)
+      pacmanMode = 2; //GED Jul-28: Challenge mode
     else
       pacmanMode = 0;
     
     return pacmanMode;
 }
 
-void Window::timerFunction() 				//GED Jul-27
+void Window::InitializeCounterTimerSlot() 				//GED Jul-27
 {
-  counterBtn->setStyleSheet("background-color: black;"
+  QTime zeroTime;
+  if (mode == 1)
+  {
+      *gameTime = gameTime->addMSecs(-oneSecondTimeMilisecs);
+      QString time = gameTime->toString();
+      gameTimeRemainingLCD->display(time);
+  }
+  else if (mode == 2)
+  {
+      counterBtn->setStyleSheet("background-color: black;"
                             "font: bold 28px;"
 			    "color: yellow;"
 			   );      
-  if(counterBtn->text() == "Ready player one?")
-      counterBtn->setText("Playing in... 3");
-  else if(counterBtn->text() == "Playing in... 3")
-      counterBtn->setText("Playing in... 2");    
-  else if(counterBtn->text() == "Playing in... 2")
-      counterBtn->setText("Playing in... 1");
-  else if(counterBtn->text() == "Playing in... 1")
-  {
-      counterTimer->stop();
-      counterBtn->setText("Play!");
-      listenMsg->setWorkingThread(true);
-      glWidget->TogglePlaying();
-      gameState = true;
+      if(counterBtn->text() == "Waiting for initialization request")
+	  counterBtn->setText("Playing in... 3");
+      else if(counterBtn->text() == "Playing in... 3")
+	  counterBtn->setText("Playing in... 2");    
+      else if(counterBtn->text() == "Playing in... 2")
+	  counterBtn->setText("Playing in... 1");
+      else if(counterBtn->text() == "Playing in... 1")
+      {
+	  counterBtn->setText("Play!");
+	  listenMsg->setWorkingThread(true);
+	  glWidget->TogglePlaying();
+	  gameState = true;
+      }
+      else if (counterBtn->text() == "Play!")
+      {
+	  *gameTime = gameTime->addMSecs(-oneSecondTimeMilisecs);
+	  QString time = gameTime->toString();
+	  gameTimeRemainingLCD->display(time);
+      }
   }
+  
+  if (*gameTime == QTime(0,0,0))
+      EndGame();
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -182,6 +204,7 @@ void Window::PlaySlot()
       playBtn->setText("Stop");
       mapsList->setEnabled(false);
       allowPlay = true;
+      counterTimer->start(oneSecondTimeMilisecs);
     }
     else
     {
@@ -190,6 +213,10 @@ void Window::PlaySlot()
       maps->CreateMap(mapsList->currentText());
       mapsList->setEnabled(true);
       allowPlay = false;
+      counterTimer->stop();
+      gameTime->setHMS(0, initialGameTimeMins, initialGameTimeSecs);
+      QString time = gameTime->toString();
+      gameTimeRemainingLCD->display(time);
     }
     glWidget->TogglePlaying();
 }
@@ -249,7 +276,6 @@ void Window::UpdateObstaclesPosSlot(QVector< QPoint >* pos, int xMin, int xMax, 
   maxY = yMax;
 }
 
-
 void Window::UpdateSizeSlot()
 {
     this->resize(sizeHint());
@@ -258,6 +284,7 @@ void Window::UpdateSizeSlot()
 void Window::DeadPacmanSlot()
 {
     refreshTimer->stop();
+    gameState = false;
 }
 
 void Window::EndOfDeadPacmanSlot()
@@ -287,6 +314,7 @@ void Window::EndGame()	//GED Ag-01
       mainLayout->addWidget(EndGameBtn2);
     }
     refreshTimer->stop();
+    counterTimer->stop();
     listenMsg->setWorkingThread(false);
     glWidget->TogglePlaying();
     allowPlay = false;
@@ -353,3 +381,10 @@ bool Window::obsService(pacman::mapService::Request& req, pacman::mapService::Re
   }
   return true;
 }
+
+/*bool Window::InitializeService(pacman::initializeService::Request& req, pacman::initializeService::Response &res)
+{
+    counterTimer->start(oneSecondTimeMilisecs);
+    //Devolver alguna confirmación de que empieza el conteo?
+    return true;
+}*/
