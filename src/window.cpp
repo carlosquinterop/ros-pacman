@@ -201,12 +201,13 @@ void Window::PlaySlot()
 {
     if(playBtn->text() == "Play")
     {
-      listenMsg->setWorkingThread(true);
       playBtn->setText("Stop");
       mapsList->setEnabled(false);
+      listenMsg->setWorkingThread(true);
+      gameState = true;
       allowPlay = true;
-      counterTimer->start(oneSecondTimeMilisecs);
       initSound->play();
+      counterTimer->start(oneSecondTimeMilisecs);
     }
     else
     {
