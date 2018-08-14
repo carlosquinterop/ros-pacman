@@ -305,8 +305,10 @@ void GLWidget::UpdateSimulationSlot()
     }
     
     //Update cookies
-    for(int i = 0;i < cookiesCoord->size();i++)
-	for(int j = 0;j < nPacman;j++)
+    for(int j = 0; j < nPacman; j++)
+    {
+	for(int i = 0; i < cookiesCoord->size(); i++)
+	{
 	    if (pacmanCoord->at(j) == cookiesCoord->at(i))
 	    {
 		if (cookiesSound->isFinished())
@@ -314,12 +316,14 @@ void GLWidget::UpdateSimulationSlot()
 		cookiesCoord->remove(i);
 		score += COOKIES_SCORE;
 	    }
+	}
+    }
        
     //Update Bonuses and detect Frightened mode
     bool enterFrigthenedMode = false;
-    for(int j = 0;j < nPacman;j++)
+    for(int j = 0; j < nPacman; j++)
     {
-	for(int i = 0;i < bonusCoord->size();i++)
+	for(int i = 0; i < bonusCoord->size(); i++)
 	{
 	    if (pacmanCoord->at(j) == bonusCoord->at(i))
 	    {
