@@ -12,10 +12,24 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     wScores->setFixedSize(scoreWidth, scoreHeight);
     maps = new Maps();
     
+    QFont fontBold;
+    fontBold.setBold(true);
+    
     scoreName = new QLabel("Score: ");
+    scoreName->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+    scoreName->setFont(fontBold);
     scoreLabel = new QLabel();
+    scoreLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     livesName = new QLabel("Lives: ");
+    livesName->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+    livesName->setFont(fontBold);
     livesLabel = new QLabel();
+    livesLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    performValName = new QLabel("Performance: ");
+    performValName->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+    performValName->setFont(fontBold);
+    performValLabel = new QLabel();
+    performValLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     
     glWidget = new GLWidget();
     refreshTimer = new QTimer();
@@ -45,6 +59,8 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     containerScores->addWidget(scoreLabel);
     containerScores->addWidget(livesName);
     containerScores->addWidget(livesLabel);
+    containerScores->addWidget(performValName);
+    containerScores->addWidget(performValLabel);   
     containerScores->addWidget(gameTimeRemainingLCD);
     ListArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
     mode = getArguments(args);						//GED Jul-28
@@ -93,6 +109,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(counterTimer, SIGNAL(timeout()), this, SLOT(InitializeCounterTimerSlot()));	//GED Jul-27
     connect(glWidget, SIGNAL(updateGameState()), this, SLOT(UpdateGameStateSlot()));
     connect(glWidget, SIGNAL(EndGameSignal()), this, SLOT(EndGame()));	//GED Ag-01
+    connect(glWidget, SIGNAL(SendMaxScore(int, int)), this, SLOT(ReceiveMaxValues(int, int)));
     
     setLayout(mainLayout);
     this->setMaximumSize(QSize(maxWidth, maxHeight));
@@ -367,6 +384,11 @@ void Window::UpdateScoresSlot(int score, int lives)
 {
   scoreLabel->setText(QString::number(score));
   livesLabel->setText(QString::number(lives));
+  
+  int timeSec = QTime(0, 0, 0).secsTo(*gameTime);
+  performEval =  (((double)score / (double)MAX_SCORE ) * wScore) + (((double)lives / (double)MAX_LIVES ) * wLives) + (((double)timeSec / (double)MAX_TIME_SEC ) * wTime);
+  performEval *= 100;
+  performValLabel->setText(QString::number(performEval, 'g', 4));
 }
 
 bool Window::obsService(pacman::mapService::Request& req, pacman::mapService::Response& res)
@@ -383,6 +405,13 @@ bool Window::obsService(pacman::mapService::Request& req, pacman::mapService::Re
     res.obs[i].y = posObstacles->at(i).y();
   }
   return true;
+}
+
+void Window::ReceiveMaxValues(int maxScore, int maxLives)
+{
+  MAX_SCORE = maxScore;
+  MAX_LIVES = maxLives;
+  MAX_TIME_SEC = (initialGameTimeMins * 60) + initialGameTimeSecs;
 }
 
 /*bool Window::InitializeService(pacman::initializeService::Request& req, pacman::initializeService::Response &res)

@@ -408,12 +408,6 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
       LoadNewTexture(mapImage);
     else
       firstTime = false;
-    
-    //Set Scores
-    score = SCORE_BASE;
-    lives = LIVES_BASE;
-    scoreGhosts = GHOSTS_BASE_SCORE;
-    emit UpdateScores(score, lives);
 
     //Set Map
     _mapImage = new QImage(*mapImage);
@@ -485,8 +479,24 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     boundaries->append( *utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, 0, 0) ); //Upper Left Boundary
     boundaries->append( *utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, maxIndexRow, maxIndexCol) ); //Lower Right Boundary
     boundaries = utilities.ConvertImageCoordToLayoutCoord(boundaries, _blockWidth, _blockHeight);
-    
     emit UpdateObstaclesPos( utilities.ConvertImageCoordToLayoutCoord(obstaclesCoord, _blockWidth, _blockHeight), boundaries->at(0).x(), boundaries->at(1).x(), boundaries->at(1).y(), boundaries->at(0).y() );
+    
+    //Set Max Scores
+    int maxScore = (cookiesCoord->size() * COOKIES_SCORE) + (bonusCoord->size() * BONUS_SCORE);
+    int scoreGhostMax = GHOSTS_BASE_SCORE;
+    for(int i = 0; i < ghostsCoord->size(); i++)
+    {
+	scoreGhostMax *= 2; 
+	maxScore += bonusCoord->size() * scoreGhostMax;
+    }
+    emit SendMaxScore(maxScore, LIVES_BASE);
+    
+    //Set Scores
+    score = SCORE_BASE;
+    lives = LIVES_BASE;
+    scoreGhosts = GHOSTS_BASE_SCORE;
+    emit UpdateScores(score, lives);
+    
     update();
 }
 
