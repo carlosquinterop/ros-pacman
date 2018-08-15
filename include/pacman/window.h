@@ -65,13 +65,19 @@ private slots:
     void UpdateScoresSlot(int score, int lives);
     void EndGame();	//GED Ag-01
     void InitializeCounterTimerSlot();	//Jul-27
+    void ReceiveMaxValues(int maxScore, int maxLives);
     
 private:
     GLWidget *glWidget;
     const int maxWidth = 1000;
     const int maxHeight = 700;
-    const int scoreWidth = 460;
+    const int scoreWidth = 750;
     const int scoreHeight = 60;
+    const double wScore = 0.3;
+    const double wLives = 0.6;
+    const double wTime = 0.1;
+    int MAX_SCORE, MAX_LIVES, MAX_TIME_SEC;
+    double performEval;
     QVBoxLayout *mainLayout;
     QPushButton *playBtn;
     QPushButton *counterBtn;	//GED Jul-27
@@ -109,6 +115,8 @@ private:
     QLabel *livesName;
     QLabel *livesLabel;
     QLCDNumber *gameTimeRemainingLCD;
+    QLabel *performValName;
+    QLabel *performValLabel;
     QTimer *remainingTimeTimer;
     QTime *gameTime;
     const int initialGameTimeMins = 3;
