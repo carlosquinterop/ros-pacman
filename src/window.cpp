@@ -110,6 +110,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(glWidget, SIGNAL(updateGameState()), this, SLOT(UpdateGameStateSlot()));
     connect(glWidget, SIGNAL(EndGameSignal()), this, SLOT(EndGame()));	//GED Ag-01
     connect(glWidget, SIGNAL(SendMaxScore(int, int)), this, SLOT(ReceiveMaxValues(int, int)));
+    connect(this, SIGNAL(InitializeGame()),this,SLOT(InitializeGameSlot()));
     
     setLayout(mainLayout);
     this->setMaximumSize(QSize(maxWidth, maxHeight));
@@ -120,7 +121,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     cookiesPublisher = node->advertise<pacman::cookiesPos>("cookiesCoord",100);
     bonusPublisher = node->advertise<pacman::bonusPos>("bonusCoord",100); 
     gameStatePublisher = node->advertise<pacman::game>("gameState",100);
-    mapResponseServer = node->advertiseService("pacman_world", &Window::obsService, this);
+    mapResponseServer = node->advertiseService("pacman_world", &Window::ObsService, this);
     listenMsg->start();
     refreshTimer->start(refreshTimeMs);
 }
@@ -391,7 +392,7 @@ void Window::UpdateScoresSlot(int score, int lives)
   performValLabel->setText(QString::number(performEval, 'g', 4));
 }
 
-bool Window::obsService(pacman::mapService::Request& req, pacman::mapService::Response& res)
+bool Window::ObsService(pacman::mapService::Request& req, pacman::mapService::Response& res)
 {
   res.minX = minX;
   res.maxX = maxX;
@@ -404,8 +405,15 @@ bool Window::obsService(pacman::mapService::Request& req, pacman::mapService::Re
     res.obs[i].x = posObstacles->at(i).x();
     res.obs[i].y = posObstacles->at(i).y();
   }
+  InitializeGame();
   return true;
 }
+
+void Window::InitializeGameSlot()
+{
+  counterTimer->start(oneSecondTimeMilisecs);
+}
+
 
 void Window::ReceiveMaxValues(int maxScore, int maxLives)
 {
@@ -414,9 +422,3 @@ void Window::ReceiveMaxValues(int maxScore, int maxLives)
   MAX_TIME_SEC = (initialGameTimeMins * 60) + initialGameTimeSecs;
 }
 
-/*bool Window::InitializeService(pacman::initializeService::Request& req, pacman::initializeService::Response &res)
-{
-    counterTimer->start(oneSecondTimeMilisecs);
-    //Devolver alguna confirmación de que empieza el conteo?
-    return true;
-}*/
