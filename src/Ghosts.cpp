@@ -49,53 +49,53 @@ int Ghosts::GetTexId()
     if (mode == Mode::Frightened)
     {
 	if (frightenedMode == 1)
-	    texId = 17;
-	else
 	    texId = 18;
+	else
+	    texId = 19;
     }
     else if (character == Ghosts::Personality::Shadow)
     { 
 	if (orientation == 90)
-	    texId = 1;
-	else if (orientation == 270)
 	    texId = 2;
-	else if (orientation == 0)
+	else if (orientation == 270)
 	    texId = 3;
-	else if (orientation == 180)
+	else if (orientation == 0)
 	    texId = 4;
+	else if (orientation == 180)
+	    texId = 5;
     }
     else if (character == Ghosts::Personality::Speedy)
     { 
 	if (orientation == 90)
-	    texId = 5;
-	else if (orientation == 270)
 	    texId = 6;
-	else if (orientation == 0)
+	else if (orientation == 270)
 	    texId = 7;
-	else if (orientation == 180)
+	else if (orientation == 0)
 	    texId = 8;
+	else if (orientation == 180)
+	    texId = 9;
     }
     else if (character == Ghosts::Personality::Bashful)
     { 
 	if (orientation == 90)
-	    texId = 9;
-	else if (orientation == 270)
 	    texId = 10;
-	else if (orientation == 0)
+	else if (orientation == 270)
 	    texId = 11;
-	else if (orientation == 180)
+	else if (orientation == 0)
 	    texId = 12;
+	else if (orientation == 180)
+	    texId = 13;
     }
     else if (character == Ghosts::Personality::Pokey)
     { 
 	if (orientation == 90)
-	    texId = 13;
-	else if (orientation == 270)
 	    texId = 14;
-	else if (orientation == 0)
+	else if (orientation == 270)
 	    texId = 15;
-	else if (orientation == 180)
+	else if (orientation == 0)
 	    texId = 16;
+	else if (orientation == 180)
+	    texId = 17;
     }
     else
 	texId = -1;

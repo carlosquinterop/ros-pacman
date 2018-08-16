@@ -55,7 +55,7 @@ void GLWidget::LoadNewTexture (QImage* img)
     QImage t = (img->convertToFormat(QImage::Format_RGBA8888)).mirrored();
     glGenTextures(1, &tex); // Obtain an id for the texture
     glBindTexture(GL_TEXTURE_2D, tex); // Set as the current texture
-    texIds[19] = tex;
+    texIds[20] = tex;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.width(), t.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glDisable(GL_TEXTURE_2D);
@@ -65,7 +65,7 @@ void GLWidget::DrawMap()
 {
     glColor3f(0.7, 0.7, 0.7);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texIds[19]);
+    glBindTexture(GL_TEXTURE_2D, texIds[20]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0f, 0.0f);
     glVertex2f  (-0.5*_mapWidth, -0.5*_mapHeight);
@@ -89,7 +89,7 @@ void GLWidget::DrawPacman()
 	glRotated(pacmanArray[i]->orientation, 0, 0, 1);
 	glColor3f(1.0, 1.0, 1.0);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texIds[0]);
+	glBindTexture(GL_TEXTURE_2D, texIds[i]);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex2f  (-0.5*pacmanArray[i]->width, -0.5*pacmanArray[i]->height);
@@ -224,7 +224,8 @@ void GLWidget::UpdatePacmanPosition(int i)
 void GLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
-    LoadTexture(new QImage(tr(":/resources/textures/pacman.jpeg")));    
+    LoadTexture(new QImage(tr(":/resources/textures/pacman.jpeg")));
+    LoadTexture(new QImage(tr(":/resources/textures/mspacman.png")));
     LoadTexture(new QImage(tr(":/resources/textures/redGhostUp.png")));
     LoadTexture(new QImage(tr(":/resources/textures/redGhostDown.png")));
     LoadTexture(new QImage(tr(":/resources/textures/redGhostRight.png")));

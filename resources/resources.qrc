@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/resources">
         <file>textures/pacman.jpeg</file>
+        <file>textures/mspacman.png</file>
         <file>textures/redGhostUp.png</file>
         <file>textures/redGhostDown.png</file>
         <file>textures/redGhostRight.png</file>
