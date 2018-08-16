@@ -66,6 +66,8 @@ private slots:
     void InitializeCounterTimerSlot();	//Jul-27
     void ReceiveMaxValues(int maxScore, int maxLives);
     void InitializeGameSlot();
+    void restartReadySlot();
+    
 private:
     GLWidget *glWidget;
     const int maxWidth = 1000;
@@ -84,6 +86,7 @@ private:
     QPushButton *EndGameBtn2;	//GED Ag-01
     MainWindow *mainWindow;
     Maps *maps;
+    QString mapName;
     int mode;
     bool gameState = false;
     QComboBox *mapsList;
@@ -122,6 +125,8 @@ private:
     const int initialGameTimeSecs = 0;
     const int oneSecondTimeMilisecs = 1000;
     QSound *initSound;
+    QTimer *restartGameTimer;
+    const int restartGameTime = 5000;
     
 signals:
     void ArrowKey(int key);

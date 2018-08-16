@@ -6,7 +6,6 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     char **argv;
     int argc = 0;
     ros::init(argc, argv, "pacman_world");
-    QString mapName;
     QWidget *w = new QWidget();
     QWidget *wScores = new QWidget();
     wScores->setFixedSize(scoreWidth, scoreHeight);
@@ -46,6 +45,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     gameTimeRemainingLCD = new QLCDNumber(4);
     gameTime = new QTime(0, initialGameTimeMins, initialGameTimeSecs);
     initSound = new QSound(tr(":/resources/audio/start.wav"));
+    restartGameTimer = new QTimer();
 
     node = new ros::NodeHandle();    
     
@@ -69,6 +69,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     gameTimeRemainingLCD->setSegmentStyle(QLCDNumber::Filled);
     QString time = gameTime->toString();
     gameTimeRemainingLCD->display(time);
+    restartGameTimer->setSingleShot(true);
     
     if(mode == 1)  							//GED Jul-27: if Game mode
     {
@@ -111,6 +112,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(glWidget, SIGNAL(EndGameSignal()), this, SLOT(EndGame()));	//GED Ag-01
     connect(glWidget, SIGNAL(SendMaxScore(int, int)), this, SLOT(ReceiveMaxValues(int, int)));
     connect(this, SIGNAL(InitializeGame()),this,SLOT(InitializeGameSlot()));
+    connect(restartGameTimer, SIGNAL(timeout()), this, SLOT(restartReadySlot()));
     
     setLayout(mainLayout);
     this->setMaximumSize(QSize(maxWidth, maxHeight));
@@ -333,6 +335,7 @@ void Window::EndGame()	//GED Ag-01
     {
       counterBtn->setVisible(false);
       mainLayout->addWidget(EndGameBtn2);
+      restartGameTimer->start(restartGameTime);
     }
     refreshTimer->stop();
     counterTimer->stop();
@@ -422,3 +425,10 @@ void Window::ReceiveMaxValues(int maxScore, int maxLives)
   MAX_TIME_SEC = (initialGameTimeMins * 60) + initialGameTimeSecs;
 }
 
+void Window::restartReadySlot()
+{
+    EndGameBtn2->setVisible(false);
+    counterBtn->setVisible(true);
+    counterBtn->setText("Waiting for initialization request");
+    maps->CreateMap(mapName);
+}
