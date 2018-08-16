@@ -45,9 +45,8 @@ public:
     QString verifyMapArgument(QStringList args, QComboBox *mapsList, int pacmanMode);	//GED Jul-30
 private:
     void ListArrayMap(QString path);
-    bool obsService(pacman::mapService::Request& req, pacman::mapService::Response &res);
-    //bool InitializeService(pacman::initializeService::Request& req, pacman::initializeService::Response &res);
-
+    bool ObsService(pacman::mapService::Request& req, pacman::mapService::Response &res);
+   
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 
@@ -66,7 +65,7 @@ private slots:
     void EndGame();	//GED Ag-01
     void InitializeCounterTimerSlot();	//Jul-27
     void ReceiveMaxValues(int maxScore, int maxLives);
-    
+    void InitializeGameSlot();
 private:
     GLWidget *glWidget;
     const int maxWidth = 1000;
@@ -126,7 +125,7 @@ private:
     
 signals:
     void ArrowKey(int key);
-    
+    void InitializeGame();
 };
 
 #endif

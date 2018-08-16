@@ -49,6 +49,7 @@ void gameStateCallback(const pacman::game::ConstPtr& msg)
 }
 int main(int argc, char **argv)
 {
+    bool inicio = false;
     srand (time(NULL));
     ros::init(argc, argv, "pacman_controller");
     ros::NodeHandle n;
@@ -60,29 +61,28 @@ int main(int argc, char **argv)
     ros::Subscriber gameStateSub = n.subscribe("gameState", 100, gameStateCallback);
     ros::ServiceClient mapRequestClient = n.serviceClient<pacman::mapService>("pacman_world");
     pacman::mapService srv;
-    ros::Rate loop_rate(1);
+    ros::Rate loop_rate(10);
     int count = 0;
-    while (ros::ok())
-    {
-      if(mapRequestClient.call(srv))
-      {	
+    if(mapRequestClient.call(srv))
+    {	
 	printf("# obs: %d \n", srv.response.nObs);
 	printf("minX: %d maxX: %d \n", srv.response.minX, srv.response.maxX);
 	printf("minY: %d maxY: %d \n", srv.response.minY, srv.response.maxY);
+	inicio = true;
 	/*for(int i = 0; i < srv.response.nObs; i++)
 	{
 	  printf("Pos obstacles [%d] :  x = [%d]  y = [%d] \n",i ,srv.response.obs[i].x, srv.response.obs[i].y );
 	}*/
-      }
-      else
-      {
-	printf("Error al llamar al servicio \n");
-      }
-      
-      
+    }
+    else
+    {
+      printf("Error al iniciar, asegurese que el nodo pacman_world se este ejecutando \n");
+    }
+    while (ros::ok() && inicio == true)
+    {
       pacman::Num msg;
       msg.num = rand() % 5;
-      //ROS_INFO("%d", msg.num);
+      ROS_INFO("%d", msg.num);
       chatter_pub.publish(msg);
       ros::spinOnce();
       loop_rate.sleep();
