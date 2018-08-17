@@ -1,35 +1,23 @@
 #include "pacman/window.h"
 
 
-Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  argumentos
+Window::Window(QStringList args)
 {
     char **argv;
     int argc = 0;
+    this->setWindowTitle(tr("Pacman World"));
+    this->setWindowIcon(QIcon(":/resources/textures/pacman.jpeg"));
     ros::init(argc, argv, "pacman_world");
+    
     QWidget *w = new QWidget();
     QWidget *wScores = new QWidget();
-    wScores->setFixedSize(scoreWidth, scoreHeight);
     maps = new Maps();
-    
-    QFont fontBold;
-    fontBold.setBold(true);
-    
     scoreName = new QLabel("Score: ");
-    scoreName->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
-    scoreName->setFont(fontBold);
     scoreLabel = new QLabel();
-    scoreLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     livesName = new QLabel("Lives: ");
-    livesName->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
-    livesName->setFont(fontBold);
     livesLabel = new QLabel();
-    livesLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     performValName = new QLabel("Performance: ");
-    performValName->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
-    performValName->setFont(fontBold);
     performValLabel = new QLabel();
-    performValLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-    
     glWidget = new GLWidget();
     refreshTimer = new QTimer();
     mainLayout = new QVBoxLayout();
@@ -44,9 +32,20 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     gameTime = new QTime(0, initialGameTimeMins, initialGameTimeSecs);
     initSound = new QSound(tr(":/resources/audio/start.wav"));
     restartGameTimer = new QTimer();
-
     node = new ros::NodeHandle();    
     
+    QFont fontBold;
+    fontBold.setBold(true);
+    scoreName->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+    scoreName->setFont(fontBold);
+    scoreLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    livesName->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+    livesName->setFont(fontBold);
+    livesLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    performValName->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+    performValName->setFont(fontBold);
+    performValLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    wScores->setFixedSize(scoreWidth, scoreHeight);
     w->setLayout(container);
     wScores->setLayout(containerScores);
     mainLayout->addWidget(wScores);
@@ -61,7 +60,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     containerScores->addWidget(performValLabel);   
     containerScores->addWidget(gameTimeRemainingLCD);
     ListArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
-    mode = getArguments(args);						//GED Jul-28
+    mode = getArguments(args);
     allowPlay = false;
     gameState = false;
     gameTimeRemainingLCD->setSegmentStyle(QLCDNumber::Filled);
@@ -74,7 +73,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
 			   );
     counterBtn->setEnabled(false);
     
-    if(mode == 1)  							//GED Jul-27: if Game mode
+    if(mode == 1)
     {
       counterBtn->setText("Ready");
       mainLayout->addWidget(playBtn);
@@ -85,7 +84,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     else if(mode == 2)
     {
       counterBtn->setText("Waiting for initialization request");
-      mapName = verifyMapArgument(args, mapsList, mode); 		//GED Jul-30
+      mapName = verifyMapArgument(args, mapsList, mode);
     }
     else
     {
@@ -112,9 +111,9 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(glWidget, SIGNAL(DeadPacmanSignal()), this, SLOT(DeadPacmanSlot()));
     connect(glWidget, SIGNAL(EndOfDeadPacmanSignal()), this, SLOT(EndOfDeadPacmanSlot()));
     connect(glWidget, SIGNAL(UpdateScores(int, int)), this, SLOT(UpdateScoresSlot(int, int)));
-    connect(counterTimer, SIGNAL(timeout()), this, SLOT(InitializeCounterTimerSlot()));	//GED Jul-27
+    connect(counterTimer, SIGNAL(timeout()), this, SLOT(InitializeCounterTimerSlot()));
     connect(glWidget, SIGNAL(updateGameState()), this, SLOT(UpdateGameStateSlot()));
-    connect(glWidget, SIGNAL(EndGameSignal(bool)), this, SLOT(EndGame(bool)));	//GED Ag-01
+    connect(glWidget, SIGNAL(EndGameSignal(bool)), this, SLOT(EndGame(bool)));
     connect(glWidget, SIGNAL(SendMaxScore(int, int)), this, SLOT(ReceiveMaxValues(int, int)));
     connect(this, SIGNAL(InitializeGame()),this,SLOT(InitializeGameSlot()));
     connect(restartGameTimer, SIGNAL(timeout()), this, SLOT(restartReadySlot()));
@@ -139,7 +138,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
 
 QSize Window::sizeHint() const
 {
-    return QSize(maps->getWidth()+scoreWidth, maps->getHeight()+scoreHeight);
+    return QSize(maps->getWidth()+scoreWidth, maps->getHeight()+scoreHeight+100);
 }
 
 QSize Window::minimumSizeHint() const
@@ -162,16 +161,16 @@ int Window::getArguments(QStringList args)				//GED Jul-28
     }
     
     if(pacmanGameMode == 0)
-      pacmanMode = 1; //GED Jul-28: Game mode
+      pacmanMode = 1;
     else if(pacmanChallengeMode == 0)
-      pacmanMode = 2; //GED Jul-28: Challenge mode
+      pacmanMode = 2;
     else
       pacmanMode = 0;
     
     return pacmanMode;
 }
 
-void Window::InitializeCounterTimerSlot() 				//GED Jul-27
+void Window::InitializeCounterTimerSlot()
 {
   if(counterBtn->text() == "Waiting for initialization request" || counterBtn->text() == "Ready")
   {
@@ -240,7 +239,6 @@ void Window::PlaySlot()
       gameTimeRemainingLCD->display(gameTime->toString());
       if (!initSound->isFinished())
 	  initSound->stop();
-      //refreshTimer->stop();
     }
 }
 void Window::UpdatePacmanPosSlot(QVector<QPoint>* pos)
@@ -318,7 +316,7 @@ void Window::EndOfDeadPacmanSlot()
     gameState = true;
 }
 
-void Window::EndGame(bool win)	//GED Ag-01
+void Window::EndGame(bool win)
 {
     if (mode == 1)
     {
@@ -341,13 +339,13 @@ void Window::EndGame(bool win)	//GED Ag-01
     gameState = false;
 }
 
-QString Window::verifyMapArgument(QStringList args, QComboBox *mapsList, int pacmanMode)	//GED Jul-30
+QString Window::verifyMapArgument(QStringList args, QComboBox *mapsList, int pacmanMode)
 {
   QString mapArgument = "", Listmaps;
   bool mapFound = false;
-  if(pacmanMode == 2)	//If test mode
+  if(pacmanMode == 2)
   {
-    for (QStringList::iterator it = args.begin(); it != args.end(); ++it) //GED Jul-30
+    for (QStringList::iterator it = args.begin(); it != args.end(); ++it)
     {
       QString current = *it;
       if(mapsList->findText(current) == -1 && !mapFound)
