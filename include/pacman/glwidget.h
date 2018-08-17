@@ -105,7 +105,7 @@ signals:
     void DeadPacmanSignal();
     void updateGameState();
     void UpdateScores(int score, int lives);
-    void EndGameSignal();	//GED Ag-01
+    void EndGameSignal(bool win);	//GED Ag-01
     void SendMaxScore(int maxScore, int maxLives);
 };
 

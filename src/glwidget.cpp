@@ -138,7 +138,7 @@ void GLWidget::DrawCookies()
     for(int i = 0; i < cookiesCoord->size(); i++)
 	DrawCircle(cookiesCoord->at(i).x(), cookiesCoord->at(i).y(), 6.0, 1.0, 1.0, 0.0);
     if(cookiesCoord->size() == 0 and bonusCoord->size() == 0)	//GED Ag-01
-	emit EndGameSignal();
+	emit EndGameSignal(true);
 }
 
 void GLWidget::DrawBonus()
@@ -377,7 +377,7 @@ void GLWidget::UpdateSimulationSlot()
 		    missSound->play();
 		    emit DeadPacmanSignal();
 		    if(lives == 0)	//GED Ago-01
-		      emit EndGameSignal();
+		      emit EndGameSignal(false);
 		    else
 		      deadPacmanTimer->start(deadPacmanTimeMs);
 		}

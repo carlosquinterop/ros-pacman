@@ -39,9 +39,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     mapsList = new QComboBox();
     counterTimer = new QTimer();				//GED Jul-27
     playBtn = new QPushButton(tr("Play"));
-    counterBtn = new QPushButton(tr("Waiting for initialization request"));	//GED Jul-27: PushButton label for reverse counter
-    EndGameBtn1 = new QPushButton(tr("Game Over"));		//GED Ag-01
-    EndGameBtn2 = new QPushButton(tr("Finished Test"));		//GED Ag-01
+    counterBtn = new QPushButton();
     gameTimeRemainingLCD = new QLCDNumber(4);
     gameTime = new QTime(0, initialGameTimeMins, initialGameTimeSecs);
     initSound = new QSound(tr(":/resources/audio/start.wav"));
@@ -52,8 +50,8 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     w->setLayout(container);
     wScores->setLayout(containerScores);
     mainLayout->addWidget(wScores);
+    mainLayout->addWidget(counterBtn);
     mainLayout->addWidget(w);
-    counterBtn->setEnabled(false);
     container->addWidget(glWidget);
     containerScores->addWidget(scoreName);  
     containerScores->addWidget(scoreLabel);
@@ -70,9 +68,15 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     QString time = gameTime->toString();
     gameTimeRemainingLCD->display(time);
     restartGameTimer->setSingleShot(true);
+    counterBtn->setStyleSheet("background-color: black;"
+                            "font: bold 28px;"
+			    "color: yellow;"
+			   );
+    counterBtn->setEnabled(false);
     
     if(mode == 1)  							//GED Jul-27: if Game mode
     {
+      counterBtn->setText("Ready");
       mainLayout->addWidget(playBtn);
       mainLayout->addWidget(mapsList);
       mapName = mapsList->currentText();
@@ -80,7 +84,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     }
     else if(mode == 2)
     {
-      mainLayout->addWidget(counterBtn);
+      counterBtn->setText("Waiting for initialization request");
       mapName = verifyMapArgument(args, mapsList, mode); 		//GED Jul-30
     }
     else
@@ -95,6 +99,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     
     connect(playBtn, &QPushButton::clicked, this, &Window::PlaySlot);
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(CreateMap(QString)));
+    connect(mapsList, SIGNAL(currentIndexChanged(QString)), this, SLOT(UpdateMapNameSlot(QString)));
     connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)));
     connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)), this, SLOT(UpdateSizeSlot()));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(UpdateSimulationSlot()));
@@ -109,7 +114,7 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(glWidget, SIGNAL(UpdateScores(int, int)), this, SLOT(UpdateScoresSlot(int, int)));
     connect(counterTimer, SIGNAL(timeout()), this, SLOT(InitializeCounterTimerSlot()));	//GED Jul-27
     connect(glWidget, SIGNAL(updateGameState()), this, SLOT(UpdateGameStateSlot()));
-    connect(glWidget, SIGNAL(EndGameSignal()), this, SLOT(EndGame()));	//GED Ag-01
+    connect(glWidget, SIGNAL(EndGameSignal(bool)), this, SLOT(EndGame(bool)));	//GED Ag-01
     connect(glWidget, SIGNAL(SendMaxScore(int, int)), this, SLOT(ReceiveMaxValues(int, int)));
     connect(this, SIGNAL(InitializeGame()),this,SLOT(InitializeGameSlot()));
     connect(restartGameTimer, SIGNAL(timeout()), this, SLOT(restartReadySlot()));
@@ -117,6 +122,10 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     setLayout(mainLayout);
     this->setMaximumSize(QSize(maxWidth, maxHeight));
     maps->CreateMap(mapName);
+    if (mapName == "ALIANZA" || mapName == "GHOST" || mapName == "mediumCRAZY" || mapName == "mediumPACMAN" || mapName == "originalEMA")
+	numberOfPacmans = 2;
+    else
+	numberOfPacmans = 1;
     subscriber = node->subscribe("pacmanActions", 100, &ListenMsgThread::callback, listenMsg);
     pacmanPublisher = node->advertise<pacman::pacmanPos>("pacmanCoord", 100);
     ghostPublisher = node->advertise<pacman::ghostsPos>("ghostsCoord",100);
@@ -125,7 +134,6 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     gameStatePublisher = node->advertise<pacman::game>("gameState",100);
     mapResponseServer = node->advertiseService("pacman_world", &Window::ObsService, this);
     listenMsg->start();
-    refreshTimer->start(refreshTimeMs);
 }
 
 QSize Window::sizeHint() const
@@ -165,41 +173,34 @@ int Window::getArguments(QStringList args)				//GED Jul-28
 void Window::InitializeCounterTimerSlot() 				//GED Jul-27
 {
   QTime zeroTime;
-  if (mode == 1)
+
+  if(counterBtn->text() == "Waiting for initialization request" || counterBtn->text() == "Ready")
+  {
+      initSound->play();
+      counterBtn->setText("Playing in... 3");
+  }
+  else if(counterBtn->text() == "Playing in... 3")
+      counterBtn->setText("Playing in... 2");    
+  else if(counterBtn->text() == "Playing in... 2")
+      counterBtn->setText("Playing in... 1");
+  else if(counterBtn->text() == "Playing in... 1")
+  {
+      counterBtn->setText("Playing");
+      listenMsg->setWorkingThread(true);
+      glWidget->TogglePlaying();
+      gameState = true;
+      allowPlay = true;
+      refreshTimer->start(refreshTimeMs);
+  }
+  else if (counterBtn->text() == "Playing")
   {
       *gameTime = gameTime->addMSecs(-oneSecondTimeMilisecs);
       QString time = gameTime->toString();
       gameTimeRemainingLCD->display(time);
   }
-  else if (mode == 2)
-  {
-      counterBtn->setStyleSheet("background-color: black;"
-                            "font: bold 28px;"
-			    "color: yellow;"
-			   );      
-      if(counterBtn->text() == "Waiting for initialization request")
-	  counterBtn->setText("Playing in... 3");
-      else if(counterBtn->text() == "Playing in... 3")
-	  counterBtn->setText("Playing in... 2");    
-      else if(counterBtn->text() == "Playing in... 2")
-	  counterBtn->setText("Playing in... 1");
-      else if(counterBtn->text() == "Playing in... 1")
-      {
-	  counterBtn->setText("Play!");
-	  listenMsg->setWorkingThread(true);
-	  glWidget->TogglePlaying();
-	  gameState = true;
-      }
-      else if (counterBtn->text() == "Play!")
-      {
-	  *gameTime = gameTime->addMSecs(-oneSecondTimeMilisecs);
-	  QString time = gameTime->toString();
-	  gameTimeRemainingLCD->display(time);
-      }
-  }
-  
+    
   if (*gameTime == QTime(0,0,0))
-      EndGame();
+      EndGame(false);
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -223,25 +224,27 @@ void Window::PlaySlot()
     {
       playBtn->setText("Stop");
       mapsList->setEnabled(false);
-      listenMsg->setWorkingThread(true);
-      gameState = true;
-      allowPlay = true;
-      initSound->play();
       counterTimer->start(oneSecondTimeMilisecs);
     }
     else
     {
       listenMsg->setWorkingThread(false);
       playBtn->setText("Play");
-      maps->CreateMap(mapsList->currentText());
+      counterBtn->setText("Ready");
+      maps->CreateMap(mapName);
       mapsList->setEnabled(true);
       allowPlay = false;
+      gameState = false;
       counterTimer->stop();
       gameTime->setHMS(0, initialGameTimeMins, initialGameTimeSecs);
       QString time = gameTime->toString();
       gameTimeRemainingLCD->display(time);
+      glWidget->TogglePlaying();
+      counterTimer->stop();
+      if (!initSound->isFinished())
+	  initSound->stop();
+      refreshTimer->stop();
     }
-    glWidget->TogglePlaying();
 }
 void Window::UpdatePacmanPosSlot(QVector<QPoint>* pos)
 {
@@ -307,41 +310,38 @@ void Window::UpdateSizeSlot()
 void Window::DeadPacmanSlot()
 {
     refreshTimer->stop();
+    counterTimer->stop();
     gameState = false;
 }
 
 void Window::EndOfDeadPacmanSlot()
 {
     refreshTimer->start(refreshTimeMs);
+    counterTimer->start(oneSecondTimeMilisecs);
+    gameState = true;
 }
 
-void Window::EndGame()	//GED Ag-01
+void Window::EndGame(bool win)	//GED Ag-01
 {
-    EndGameBtn1->setStyleSheet("background-color: black;"
-                               "font: bold 28px;"
-			       "color: yellow;"
-			      );
-    EndGameBtn2->setStyleSheet("background-color: black;"
-                               "font: bold 28px;"
-			       "color: yellow;"
-			      );
-    if(mode == 1)
+    if (mode == 1)
     {
-      mapsList->setVisible(false);
-      playBtn->setVisible(false);
-      mainLayout->addWidget(EndGameBtn1);
+	playBtn->setText("Play");
+	playBtn->setEnabled(false);
     }
-    else if(mode == 2)
-    {
-      counterBtn->setVisible(false);
-      mainLayout->addWidget(EndGameBtn2);
-      restartGameTimer->start(restartGameTime);
-    }
+    
+    if (win)
+	counterBtn->setText("Win!");
+    else
+	counterBtn->setText("Game Over");
+    
+    restartGameTimer->start(restartGameTime);
     refreshTimer->stop();
     counterTimer->stop();
     listenMsg->setWorkingThread(false);
     glWidget->TogglePlaying();
+    gameTime->setHMS(0, initialGameTimeMins, initialGameTimeSecs);
     allowPlay = false;
+    gameState = false;
 }
 
 QString Window::verifyMapArgument(QStringList args, QComboBox *mapsList, int pacmanMode)	//GED Jul-30
@@ -408,15 +408,19 @@ bool Window::ObsService(pacman::mapService::Request& req, pacman::mapService::Re
     res.obs[i].x = posObstacles->at(i).x();
     res.obs[i].y = posObstacles->at(i).y();
   }
-  InitializeGame();
+  if (counterBtn->text() == "Waiting for initialization request")
+      emit InitializeGame();
+  
   return true;
 }
 
 void Window::InitializeGameSlot()
 {
-  counterTimer->start(oneSecondTimeMilisecs);
+    maps->CreateMap(mapName);
+    QString time = gameTime->toString();
+    gameTimeRemainingLCD->display(time);
+    counterTimer->start(oneSecondTimeMilisecs);
 }
-
 
 void Window::ReceiveMaxValues(int maxScore, int maxLives)
 {
@@ -427,8 +431,25 @@ void Window::ReceiveMaxValues(int maxScore, int maxLives)
 
 void Window::restartReadySlot()
 {
-    EndGameBtn2->setVisible(false);
     counterBtn->setVisible(true);
-    counterBtn->setText("Waiting for initialization request");
-    maps->CreateMap(mapName);
+    if (mode == 1)
+    {
+	playBtn->setEnabled(true);
+	counterBtn->setText("Ready");
+	maps->CreateMap(mapName);
+	mapsList->setEnabled(true);
+	QString time = gameTime->toString();
+	gameTimeRemainingLCD->display(time);
+    }
+    else if (mode == 2)
+	counterBtn->setText("Waiting for initialization request");
+}
+
+void Window::UpdateMapNameSlot(QString name)
+{
+    mapName = name;
+    if (mapName == "ALIANZA" || mapName == "GHOST" || mapName == "mediumCRAZY" || mapName == "mediumPACMAN" || mapName == "originalEMA")
+	numberOfPacmans = 2;
+    else
+	numberOfPacmans = 1;
 }

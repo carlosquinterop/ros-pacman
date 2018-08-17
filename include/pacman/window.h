@@ -62,11 +62,12 @@ private slots:
     void EndOfDeadPacmanSlot();
     void UpdateGameStateSlot();
     void UpdateScoresSlot(int score, int lives);
-    void EndGame();	//GED Ag-01
+    void EndGame(bool win);	//GED Ag-01
     void InitializeCounterTimerSlot();	//Jul-27
     void ReceiveMaxValues(int maxScore, int maxLives);
     void InitializeGameSlot();
     void restartReadySlot();
+    void UpdateMapNameSlot(QString name);
     
 private:
     GLWidget *glWidget;
@@ -82,8 +83,6 @@ private:
     QVBoxLayout *mainLayout;
     QPushButton *playBtn;
     QPushButton *counterBtn;	//GED Jul-27
-    QPushButton *EndGameBtn1;	//GED Ag-01
-    QPushButton *EndGameBtn2;	//GED Ag-01
     MainWindow *mainWindow;
     Maps *maps;
     QString mapName;
@@ -127,6 +126,7 @@ private:
     QSound *initSound;
     QTimer *restartGameTimer;
     const int restartGameTime = 5000;
+    int numberOfPacmans;
     
 signals:
     void ArrowKey(int key);
