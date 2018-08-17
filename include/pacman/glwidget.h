@@ -36,6 +36,7 @@ public:
     void DrawCircle(float x, float y, float radius, float red, float green, float blue);
     void TogglePlaying();
     void UpdatePacmanPosition(int i);
+    bool IsPlaying();
     
 protected:
     void initializeGL() override;

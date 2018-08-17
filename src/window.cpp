@@ -119,13 +119,14 @@ Window::Window(QStringList args)	//GED Jul-27: Se recibe QStringList args con  a
     connect(this, SIGNAL(InitializeGame()),this,SLOT(InitializeGameSlot()));
     connect(restartGameTimer, SIGNAL(timeout()), this, SLOT(restartReadySlot()));
     
-    setLayout(mainLayout);
-    this->setMaximumSize(QSize(maxWidth, maxHeight));
-    maps->CreateMap(mapName);
     if (mapName == "ALIANZA" || mapName == "GHOST" || mapName == "mediumCRAZY" || mapName == "mediumPACMAN" || mapName == "originalEMA")
 	numberOfPacmans = 2;
     else
 	numberOfPacmans = 1;
+    
+    setLayout(mainLayout);
+    this->setMaximumSize(QSize(maxWidth, maxHeight));
+    maps->CreateMap(mapName);
     subscriber = node->subscribe("pacmanActions", 100, &ListenMsgThread::callback, listenMsg);
     pacmanPublisher = node->advertise<pacman::pacmanPos>("pacmanCoord", 100);
     ghostPublisher = node->advertise<pacman::ghostsPos>("ghostsCoord",100);
@@ -172,8 +173,6 @@ int Window::getArguments(QStringList args)				//GED Jul-28
 
 void Window::InitializeCounterTimerSlot() 				//GED Jul-27
 {
-  QTime zeroTime;
-
   if(counterBtn->text() == "Waiting for initialization request" || counterBtn->text() == "Ready")
   {
       initSound->play();
@@ -186,7 +185,8 @@ void Window::InitializeCounterTimerSlot() 				//GED Jul-27
   else if(counterBtn->text() == "Playing in... 1")
   {
       counterBtn->setText("Playing");
-      listenMsg->setWorkingThread(true);
+      if (mode == 2)
+	  listenMsg->setWorkingThread(true);
       glWidget->TogglePlaying();
       gameState = true;
       allowPlay = true;
@@ -228,22 +228,19 @@ void Window::PlaySlot()
     }
     else
     {
-      listenMsg->setWorkingThread(false);
+      if (glWidget->IsPlaying())
+	  glWidget->TogglePlaying();
       playBtn->setText("Play");
       counterBtn->setText("Ready");
       maps->CreateMap(mapName);
+      counterTimer->stop();
       mapsList->setEnabled(true);
       allowPlay = false;
-      gameState = false;
-      counterTimer->stop();
       gameTime->setHMS(0, initialGameTimeMins, initialGameTimeSecs);
-      QString time = gameTime->toString();
-      gameTimeRemainingLCD->display(time);
-      glWidget->TogglePlaying();
-      counterTimer->stop();
+      gameTimeRemainingLCD->display(gameTime->toString());
       if (!initSound->isFinished())
 	  initSound->stop();
-      refreshTimer->stop();
+      //refreshTimer->stop();
     }
 }
 void Window::UpdatePacmanPosSlot(QVector<QPoint>* pos)
@@ -431,7 +428,6 @@ void Window::ReceiveMaxValues(int maxScore, int maxLives)
 
 void Window::restartReadySlot()
 {
-    counterBtn->setVisible(true);
     if (mode == 1)
     {
 	playBtn->setEnabled(true);

@@ -594,3 +594,8 @@ void GLWidget::ChangeFrightenedFigSlot()
 	    ghostsArray[i]->frightenedMode = 1;
     }
 }
+
+bool GLWidget::IsPlaying()
+{
+    return allowToPlay;
+}
