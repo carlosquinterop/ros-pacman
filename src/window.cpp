@@ -143,7 +143,7 @@ QSize Window::sizeHint() const
 
 QSize Window::minimumSizeHint() const
 {
-    return QSize(150, 150);
+    return QSize(60, 60);
 }
 
 int Window::getArguments(QStringList args)				//GED Jul-28
