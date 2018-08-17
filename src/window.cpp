@@ -122,6 +122,7 @@ Window::Window(QStringList args)
 	numberOfPacmans = 2;
     else
 	numberOfPacmans = 1;
+    glWidget->setNumberOfPacmans(numberOfPacmans);
     
     setLayout(mainLayout);
     this->setMaximumSize(QSize(maxWidth, maxHeight));
@@ -446,4 +447,5 @@ void Window::UpdateMapNameSlot(QString name)
 	numberOfPacmans = 2;
     else
 	numberOfPacmans = 1;
+    glWidget->setNumberOfPacmans(numberOfPacmans);
 }

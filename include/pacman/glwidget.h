@@ -37,6 +37,7 @@ public:
     void TogglePlaying();
     void UpdatePacmanPosition(int i);
     bool IsPlaying();
+    void setNumberOfPacmans(int numberOfPacmans);
     
 protected:
     void initializeGL() override;

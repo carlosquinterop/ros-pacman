@@ -275,12 +275,38 @@ void GLWidget::UpdateSimulationSlot()
 {      
     bool scaredGhosts = false;
     //Update ghost dynamics (it has be done before changing pacman position)
-    QVector<QPoint> previousGhostsCoord, previousPacmanCoord;    
+    QVector<QPoint> previousGhostsCoord, previousPacmanCoord;
+    QPoint pacmanCurrentPosition[4];
+    double pacmanCurrentOrientation[4];
+    if (nPacman == 1)
+    {
+	pacmanCurrentPosition[0] = pacmanArray[0]->currentPosition;
+	pacmanCurrentPosition[1] = pacmanArray[0]->currentPosition;
+	pacmanCurrentPosition[2] = pacmanArray[0]->currentPosition;
+	pacmanCurrentPosition[3] = pacmanArray[0]->currentPosition;
+	pacmanCurrentOrientation[0] = pacmanArray[0]->orientation;
+	pacmanCurrentOrientation[1] = pacmanArray[0]->orientation;
+	pacmanCurrentOrientation[2] = pacmanArray[0]->orientation;
+	pacmanCurrentOrientation[3] = pacmanArray[0]->orientation;
+    }
+    else if (nPacman == 2)
+    {
+	pacmanCurrentPosition[0] = pacmanArray[0]->currentPosition;
+	pacmanCurrentPosition[1] = pacmanArray[0]->currentPosition;
+	pacmanCurrentPosition[2] = pacmanArray[1]->currentPosition;
+	pacmanCurrentPosition[3] = pacmanArray[1]->currentPosition;
+	pacmanCurrentOrientation[0] = pacmanArray[0]->orientation;
+	pacmanCurrentOrientation[1] = pacmanArray[0]->orientation;
+	pacmanCurrentOrientation[2] = pacmanArray[1]->orientation;
+	pacmanCurrentOrientation[3] = pacmanArray[1]->orientation;
+    }
+    
     for(int i = 0;i < nGhosts; i++)
     {
 	previousGhostsCoord.append(ghostsArray[i]->currentPosition);
 	if(allowToPlay)
-	   ghostsArray[i]->UpdateGhostPosition(pacmanArray[0]->currentPosition, pacmanArray[0]->orientation, ghostsArray[0]->currentPosition);
+	   ghostsArray[i]->UpdateGhostPosition(pacmanCurrentPosition[i], pacmanCurrentOrientation[i], ghostsArray[0]->currentPosition);
+	
 	ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
 	scaredGhosts |= ghostsArray[i]->isFrightened();
     }
@@ -422,7 +448,7 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     ortho[2] = -_mapHeight*0.5;
     ortho[3] = _mapHeight*0.5;
         
-    //Set Pacman
+    //Set Pacmans
     nPacman = pPacman->size()/2;
     pacmanArray = (Pacman**) malloc(sizeof(Pacman)*nPacman);
     pacmanCoord = new QVector<QPoint>;
@@ -440,11 +466,33 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     deadGhostTimers = (QTimer**) malloc(sizeof(QTimer)*nGhosts);
     ghostsCoord = new QVector<QPoint>;
     QPoint *ghostPositions;
-    Ghosts::Personality ghostsPersonality[4] = {Ghosts::Personality::Shadow, Ghosts::Personality::Speedy, Ghosts::Personality::Bashful, Ghosts::Personality::Pokey};
+    Ghosts::Personality ghostsPersonality[4];
+    ghostsPersonality[0] = Ghosts::Personality::Shadow;
+    ghostsPersonality[1] = Ghosts::Personality::Speedy;
+    
+    QPoint tempPacmanPositions[4];
+    if (nPacman == 1)
+    {
+	ghostsPersonality[2] = Ghosts::Personality::Bashful;
+	ghostsPersonality[3] = Ghosts::Personality::Pokey;
+    }
+    else if (nPacman == 2)
+    {
+	ghostsPersonality[2] = Ghosts::Personality::Shadow;
+	ghostsPersonality[3] = Ghosts::Personality::Speedy;
+	tempPacmanPositions[0] = pacmanArray[0]->currentPosition;
+	tempPacmanPositions[1] = pacmanArray[0]->currentPosition;
+	tempPacmanPositions[2] = pacmanArray[1]->currentPosition;
+	tempPacmanPositions[3] = pacmanArray[1]->currentPosition;
+    }
+	
     for(int i = 0; i < nGhosts; i++)
     {
 	ghostPositions = utilities.GetCoordFromIndex(_blockWidth, _blockHeight, ortho, pGhosts->at(i*2), pGhosts->at(i*2 + 1));
-	ghostsArray[i] = new Ghosts(*ghostPositions, ghostsPersonality[i], blockHeight, blockWidth, pacmanArray[0]->currentPosition, _mapHeight, _mapWidth, _obstacles);
+	if (nPacman == 1)
+	    ghostsArray[i] = new Ghosts(*ghostPositions, ghostsPersonality[i], blockHeight, blockWidth, pacmanArray[0]->currentPosition, _mapHeight, _mapWidth, _obstacles);
+	else if (nPacman == 2)
+	    ghostsArray[i] = new Ghosts(*ghostPositions, ghostsPersonality[i], blockHeight, blockWidth, tempPacmanPositions[i], _mapHeight, _mapWidth, _obstacles);
 	ghostsCoord->append(ghostsArray[i]->currentPosition);
 	
 	deadGhostTimers[i] = new QTimer();
@@ -459,6 +507,7 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
 	    connect(deadGhostTimers[i], SIGNAL(timeout()), this, SLOT(reviveGhost3Slot()));
     }
     scoreGhosts = GHOSTS_BASE_SCORE;
+    
     //Set cookies
     cookiesCoord = new QVector<QPoint>;
     for(int i = 0; i < pCookies->size()/2; i++)
@@ -597,4 +646,9 @@ void GLWidget::ChangeFrightenedFigSlot()
 bool GLWidget::IsPlaying()
 {
     return allowToPlay;
+}
+
+void GLWidget::setNumberOfPacmans(int numberOfPacmans)
+{
+    nPacman = numberOfPacmans;
 }
