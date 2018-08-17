@@ -136,7 +136,7 @@ void GLWidget::DrawGhosts()
 void GLWidget::DrawCookies()
 {
     for(int i = 0; i < cookiesCoord->size(); i++)
-	DrawCircle(cookiesCoord->at(i).x(), cookiesCoord->at(i).y(), 6.0, 1.0, 1.0, 0.0);
+	DrawCircle(cookiesCoord->at(i).x(), cookiesCoord->at(i).y(), _blockWidth/11.6, 1.0, 1.0, 0.0);
     if(cookiesCoord->size() == 0 and bonusCoord->size() == 0)	//GED Ag-01
 	emit EndGameSignal(true);
 }
@@ -144,7 +144,7 @@ void GLWidget::DrawCookies()
 void GLWidget::DrawBonus()
 {
     for(int i = 0; i < bonusCoord->size(); i++)
-	DrawCircle(bonusCoord->at(i).x(), bonusCoord->at(i).y(), 11.0, 1.0, 0.8, 0.0);
+	DrawCircle(bonusCoord->at(i).x(), bonusCoord->at(i).y(), _blockWidth/6.4, 1.0, 0.8, 0.0);
 }
 
 void GLWidget::DrawCircle(float x, float y, float radius, float red, float green, float blue) 
@@ -157,7 +157,6 @@ void GLWidget::DrawCircle(float x, float y, float radius, float red, float green
     static const int circle_points = 100;
     static const float angle = 2.0f * 3.1416f / circle_points;
 
-    // this code (mostly) copied from question:
     glBegin(GL_POLYGON);
     double angle1=0.0;
     glVertex2d(radius * cos(0.0) , radius * sin(0.0));

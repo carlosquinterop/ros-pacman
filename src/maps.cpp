@@ -32,7 +32,7 @@ QByteArray Maps::File2ArrayMap(QString fileName, int& colsText, int& rowsText)
     }
     rowsText = (text.size()/(colsText));
  	
- 	//Hacer que el mapa tenga siempre un centro cuando se convierte a coordenadas
+    //Hacer que el mapa tenga siempre un centro cuando se convierte a coordenadas
     if(rowsText%2 == 0)
     {
 		for(int i = 0; i < colsText; i++)

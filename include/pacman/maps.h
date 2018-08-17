@@ -37,7 +37,7 @@ private:
    
 private:
     int rows, cols;
-    int BLOCK_SIZE = 70;
+    int BLOCK_SIZE = 50;
     bool *mObstacles;
     
     QVector<int> *pPacman;
