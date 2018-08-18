@@ -30,6 +30,14 @@ EXECUTION
 	- source devel/setup.bash
 	- rosrun pacman pacman_controller
 
+NETWORK EXECUTION
+	For Pacman_world
+		-cd ~/catkin_ws/src/ros-pacman
+		-source starPacmanServer.sh
+	For Other Nodes
+		-cd ~/catkin_ws/src/ros-pacman
+		-source starPacmanController.sh
+
 FOR DEVELOPMENT (Recommended)
 	- http://wiki.ros.org/IDEs#Reusing_your_shell.27s_environment
 
