@@ -5,12 +5,13 @@ Window::Window(QStringList args)
 {
     char **argv;
     int argc = 0;
+    ros::init(argc, argv, "pacman_world");
     this->setWindowTitle(tr("Pacman World"));
     this->setWindowIcon(QIcon(":/resources/textures/pacman.jpeg"));
-    ros::init(argc, argv, "pacman_world");
+    this->setMaximumSize(maxWidth, maxHeight);
     
     QWidget *w = new QWidget();
-    QWidget *wScores = new QWidget();
+    wScores = new QWidget();
     maps = new Maps();
     scoreName = new QLabel("Score: ");
     scoreLabel = new QLabel();
@@ -18,6 +19,8 @@ Window::Window(QStringList args)
     livesLabel = new QLabel();
     performValName = new QLabel("Performance: ");
     performValLabel = new QLabel();
+    playerNameLabel = new QLabel("Player: ");
+    playerNameTextEdit = new QTextEdit();
     glWidget = new GLWidget();
     refreshTimer = new QTimer();
     mainLayout = new QVBoxLayout();
@@ -32,6 +35,7 @@ Window::Window(QStringList args)
     gameTime = new QTime(0, initialGameTimeMins, initialGameTimeSecs);
     initSound = new QSound(tr(":/resources/audio/start.wav"));
     restartGameTimer = new QTimer();
+    scoreBoardFile = new QFile(tr("src/ros-pacman/.scoreBoard"));
     node = new ros::NodeHandle();    
     
     QFont fontBold;
@@ -45,9 +49,13 @@ Window::Window(QStringList args)
     performValName->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
     performValName->setFont(fontBold);
     performValLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-    wScores->setFixedSize(scoreWidth, scoreHeight);
+    playerNameLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+    playerNameLabel->setFont(fontBold);
+    playerNameTextEdit->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    playerNameTextEdit->setMaximumSize(90, 33);
     w->setLayout(container);
     wScores->setLayout(containerScores);
+    wScores->setMaximumSize(maxWidth, scoreHeight);
     mainLayout->addWidget(wScores);
     mainLayout->addWidget(counterBtn);
     mainLayout->addWidget(w);
@@ -59,6 +67,8 @@ Window::Window(QStringList args)
     containerScores->addWidget(performValName);
     containerScores->addWidget(performValLabel);   
     containerScores->addWidget(gameTimeRemainingLCD);
+    containerScores->addWidget(playerNameLabel);
+    containerScores->addWidget(playerNameTextEdit);
     ListArrayMap(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
     mode = getArguments(args);
     allowPlay = false;
@@ -72,19 +82,23 @@ Window::Window(QStringList args)
 			    "color: yellow;"
 			   );
     counterBtn->setEnabled(false);
-    
+    playerDateAndTime = QTime::currentTime().toString(Qt::DefaultLocaleLongDate) + " " + QDate::currentDate().toString("dMMMyy");
+        
     if(mode == 1)
     {
       counterBtn->setText("Ready");
       mainLayout->addWidget(playBtn);
       mainLayout->addWidget(mapsList);
       mapName = mapsList->currentText();
+      playerName = "GameMode ";
       connect(this, SIGNAL(ArrowKey(int)), glWidget, SLOT(receiveArrowKey(int)));
     }
     else if(mode == 2)
     {
       counterBtn->setText("Waiting for initialization request");
       mapName = verifyMapArgument(args, mapsList, mode);
+      playerName = "ChallengeMode ";
+      playerNameTextEdit->setEnabled(false);
     }
     else
     {
@@ -94,6 +108,15 @@ Window::Window(QStringList args)
       cout << "                : --g" << endl;
       cout << "     mapName    : file name of the map" << endl;
       exit(0);
+    }
+    
+    if(scoreBoardFile->exists())
+	scoreBoardFile->remove();
+    
+    if (scoreBoardFile->open(QIODevice::ReadWrite))
+    {
+	QTextStream out(scoreBoardFile);
+	out << "Session " + playerName + playerDateAndTime << "\n";
     }
     
     connect(playBtn, &QPushButton::clicked, this, &Window::PlaySlot);
@@ -117,6 +140,7 @@ Window::Window(QStringList args)
     connect(glWidget, SIGNAL(SendMaxScore(int, int)), this, SLOT(ReceiveMaxValues(int, int)));
     connect(this, SIGNAL(InitializeGame()),this,SLOT(InitializeGameSlot()));
     connect(restartGameTimer, SIGNAL(timeout()), this, SLOT(restartReadySlot()));
+    connect(playerNameTextEdit, SIGNAL(textChanged()), this, SLOT(PlayerNameChangedSlot()));
     
     if (mapName == "ALIANZA" || mapName == "GHOST" || mapName == "mediumCRAZY" || mapName == "mediumPACMAN" || mapName == "originalEMA")
 	numberOfPacmans = 2;
@@ -125,7 +149,6 @@ Window::Window(QStringList args)
     glWidget->setNumberOfPacmans(numberOfPacmans);
     
     setLayout(mainLayout);
-    this->setMaximumSize(QSize(maxWidth, maxHeight));
     maps->CreateMap(mapName);
     subscriber = node->subscribe("pacmanActions", 100, &ListenMsgThread::callback, listenMsg);
     pacmanPublisher = node->advertise<pacman::pacmanPos>("pacmanCoord", 100);
@@ -139,7 +162,7 @@ Window::Window(QStringList args)
 
 QSize Window::sizeHint() const
 {
-    return QSize(maps->getWidth()+scoreWidth, maps->getHeight()+scoreHeight+100);
+    return QSize(maps->getWidth(), maps->getHeight() + scoreHeight + 100);
 }
 
 QSize Window::minimumSizeHint() const
@@ -225,11 +248,13 @@ void Window::PlaySlot()
       playBtn->setText("Stop");
       mapsList->setEnabled(false);
       counterTimer->start(oneSecondTimeMilisecs);
+      playerNameTextEdit->setEnabled(false);
     }
     else
     {
       if (glWidget->IsPlaying())
 	  glWidget->TogglePlaying();
+      playerNameTextEdit->setEnabled(true);
       playBtn->setText("Play");
       counterBtn->setText("Ready");
       maps->CreateMap(mapName);
@@ -244,58 +269,58 @@ void Window::PlaySlot()
 }
 void Window::UpdatePacmanPosSlot(QVector<QPoint>* pos)
 {
-  msgPacman.pacmanPos.resize(pos->size());
-  for(int i = 0; i < pos->size(); i++)
-  {
-    msgPacman.pacmanPos[i].x = pos->at(i).x(); 
-    msgPacman.pacmanPos[i].y = pos->at(i).y();
-  }
-  msgPacman.nPacman = pos->size();
-  pacmanPublisher.publish(msgPacman);
+    msgPacman.pacmanPos.resize(pos->size());
+    for(int i = 0; i < pos->size(); i++)
+    {
+      msgPacman.pacmanPos[i].x = pos->at(i).x(); 
+      msgPacman.pacmanPos[i].y = pos->at(i).y();
+    }
+    msgPacman.nPacman = pos->size();
+    pacmanPublisher.publish(msgPacman);
 }
 void Window::UpdateGhostsPosSlot(QVector<QPoint>* pos, bool* ghostsMode)
 {
-  msgGhosts.ghostsPos.resize(pos->size());
-  msgGhosts.mode.resize(pos->size());
-  for(int i = 0; i < pos->size(); i++)
-  {
-    msgGhosts.ghostsPos[i].x = pos->at(i).x(); 
-    msgGhosts.ghostsPos[i].y = pos->at(i).y();
-    msgGhosts.mode[i] = (int)ghostsMode[i];
-  }
-  msgGhosts.nGhosts = pos->size();
-  ghostPublisher.publish(msgGhosts);
+    msgGhosts.ghostsPos.resize(pos->size());
+    msgGhosts.mode.resize(pos->size());
+    for(int i = 0; i < pos->size(); i++)
+    {
+      msgGhosts.ghostsPos[i].x = pos->at(i).x(); 
+      msgGhosts.ghostsPos[i].y = pos->at(i).y();
+      msgGhosts.mode[i] = (int)ghostsMode[i];
+    }
+    msgGhosts.nGhosts = pos->size();
+    ghostPublisher.publish(msgGhosts);
 }
 void Window::UpdateCookiesPosSlot(QVector<QPoint>* pos)
 {
-  msgCookies.cookiesPos.resize(pos->size());
-  for(int i = 0; i < pos->size(); i++)
-  {
-    msgCookies.cookiesPos[i].x = pos->at(i).x();
-    msgCookies.cookiesPos[i].y = pos->at(i).y();
-  }
-  msgCookies.nCookies = pos->size();
-  cookiesPublisher.publish(msgCookies);
+    msgCookies.cookiesPos.resize(pos->size());
+    for(int i = 0; i < pos->size(); i++)
+    {
+      msgCookies.cookiesPos[i].x = pos->at(i).x();
+      msgCookies.cookiesPos[i].y = pos->at(i).y();
+    }
+    msgCookies.nCookies = pos->size();
+    cookiesPublisher.publish(msgCookies);
 }
 void Window::UpdateBonusPosSlot(QVector<QPoint>* pos)
 {
-  msgBonus.bonusPos.resize(pos->size());
-  for(int i = 0; i < pos->size(); i++)
-  {
-    msgBonus.bonusPos[i].x = pos->at(i).x();
-    msgBonus.bonusPos[i].y = pos->at(i).y();
-  }
-  msgBonus.nBonus = pos->size();
-  bonusPublisher.publish(msgBonus);
+    msgBonus.bonusPos.resize(pos->size());
+    for(int i = 0; i < pos->size(); i++)
+    {
+      msgBonus.bonusPos[i].x = pos->at(i).x();
+      msgBonus.bonusPos[i].y = pos->at(i).y();
+    }
+    msgBonus.nBonus = pos->size();
+    bonusPublisher.publish(msgBonus);
 }
 
 void Window::UpdateObstaclesPosSlot(QVector< QPoint >* pos, int xMin, int xMax, int yMin, int yMax)
 {
-  posObstacles = pos;
-  minX = xMin;
-  maxX = xMax;
-  minY = yMin;
-  maxY = yMax;
+    posObstacles = pos;
+    minX = xMin;
+    maxX = xMax;
+    minY = yMin;
+    maxY = yMax;
 }
 
 void Window::UpdateSizeSlot()
@@ -330,14 +355,13 @@ void Window::EndGame(bool win)
     else
 	counterBtn->setText("Game Over");
     
-    restartGameTimer->start(restartGameTime);
     refreshTimer->stop();
     counterTimer->stop();
     listenMsg->setWorkingThread(false);
     glWidget->TogglePlaying();
-    gameTime->setHMS(0, initialGameTimeMins, initialGameTimeSecs);
     allowPlay = false;
     gameState = false;
+    restartGameTimer->start(restartGameTime);
 }
 
 QString Window::verifyMapArgument(QStringList args, QComboBox *mapsList, int pacmanMode)
@@ -376,38 +400,41 @@ QString Window::verifyMapArgument(QStringList args, QComboBox *mapsList, int pac
 
 void Window::UpdateGameStateSlot()
 {
-  msgState.state = (int)gameState; 
-  gameStatePublisher.publish(msgState);
+    msgState.state = (int)gameState; 
+    gameStatePublisher.publish(msgState);
 }
 
 void Window::UpdateScoresSlot(int score, int lives)
 {
-  scoreLabel->setText(QString::number(score));
-  livesLabel->setText(QString::number(lives));
-  
-  int timeSec = QTime(0, 0, 0).secsTo(*gameTime);
-  performEval =  (((double)score / (double)MAX_SCORE ) * wScore) + (((double)lives / (double)MAX_LIVES ) * wLives) + (((double)timeSec / (double)MAX_TIME_SEC ) * wTime);
-  performEval *= 100;
-  performValLabel->setText(QString::number(performEval, 'g', 4));
+    _score = score;
+    _lives = lives;
+    scoreLabel->setText(QString::number(score));
+    livesLabel->setText(QString::number(lives));
+    
+    gTime = QTime(0, 0, 0).secsTo(*gameTime);
+    performEval =  (((double)score / (double)MAX_SCORE ) * wScore) + (((double)lives / (double)MAX_LIVES ) * wLives) + (((double)gTime / (double)MAX_TIME_SEC ) * wTime);
+    performEval *= 100;
+    performValLabel->setText(QString::number(performEval, 'g', 4));
 }
 
 bool Window::ObsService(pacman::mapService::Request& req, pacman::mapService::Response& res)
 {
-  res.minX = minX;
-  res.maxX = maxX;
-  res.minY = minY;
-  res.maxY = maxY;
-  res.nObs = posObstacles->size();
-  res.obs.resize(posObstacles->size());
-  for(int i = 0; i < posObstacles->size(); i++)
-  {
-    res.obs[i].x = posObstacles->at(i).x();
-    res.obs[i].y = posObstacles->at(i).y();
-  }
-  if (counterBtn->text() == "Waiting for initialization request")
-      emit InitializeGame();
-  
-  return true;
+    res.minX = minX;
+    res.maxX = maxX;
+    res.minY = minY;
+    res.maxY = maxY;
+    res.nObs = posObstacles->size();
+    res.obs.resize(posObstacles->size());
+    for(int i = 0; i < posObstacles->size(); i++)
+    {
+      res.obs[i].x = posObstacles->at(i).x();
+      res.obs[i].y = posObstacles->at(i).y();
+    }
+    if (counterBtn->text() == "Waiting for initialization request")
+	emit InitializeGame();
+    //TODO: Modificar InitializeGame para que envíe el parámetro del nombre del usuario
+        
+    return true;
 }
 
 void Window::InitializeGameSlot()
@@ -415,26 +442,37 @@ void Window::InitializeGameSlot()
     maps->CreateMap(mapName);
     QString time = gameTime->toString();
     gameTimeRemainingLCD->display(time);
+    playerNameTextEdit->setText(playerName);
+    //TODO: Recibir el nombre del usuario y asignarlo a playerName
+    //playerName = name;
     counterTimer->start(oneSecondTimeMilisecs);
 }
 
 void Window::ReceiveMaxValues(int maxScore, int maxLives)
 {
-  MAX_SCORE = maxScore;
-  MAX_LIVES = maxLives;
-  MAX_TIME_SEC = (initialGameTimeMins * 60) + initialGameTimeSecs;
+    MAX_SCORE = maxScore;
+    MAX_LIVES = maxLives;
+    MAX_TIME_SEC = (initialGameTimeMins * 60) + initialGameTimeSecs;
 }
 
 void Window::restartReadySlot()
 {
+    QTextStream out(scoreBoardFile);
+    out << "Name: " << playerName << "\t" << "Score: " << _score << "\t" << "Lives: " 
+    << _lives << "\t" << "Performance: " << performEval << "\t" << "Time: " << gTime 
+    << "\t" << "Map: " << mapName << "\t" << "Date: " 
+    << QTime::currentTime().toString(Qt::DefaultLocaleLongDate) << endl;
+    
     if (mode == 1)
     {
 	playBtn->setEnabled(true);
 	counterBtn->setText("Ready");
-	maps->CreateMap(mapName);
-	mapsList->setEnabled(true);
+	gameTime->setHMS(0, initialGameTimeMins, initialGameTimeSecs);
 	QString time = gameTime->toString();
 	gameTimeRemainingLCD->display(time);
+	maps->CreateMap(mapName);
+	mapsList->setEnabled(true);
+	playerNameTextEdit->setEnabled(true);
     }
     else if (mode == 2)
 	counterBtn->setText("Waiting for initialization request");
@@ -448,4 +486,14 @@ void Window::UpdateMapNameSlot(QString name)
     else
 	numberOfPacmans = 1;
     glWidget->setNumberOfPacmans(numberOfPacmans);
+}
+
+void Window::PlayerNameChangedSlot()
+{
+    if (playerNameTextEdit->toPlainText() == "" && mode == 1)
+	playerName = "GameMode ";
+    else if (playerNameTextEdit->toPlainText() == "" && mode == 2)
+	playerName = "ChallengeMode ";
+    else
+	playerName = playerNameTextEdit->toPlainText();
 }
