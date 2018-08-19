@@ -93,4 +93,4 @@ resources/textures/trickyClassic.png
 resources/textures/trickySearch.png
 
 #Score Board file
-*.scoreBoard
+ScoreBoard

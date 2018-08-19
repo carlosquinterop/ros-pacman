@@ -35,7 +35,7 @@ Window::Window(QStringList args)
     gameTime = new QTime(0, initialGameTimeMins, initialGameTimeSecs);
     initSound = new QSound(tr(":/resources/audio/start.wav"));
     restartGameTimer = new QTimer();
-    scoreBoardFile = new QFile(tr("src/ros-pacman/.scoreBoard"));
+    scoreBoardFile = new QFile(tr(QString::fromStdString(ros::package::getPath("pacman")) + "ScoreBoard"));
     node = new ros::NodeHandle();    
     
     QFont fontBold;
@@ -113,7 +113,7 @@ Window::Window(QStringList args)
     if(scoreBoardFile->exists())
 	scoreBoardFile->remove();
     
-    if (scoreBoardFile->open(QIODevice::ReadWrite))
+    if (scoreBoardFile->open(QIODevice::ReadWrite | QIODevice::Text))
     {
 	QTextStream out(scoreBoardFile);
 	out << "Session " + playerName + playerDateAndTime << "\n";
