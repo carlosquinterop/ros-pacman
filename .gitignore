@@ -91,3 +91,6 @@ resources/textures/tinySearch.png
 resources/textures/trappedClassic.png
 resources/textures/trickyClassic.png
 resources/textures/trickySearch.png
+
+#Score Board file
+.scoreBoard
