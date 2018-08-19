@@ -139,6 +139,7 @@ private:
     QString playerName, playerDateAndTime;
     QFile *scoreBoardFile;
     int _score, _lives, gTime;
+    bool mute;
     
 signals:
     void ArrowKey(int key);

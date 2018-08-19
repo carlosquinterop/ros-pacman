@@ -18,11 +18,15 @@ EXECUTION
 	- Run: roscore
 	- Open a new terminal
 	- source devel/setup.bash
-	- rosrun pacman pacman_world --[pacmanMode] {optional:mapName}
-	      pacmanMode : c (challenge)
-                         : g (game)
-              mapName    : file name of the map (only required in challenge mode)
-
+	- Usage: rosrun pacman pacman_world [pacmanMode] {options}
+       		 
+       		 pacmanMode: Parameter that specifies the mode
+                   		 --c: Challenge mode
+                   	 	 --g: Game mode
+       		 options   : Optional arguments
+                   	     mapName: Name of map to play. Only needed in Challenge mode 
+                   		 --m: If used, runs the game with without sound 
+                   		 
 	- Example 1: rosrun pacman pacman_world --c originalClassic
 	- Example 2: rosrun pacman pacman_world --g
 	- In test mode, a controller node must be executed

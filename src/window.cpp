@@ -28,14 +28,14 @@ Window::Window(QStringList args)
     containerScores = new QHBoxLayout();
     listenMsg = new ListenMsgThread();
     mapsList = new QComboBox();
-    counterTimer = new QTimer();				//GED Jul-27
+    counterTimer = new QTimer();
     playBtn = new QPushButton(tr("Play"));
     counterBtn = new QPushButton();
     gameTimeRemainingLCD = new QLCDNumber(4);
     gameTime = new QTime(0, initialGameTimeMins, initialGameTimeSecs);
     initSound = new QSound(tr(":/resources/audio/start.wav"));
     restartGameTimer = new QTimer();
-    scoreBoardFile = new QFile(tr(QString::fromStdString(ros::package::getPath("pacman")) + "ScoreBoard"));
+    scoreBoardFile = new QFile(QString::fromStdString(ros::package::getPath("pacman")) + "ScoreBoard");
     node = new ros::NodeHandle();    
     
     QFont fontBold;
@@ -82,8 +82,8 @@ Window::Window(QStringList args)
 			    "color: yellow;"
 			   );
     counterBtn->setEnabled(false);
-    playerDateAndTime = QTime::currentTime().toString(Qt::DefaultLocaleLongDate) + " " + QDate::currentDate().toString("dMMMyy");
-        
+    playerDateAndTime = QTime::currentTime().toString(Qt::DefaultLocaleLongDate) + " " + QDate::currentDate().toString("dMMMyy");    
+    
     if(mode == 1)
     {
       counterBtn->setText("Ready");
@@ -102,11 +102,14 @@ Window::Window(QStringList args)
     }
     else
     {
-      cout << "Error: Pacman mode argument missing" << endl;
-      cout << "Usage: rosrun pacman pacman_world [pacmanMode] {opt:mapName}" << endl;
-      cout << "     pacmanMode : --c" << endl;
-      cout << "                : --g" << endl;
-      cout << "     mapName    : file name of the map" << endl;
+      cout << "Error: Pacman argument missing" << endl;
+      cout << "Usage: rosrun pacman pacman_world [pacmanMode] {options}" << endl;
+      cout << "       pacmanMode: Parameter that specifies the mode" << endl;
+      cout << "                   --c: Challenge mode" << endl;
+      cout << "                   --g: Game mode" << endl;
+      cout << "       options   : Optional arguments" << endl;
+      cout << "                   mapName: Name of map to play. Only needed in Challenge mode " << endl;
+      cout << "                   --m: If used, runs the game with without sound " << endl;
       exit(0);
     }
     
@@ -170,26 +173,27 @@ QSize Window::minimumSizeHint() const
     return QSize(60, 60);
 }
 
-int Window::getArguments(QStringList args)				//GED Jul-28
+int Window::getArguments(QStringList args)
 {
     int pacmanMode = 0;
-    int pacmanGameMode = 1, pacmanChallengeMode = -1;
-    
-    for (QStringList::iterator it = args.begin(); it != args.end(); ++it)//GED Jul-28
+    int cont = 0;
+    for (QStringList::iterator it = args.begin(); it != args.end(); ++it)
     {
-      QString current = *it;
-      QString pacmanModeG="--g";
-      QString pacmanModeC="--c";
-      pacmanGameMode = QString::compare(pacmanModeG, current, Qt::CaseInsensitive)*pacmanGameMode;
-      pacmanChallengeMode = QString::compare(pacmanModeC, current, Qt::CaseInsensitive)*pacmanChallengeMode;
+	QString current = *it;
+	if (current.contains("--g", Qt::CaseInsensitive) && cont == 1)
+	    pacmanMode = 1;
+	else if (current.contains("--c", Qt::CaseInsensitive) && cont == 1)
+	    pacmanMode = 2;
+	else if (cont == 1)
+	    pacmanMode = 0;
+	
+	if (current.contains("--m", Qt::CaseInsensitive) && (cont == 2 || cont == 3))
+	{
+	    mute = true;
+	    glWidget->setMute();
+	}
+	cont++;
     }
-    
-    if(pacmanGameMode == 0)
-      pacmanMode = 1;
-    else if(pacmanChallengeMode == 0)
-      pacmanMode = 2;
-    else
-      pacmanMode = 0;
     
     return pacmanMode;
 }
@@ -198,7 +202,8 @@ void Window::InitializeCounterTimerSlot()
 {
   if(counterBtn->text() == "Waiting for initialization request" || counterBtn->text() == "Ready")
   {
-      initSound->play();
+      if (!mute)
+	  initSound->play();
       counterBtn->setText("Playing in... 3");
   }
   else if(counterBtn->text() == "Playing in... 3")
@@ -263,7 +268,7 @@ void Window::PlaySlot()
       allowPlay = false;
       gameTime->setHMS(0, initialGameTimeMins, initialGameTimeSecs);
       gameTimeRemainingLCD->display(gameTime->toString());
-      if (!initSound->isFinished())
+      if (!initSound->isFinished() && !mute)
 	  initSound->stop();
     }
 }
@@ -380,11 +385,12 @@ QString Window::verifyMapArgument(QStringList args, QComboBox *mapsList, int pac
       {
 	mapArgument = mapsList->itemText(mapsList->findText(current));
 	mapFound = true;
+	break;
       }
     }      
+    
     if(mapFound == false)
     {
-      
       QDir dir(QString::fromStdString(ros::package::getPath("pacman")) + "/resources/layouts/");
       dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
       QStringList list = dir.entryList();
