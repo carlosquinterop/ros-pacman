@@ -554,10 +554,11 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     update();
 }
 
-void GLWidget::SetPacmanCommand(int aPacmanCommand)
+void GLWidget::SetPacmanCommand(int aPacmanCommand, int id)
 {
     //TODO :modify pacman message to be able to receive up to two pacman actions
-    pacmanArray[0]->action = static_cast<Pacman::Action>(aPacmanCommand);
+    
+    pacmanArray[id]->action = static_cast<Pacman::Action>(aPacmanCommand);
 }
 
 void GLWidget::ToggleGhostModeSlot()

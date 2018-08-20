@@ -128,7 +128,7 @@ Window::Window(QStringList args)
     connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)));
     connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)), this, SLOT(UpdateSizeSlot()));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(UpdateSimulationSlot()));
-    connect(listenMsg, SIGNAL(UpdatePacmanCommand(int)), glWidget, SLOT(SetPacmanCommand(int)));
+    connect(listenMsg, SIGNAL(UpdatePacmanCommand(int, int)), glWidget, SLOT(SetPacmanCommand(int, int)));
     connect(glWidget, SIGNAL(UpdatePacmanPos(QVector<QPoint>*)), this, SLOT(UpdatePacmanPosSlot(QVector<QPoint>*)));
     connect(glWidget, SIGNAL(UpdateGhostsPos(QVector<QPoint>*, bool*)), this, SLOT(UpdateGhostsPosSlot(QVector<QPoint>*, bool*)));
     connect(glWidget, SIGNAL(UpdateCookiesPos(QVector<QPoint>*)), this, SLOT(UpdateCookiesPosSlot(QVector<QPoint>*)));
@@ -153,8 +153,17 @@ Window::Window(QStringList args)
     
     setLayout(mainLayout);
     maps->CreateMap(mapName);
-    subscriber = node->subscribe("pacmanActions", 100, &ListenMsgThread::callback, listenMsg);
-    pacmanPublisher = node->advertise<pacman::pacmanPos>("pacmanCoord", 100);
+    if (numberOfPacmans == 1)
+    {
+      subscriber0 = node->subscribe("pacmanActions0", 100, &ListenMsgThread::callback0, listenMsg);
+    }
+    else if (numberOfPacmans == 2)
+    {
+      subscriber0 = node->subscribe("pacmanActions0", 100, &ListenMsgThread::callback0, listenMsg);
+      subscriber1 = node->subscribe("pacmanActions1", 100, &ListenMsgThread::callback1, listenMsg);
+    }
+    pacmanPublisher0 = node->advertise<pacman::pacmanPos>("pacmanCoord0", 100);
+    pacmanPublisher1 = node->advertise<pacman::pacmanPos>("pacmanCoord1", 100);
     ghostPublisher = node->advertise<pacman::ghostsPos>("ghostsCoord",100);
     cookiesPublisher = node->advertise<pacman::cookiesPos>("cookiesCoord",100);
     bonusPublisher = node->advertise<pacman::bonusPos>("bonusCoord",100); 
@@ -274,14 +283,24 @@ void Window::PlaySlot()
 }
 void Window::UpdatePacmanPosSlot(QVector<QPoint>* pos)
 {
-    msgPacman.pacmanPos.resize(pos->size());
-    for(int i = 0; i < pos->size(); i++)
-    {
-      msgPacman.pacmanPos[i].x = pos->at(i).x(); 
-      msgPacman.pacmanPos[i].y = pos->at(i).y();
-    }
-    msgPacman.nPacman = pos->size();
-    pacmanPublisher.publish(msgPacman);
+  if(pos->size() == 1)
+  {
+    msgPacman0.pacmanPos.x = pos->at(0).x(); 
+    msgPacman0.pacmanPos.y = pos->at(0).y();
+    msgPacman0.nPacman = pos->size();
+    pacmanPublisher0.publish(msgPacman0);
+  }
+  else if (pos->size() == 2)
+  {
+    msgPacman0.pacmanPos.x = pos->at(0).x(); 
+    msgPacman0.pacmanPos.y = pos->at(0).y();
+    msgPacman0.nPacman = pos->size();
+    pacmanPublisher0.publish(msgPacman0);
+    msgPacman1.pacmanPos.x = pos->at(1).x(); 
+    msgPacman1.pacmanPos.y = pos->at(1).y();
+    msgPacman1.nPacman = pos->size();
+    pacmanPublisher1.publish(msgPacman1);
+  }
 }
 void Window::UpdateGhostsPosSlot(QVector<QPoint>* pos, bool* ghostsMode)
 {

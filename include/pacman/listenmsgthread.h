@@ -17,14 +17,15 @@ class ListenMsgThread : public QThread
     void run();
 public:
     ListenMsgThread();
-    void callback(const pacman::Num::ConstPtr& msg);
+    void callback0(const pacman::Num::ConstPtr& msg);
+    void callback1(const pacman::Num::ConstPtr& msg);
     void setWorkingThread(bool aWork);
            
 private:
     bool work;
     
 signals:
-    void UpdatePacmanCommand(int action);
+    void UpdatePacmanCommand(int action, int id);
 };
 
 #endif // LISTENMSGTHREAD_H

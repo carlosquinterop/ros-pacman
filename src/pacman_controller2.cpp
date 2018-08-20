@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     char cadena[13];
     char cadenaAccion[15];
     srand (time(NULL));
-    ros::init(argc, argv, "pacman_controller");
+    ros::init(argc, argv, "pacman_controller2");
     ros::NodeHandle n;
     if (argc == 1)
     {

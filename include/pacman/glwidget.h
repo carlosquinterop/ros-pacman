@@ -48,7 +48,7 @@ protected:
 private slots:
     void UpdateSimulationSlot();
     void ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles, int maxIndexRow, int maxIndexCol);
-    void SetPacmanCommand(int aPacmanCommand);
+    void SetPacmanCommand(int aPacmanCommand, int id);
     void ToggleGhostModeSlot();
     void EndOfFrightenedGhostModeSlot();
     void reviveGhost0Slot();

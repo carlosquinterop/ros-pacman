@@ -90,3 +90,7 @@ add_dependencies(pacman_world pacman_generate_messages_cpp)
 add_executable(pacman_controller src/pacman_controller.cpp)
 target_link_libraries(pacman_controller ${catkin_LIBRARIES})
 add_dependencies(pacman_controller pacman_generate_messages_cpp)
+
+add_executable(pacman_controller2 src/pacman_controller2.cpp)
+target_link_libraries(pacman_controller2 ${catkin_LIBRARIES})
+add_dependencies(pacman_controller2 pacman_generate_messages_cpp)
