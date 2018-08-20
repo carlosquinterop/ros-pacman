@@ -35,7 +35,7 @@ Window::Window(QStringList args)
     gameTime = new QTime(0, initialGameTimeMins, initialGameTimeSecs);
     initSound = new QSound(tr(":/resources/audio/start.wav"));
     restartGameTimer = new QTimer();
-    scoreBoardFile = new QFile(QString::fromStdString(ros::package::getPath("pacman")) + "ScoreBoard");
+    scoreBoardFile = new QFile(QString::fromStdString(ros::package::getPath("pacman")) + "/ScoreBoard");
     node = new ros::NodeHandle();    
     
     QFont fontBold;
