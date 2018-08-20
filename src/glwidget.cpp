@@ -225,7 +225,7 @@ void GLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
     LoadTexture(new QImage(tr(":/resources/textures/pacman.jpeg")));
-    LoadTexture(new QImage(tr(":/resources/textures/mspacman.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/pacgirl.jpg")));
     LoadTexture(new QImage(tr(":/resources/textures/redGhostUp.png")));
     LoadTexture(new QImage(tr(":/resources/textures/redGhostDown.png")));
     LoadTexture(new QImage(tr(":/resources/textures/redGhostRight.png")));
