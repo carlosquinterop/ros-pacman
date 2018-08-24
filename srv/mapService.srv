@@ -1,4 +1,4 @@
-int32 request
+string name
 ---
 int32 minX
 int32 maxX

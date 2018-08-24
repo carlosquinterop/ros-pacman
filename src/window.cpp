@@ -457,6 +457,7 @@ bool Window::ObsService(pacman::mapService::Request& req, pacman::mapService::Re
     }
     if (counterBtn->text() == "Waiting for initialization request")
 	emit InitializeGame();
+    playerName = QString::fromStdString(req.name);
     //TODO: Modificar InitializeGame para que envíe el parámetro del nombre del usuario
         
     return true;
