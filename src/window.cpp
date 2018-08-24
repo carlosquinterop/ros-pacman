@@ -52,7 +52,7 @@ Window::Window(QStringList args)
     playerNameLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
     playerNameLabel->setFont(fontBold);
     playerNameTextEdit->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    playerNameTextEdit->setMaximumSize(90, 33);
+    playerNameTextEdit->setMaximumSize(90, 43);
     w->setLayout(container);
     wScores->setLayout(containerScores);
     wScores->setMaximumSize(maxWidth, scoreHeight);
