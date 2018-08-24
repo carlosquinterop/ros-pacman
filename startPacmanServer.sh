@@ -18,13 +18,6 @@ echo
 echo 'Starting ros-pacman server...'
 echo
 
-if pgrep -x "roscore" > /dev/null
-then
-  echo "'roscore' process found, please close it."
-  echo
-  return
-fi
-
 echo 'Type the Pacman workspace path:'
 read -p "[default (Enter): ${DEF_PATH}]: " WS_PATH
 if [ -z "$WS_PATH" ]
@@ -49,16 +42,43 @@ export ROS_IP=${ROS_IP//[[:blank:]]/}
 
 echo 'Server ready.'
 echo "Use the IP address ${ROS_IP} in your Pacman Controller"
-read -p "Press Enter to start roscore and the Pacman World"
 echo
 
+echo "Press g for 'game mode' and c for 'challenge mode'"
+read MODE
+
+if [ $MODE != "c" -a $MODE != "g" ]
+then echo "Wrong mode. Select g for 'game mode' and c for 'challenge mode'"
+return
+fi
+
+echo
+if [ $MODE == "c" ]
+then echo "Enter map name" 
+read MAP 
+fi
+
+echo "Do you want to run with --m (mute) option? (y or n)"
+read ARGS
+echo
+
+if [ $ARGS == y ]
+then MUTE="m"
+else MUTE=""
+fi
+
+if pgrep -x "roscore" > /dev/null
+then
+  echo "'roscore' process found"
+else echo "Running 'roscore'..."
 gnome-terminal -e 'roscore'
+fi
 
 export ROS_MASTER_URI="http://${ROS_IP}:11311"
 export ROS_MASTER_URI=${ROS_MASTER_URI//[[:blank:]]/}
 
 cd $WS_PATH
 source devel/setup.bash
-rosrun pacman pacman_world game
+rosrun pacman pacman_world --$MODE $MAP --$MUTE
 
 cd $ORIG_PATH

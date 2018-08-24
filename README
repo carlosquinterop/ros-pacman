@@ -1,8 +1,9 @@
 # ros-pacman
+This is a version of the original game Pac-Man implemented over ROS. It consists of a ROS package called pacman and a ROS node called pacman_world that acts as a simulator of the Pac-Man environment, i.e., the dots, bonus, ghosts, maps (obstacles) and Pac-Man himself. The simulator creates all the environment and publishes it in different ROS topics so that a controller node(s) can read them. At the same time, the controller node(s) is (are) expected to generate actions for Pac-Man and publish them in a specific ROS topic. The pacman_world node suscribes to such topic to implement the motion of Pac-man inside the world.
+
 SYSTEM REQUIREMENTS
 	- Ubuntu 16.04 64 bits
 	- ROS Kinetic
-	- Catkin workspace
 	- Qt5 Development Libraries
 	- OpenGL
 				
@@ -14,6 +15,11 @@ COMPILATION
 	- catkin_make
 	
 EXECUTION
+There are two ways to execute the pacman_world node. 1) By executing it directly in one machine as a traditional ROS node and 2) Using a bash script. The first option requires the user to independently run a roscore process, source the setup.bash and run the pacman_world node using the rosrun command with the required parameters. The second option, automatically run the roscore process (if it is not already running), it sources the setup.bash file and receives the arguments of the node as inputs by the user.
+
+The pacman_world node has two modes: Challenge Mode and Game Mode. In Challenge Mode, it is expected that a controller node is built and launch to control the actions of Pac-Man. The controller node can be launched in the same machine as the pacman_world or in a different machine in a local network. In Game Mode a graphic user interface allows the user to select a map and start playing using a button. The actions of Pac-Man can be controlled using the wasd keys from the keyboard.
+
+TRADITIONAL EXECUTION 
 	- Open a new terminal
 	- Run: roscore
 	- Open a new terminal
@@ -27,21 +33,24 @@ EXECUTION
                    	     mapName: Name of map to play. Only needed in Challenge mode 
                    		 --m: If used, runs the game with without sound 
                    		 
-	- Example 1: rosrun pacman pacman_world --c originalClassic
-	- Example 2: rosrun pacman pacman_world --g
-	- In test mode, a controller node must be executed
+	- Example 1. Challente Mode in originalClassic map with no mute argument:
+		 rosrun pacman pacman_world --c originalClassic
+	- Example 2. Game Mode with no mute argument
+		 rosrun pacman pacman_world --g
+	- Example 3. Challenge Mode in bigMaze map with mute argument
+		 rosrun pacman pacman_world --c bigMaze --m
+	- In Challenge Mode, a controller node must be executed to control Pac-Man
 	- Open a new terminal
 	- source devel/setup.bash
 	- rosrun pacman pacman_controller
 
-NETWORK EXECUTION
-	For Pacman_world
+NETWORK (SCRIPT) EXECUTION
+	For pacman_world node:
 		-cd ~/catkin_ws/src/ros-pacman
-		-source starPacmanServer.sh
+		-source startPacmanServer.sh
 	For Other Nodes
 		-cd ~/catkin_ws/src/ros-pacman
-		-source starPacmanController.sh
+		-source startPacmanController.sh
 
 FOR DEVELOPMENT (Recommended)
 	- http://wiki.ros.org/IDEs#Reusing_your_shell.27s_environment
-
