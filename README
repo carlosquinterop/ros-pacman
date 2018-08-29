@@ -37,6 +37,7 @@ NETWORK EXECUTION
 	For Other Nodes
 		-cd ~/catkin_ws/src/ros-pacman
 		-source starPacmanController.sh
+		-rosrun "Your ROS node controller"
 
 FOR DEVELOPMENT (Recommended)
 	- http://wiki.ros.org/IDEs#Reusing_your_shell.27s_environment
