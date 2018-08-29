@@ -77,7 +77,7 @@ echo
 sudo rosdep init
 rosdep update
 
-echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 source ~/.bashrc
 
 echo 'Installing Dependencies'
@@ -89,5 +89,10 @@ else
   return 
 fi
 
+echo 'Setting the Catkin Workspace'
 
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/
+catkin_make
 
+source devel/setup.bash

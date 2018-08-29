@@ -15,7 +15,7 @@ DEF_PATH="$HOME/catkin_ws"
 ORIG_PATH=$( pwd )
 
 echo
-echo 'Starting ros-pacman controller...'
+echo 'Starting network environment...'
 echo
 
 if pgrep -x "roscore" > /dev/null
@@ -33,7 +33,7 @@ export ROS_IP=${ROS_IP//[[:blank:]]/}
 export ROS_MASTER_URI="http://${IP_ROSCORE}:11311"
 export ROS_MASTER_URI=${ROS_MASTER_URI//[[:blank:]]/}
 
-echo 'Type the Pacman workspace path:'
+echo 'Type the ROS NODE workspace path:'
 read -p "[default (Enter): ${DEF_PATH}] " WS_PATH
 if [ -z "$WS_PATH" ]
 then
@@ -52,12 +52,12 @@ fi
 
 echo
 
-echo 'Pacman controller ready.'
+echo 'Network environment ready.'
 # read -p "Press Enter to start the Pacman controller"
 echo
 
 cd $WS_PATH
 source devel/setup.bash
-rosrun pacman pacman_controller
+#rosrun pacman pacman_controller
 
 cd $ORIG_PATH
