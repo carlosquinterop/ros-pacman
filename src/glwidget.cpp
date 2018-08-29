@@ -28,6 +28,7 @@ GLWidget::GLWidget(QWidget *parent)
     contGhostModePhases = 0;
     ghostRemainingTime = 0;
     isInFrightenedMode = false;
+    mute = false;
 }
 
 GLWidget::~GLWidget()
@@ -224,7 +225,7 @@ void GLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
     LoadTexture(new QImage(tr(":/resources/textures/pacman.jpeg")));
-    LoadTexture(new QImage(tr(":/resources/textures/mspacman.png")));
+    LoadTexture(new QImage(tr(":/resources/textures/pacgirl.jpg")));
     LoadTexture(new QImage(tr(":/resources/textures/redGhostUp.png")));
     LoadTexture(new QImage(tr(":/resources/textures/redGhostDown.png")));
     LoadTexture(new QImage(tr(":/resources/textures/redGhostRight.png")));
@@ -311,9 +312,9 @@ void GLWidget::UpdateSimulationSlot()
 	scaredGhosts |= ghostsArray[i]->isFrightened();
     }
         
-    if (normalSound->isFinished() && allowToPlay && !scaredGhosts)
+    if (normalSound->isFinished() && allowToPlay && !scaredGhosts && !mute)
 	normalSound->play();
-    else if (frightenedSound->isFinished() && scaredGhosts)
+    else if (frightenedSound->isFinished() && scaredGhosts && !mute)
 	frightenedSound->play();
 
     if ((frightenedGhostModeTimer->remainingTime() < almostFrightenedTimeMs) && (frightenedGhostModeTimer->remainingTime() > 0))
@@ -337,7 +338,7 @@ void GLWidget::UpdateSimulationSlot()
 	{
 	    if (pacmanCoord->at(j) == cookiesCoord->at(i))
 	    {
-		if (cookiesSound->isFinished())
+		if (cookiesSound->isFinished() && !mute)
 		    cookiesSound->play();
 		cookiesCoord->remove(i);
 		score += COOKIES_SCORE;
@@ -393,13 +394,17 @@ void GLWidget::UpdateSimulationSlot()
 		    ghostsArray[i]->deadGhost = true;
 		    ghostsCoord->replace(i, ghostsArray[i]->currentPosition);
 		    deadGhostTimers[i]->start(deadGhostTimeMs);
-		    ghostSound->play();
-		    returnHomeSound->play();
+		    if (!mute)
+		    {
+			ghostSound->play();
+			returnHomeSound->play();
+		    }
 		}
 		else
 		{
 		    lives--;
-		    missSound->play();
+		    if (!mute)
+			missSound->play();
 		    emit DeadPacmanSignal();
 		    if(lives == 0)	//GED Ago-01
 		      emit EndGameSignal(false);
@@ -549,10 +554,11 @@ void GLWidget::ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImag
     update();
 }
 
-void GLWidget::SetPacmanCommand(int aPacmanCommand)
+void GLWidget::SetPacmanCommand(int aPacmanCommand, int id)
 {
     //TODO :modify pacman message to be able to receive up to two pacman actions
-    pacmanArray[0]->action = static_cast<Pacman::Action>(aPacmanCommand);
+    
+    pacmanArray[id]->action = static_cast<Pacman::Action>(aPacmanCommand);
 }
 
 void GLWidget::ToggleGhostModeSlot()
@@ -651,4 +657,9 @@ bool GLWidget::IsPlaying()
 void GLWidget::setNumberOfPacmans(int numberOfPacmans)
 {
     nPacman = numberOfPacmans;
+}
+
+void GLWidget::setMute()
+{
+    mute = true;
 }

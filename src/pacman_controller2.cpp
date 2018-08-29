@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     char cadena[13];
     char cadenaAccion[15];
     srand (time(NULL));
-    ros::init(argc, argv, "pacman_controller");
+    ros::init(argc, argv, "pacman_controller2");
     ros::NodeHandle n;
     if (argc == 1)
     {
@@ -75,7 +75,8 @@ int main(int argc, char **argv)
     ros::Subscriber gameStateSub = n.subscribe("gameState", 100, gameStateCallback);
     ros::ServiceClient mapRequestClient = n.serviceClient<pacman::mapService>("pacman_world");
     pacman::mapService srv;
-    srv.request.name = "Hola Mundo";
+    ros::Rate loop_rate(10);
+    int count = 0;
     if(mapRequestClient.call(srv))
     {	
 	printf("# obs: %d \n", srv.response.nObs);
@@ -91,8 +92,6 @@ int main(int argc, char **argv)
     {
       printf("Error al iniciar, asegurese que el nodo pacman_world se este ejecutando \n");
     }
-    ros::Rate loop_rate(10);
-    int count = 0;
     while (ros::ok() && inicio == true)
     {
       pacman::Num msg;

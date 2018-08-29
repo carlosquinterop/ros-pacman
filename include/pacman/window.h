@@ -12,7 +12,11 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <QTime>
-#include <QList>  //GED
+#include <QDate>
+#include <QList>
+#include <QFile>
+#include <QTextStream>
+#include <QTextEdit>
 #include <QLCDNumber>
 #include <QSound>
 #include <iostream>
@@ -68,16 +72,19 @@ private slots:
     void InitializeGameSlot();
     void restartReadySlot();
     void UpdateMapNameSlot(QString name);
+    void PlayerNameChangedSlot();
     
 private:
     GLWidget *glWidget;
+    QWidget *wScores;
     const int maxWidth = 1000;
-    const int maxHeight = 700;
+    const int maxHeight = 680;
     const int scoreWidth = 750;
     const int scoreHeight = 60;
     const double wScore = 0.3;
     const double wLives = 0.6;
     const double wTime = 0.1;
+    int windowWidth, windowHeight;
     int MAX_SCORE, MAX_LIVES, MAX_TIME_SEC;
     double performEval;
     QVBoxLayout *mainLayout;
@@ -96,14 +103,17 @@ private:
     const int refreshTimeMs = 150;
     ListenMsgThread *listenMsg;
     ros::NodeHandle *node;
-    ros::Subscriber subscriber;
-    ros::Publisher pacmanPublisher;
+    ros::Subscriber subscriber0;
+    ros::Subscriber subscriber1;
+    ros::Publisher pacmanPublisher0;
+    ros::Publisher pacmanPublisher1;
     ros::Publisher ghostPublisher;
     ros::Publisher cookiesPublisher;
     ros::Publisher bonusPublisher;
     ros::Publisher gameStatePublisher;
     ros::ServiceServer mapResponseServer;
-    pacman::pacmanPos msgPacman;
+    pacman::pacmanPos msgPacman0;
+    pacman::pacmanPos msgPacman1;
     pacman::ghostsPos msgGhosts;
     pacman::cookiesPos msgCookies;
     pacman::bonusPos msgBonus;
@@ -118,6 +128,8 @@ private:
     QLCDNumber *gameTimeRemainingLCD;
     QLabel *performValName;
     QLabel *performValLabel;
+    QLabel *playerNameLabel;
+    QTextEdit *playerNameTextEdit;
     QTimer *remainingTimeTimer;
     QTime *gameTime;
     const int initialGameTimeMins = 3;
@@ -127,6 +139,10 @@ private:
     QTimer *restartGameTimer;
     const int restartGameTime = 5000;
     int numberOfPacmans;
+    QString playerName, playerDateAndTime;
+    QFile *scoreBoardFile;
+    int _score, _lives, gTime;
+    bool mute;
     
 signals:
     void ArrowKey(int key);

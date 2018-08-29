@@ -38,6 +38,7 @@ public:
     void UpdatePacmanPosition(int i);
     bool IsPlaying();
     void setNumberOfPacmans(int numberOfPacmans);
+    void setMute();
     
 protected:
     void initializeGL() override;
@@ -47,7 +48,7 @@ protected:
 private slots:
     void UpdateSimulationSlot();
     void ReceiveMapDataGL(int blockWidth, int blockHeight, QImage* mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles, int maxIndexRow, int maxIndexCol);
-    void SetPacmanCommand(int aPacmanCommand);
+    void SetPacmanCommand(int aPacmanCommand, int id);
     void ToggleGhostModeSlot();
     void EndOfFrightenedGhostModeSlot();
     void reviveGhost0Slot();
@@ -96,6 +97,7 @@ private:
     int COOKIES_SCORE = 10, BONUS_SCORE = 50, GHOSTS_BASE_SCORE = 100, LIVES_BASE = 3, SCORE_BASE = 0;
     int score, lives, scoreGhosts;
     QSound *cookiesSound, *normalSound, *frightenedSound, *ghostSound, *returnHomeSound, *missSound;
+    bool mute;
 
 signals:
     void UpdatePacmanPos(QVector<QPoint> *pacmanCoord);
