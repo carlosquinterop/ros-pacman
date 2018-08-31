@@ -22,13 +22,14 @@ list(APPEND libs Qt5::Multimedia)
 
 add_message_files(
 FILES 
-Num.msg
+actions.msg
 pos.msg
 pacmanPos.msg
 ghostsPos.msg
 cookiesPos.msg
 bonusPos.msg
 game.msg
+performance.msg
 )
 
 add_service_files(

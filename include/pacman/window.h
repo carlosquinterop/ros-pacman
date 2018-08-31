@@ -32,6 +32,7 @@
 #include "pacman/game.h"
 #include "pacman/pos.h"
 #include "pacman/mapService.h"
+#include "pacman/performance.h"
 
 using namespace std;
 
@@ -111,6 +112,7 @@ private:
     ros::Publisher cookiesPublisher;
     ros::Publisher bonusPublisher;
     ros::Publisher gameStatePublisher;
+    ros::Publisher performancePublisher;
     ros::ServiceServer mapResponseServer;
     pacman::pacmanPos msgPacman0;
     pacman::pacmanPos msgPacman1;
@@ -118,6 +120,7 @@ private:
     pacman::cookiesPos msgCookies;
     pacman::bonusPos msgBonus;
     pacman::game msgState;
+    pacman::performance msgPerformance;
     QVector<QPoint> *posObstacles;
     int minX, maxX, minY, maxY;
     QHBoxLayout *containerScores;
