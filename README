@@ -49,19 +49,10 @@ TRADITIONAL EXECUTION
 	- Example 3. Challenge Mode in bigMaze map with mute argument
 		 rosrun pacman pacman_world --c bigMaze --m
 	- In Challenge Mode, a controller node must be executed to control Pac-Man
-	- Open a new terminal
-	- source devel/setup.bash
-	- rosrun pacman pacman_controller
 
 NETWORK (SCRIPT) EXECUTION
-	For pacman_world node:
-		-cd ~/catkin_ws/src/ros-pacman
-		-source startPacmanServer.sh
-	For Other Nodes
-		-cd ~/catkin_ws/src/ros-pacman
-
-		-source starPacmanController.sh
-		-rosrun "Your ROS node controller"
+	-cd ~/catkin_ws/src/ros-pacman
+	-source startPacmanServer.sh
 
 FOR DEVELOPMENT (Recommended)
 	- http://wiki.ros.org/IDEs#Reusing_your_shell.27s_environment
