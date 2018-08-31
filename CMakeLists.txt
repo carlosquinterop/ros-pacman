@@ -9,9 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   roslib
-  std_msgs
   message_generation
-  actionlib_msgs
   Qt5Widgets
   Qt5Gui
   Qt5Core
@@ -47,7 +45,7 @@ find_package(OpenGL REQUIRED)
 list(APPEND libs ${OPENGL_LIBRARIES})
 
 catkin_package(
-   CATKIN_DEPENDS roscpp rospy roslib message_runtime
+   CATKIN_DEPENDS roscpp rospy roslib message_runtime geometry_msgs
    DEPENDS Qt5Widgets Qt5Gui Qt5Core Qt5Multimedia OpenGL
 )
 
@@ -56,7 +54,7 @@ include_directories(include
  ${OPENGL_INCLUDE_DIRS}
 )
 
-set(pacman_SRCS
+set(ros-pacman-simulator_SRCS
   src/main.cpp
   src/glwidget.cpp
   src/window.cpp
@@ -66,7 +64,7 @@ set(pacman_SRCS
   src/Pacman.cpp
   src/Utilities.cpp
 )
-set(pacman_HDRS
+set(ros-pacman-simulator_HDRS
   include/pacman/glwidget.h
   include/pacman/window.h
   include/pacman/maps.h
@@ -76,21 +74,13 @@ set(pacman_HDRS
   include/pacman/Utilities.h
 )
 
-qt5_wrap_cpp(pacman_MOCS ${pacman_HDRS})
+qt5_wrap_cpp(ros-pacman-simulator_MOCS ${ros-pacman-simulator_HDRS})
 
 qt5_add_resources(RC_SRCS 
     resources/resources.qrc
     ${SHARED_RC}
 )
 
-add_executable(pacman_world ${pacman_SRCS} ${pacman_MOCS} ${RC_SRCS})
+add_executable(pacman_world ${ros-pacman-simulator_SRCS} ${ros-pacman-simulator_MOCS} ${RC_SRCS})
 target_link_libraries(pacman_world Qt5::Widgets ${catkin_LIBRARIES} ${OPENGL_LIBRARIES})
 add_dependencies(pacman_world pacman_generate_messages_cpp)
-
-add_executable(pacman_controller src/pacman_controller.cpp)
-target_link_libraries(pacman_controller ${catkin_LIBRARIES})
-add_dependencies(pacman_controller pacman_generate_messages_cpp)
-
-add_executable(pacman_controller2 src/pacman_controller2.cpp)
-target_link_libraries(pacman_controller2 ${catkin_LIBRARIES})
-add_dependencies(pacman_controller2 pacman_generate_messages_cpp)
