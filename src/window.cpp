@@ -121,6 +121,8 @@ Window::Window(QStringList args)
 	QTextStream out(scoreBoardFile);
 	out << "Session " + playerName + playerDateAndTime << "\n";
     }
+    performancePublisher = node->advertise<pacman::performance>("performanceEval",100);
+    
     
     connect(playBtn, &QPushButton::clicked, this, &Window::PlaySlot);
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(CreateMap(QString)));
@@ -169,6 +171,7 @@ Window::Window(QStringList args)
     bonusPublisher = node->advertise<pacman::bonusPos>("bonusCoord",100); 
     gameStatePublisher = node->advertise<pacman::game>("gameState",100);
     mapResponseServer = node->advertiseService("pacman_world", &Window::ObsService, this);
+    
     listenMsg->start();
 }
 
@@ -427,6 +430,7 @@ void Window::UpdateGameStateSlot()
 {
     msgState.state = (int)gameState; 
     gameStatePublisher.publish(msgState);
+    
 }
 
 void Window::UpdateScoresSlot(int score, int lives)
@@ -440,6 +444,11 @@ void Window::UpdateScoresSlot(int score, int lives)
     performEval =  (((double)score / (double)MAX_SCORE ) * wScore) + (((double)lives / (double)MAX_LIVES ) * wLives) + (((double)gTime / (double)MAX_TIME_SEC ) * wTime);
     performEval *= 100;
     performValLabel->setText(QString::number(performEval, 'g', 4));
+    msgPerformance.lives = _lives;
+    msgPerformance.score = _score;
+    msgPerformance.gtime = gTime;
+    msgPerformance.performEval = performEval;
+    performancePublisher.publish(msgPerformance);
 }
 
 bool Window::ObsService(pacman::mapService::Request& req, pacman::mapService::Response& res)

@@ -1,14 +1,14 @@
 #include "pacman/listenmsgthread.h"
 
-void ListenMsgThread::callback0(const pacman::Num::ConstPtr& msg)
+void ListenMsgThread::callback0(const pacman::actions::ConstPtr& msg)
 {
-    if(msg->num < 5 && work)
-      emit UpdatePacmanCommand(msg->num, 0);
+    if(msg->action < 5 && work)
+      emit UpdatePacmanCommand(msg->action, 0);
 }
-void ListenMsgThread::callback1(const pacman::Num::ConstPtr& msg)
+void ListenMsgThread::callback1(const pacman::actions::ConstPtr& msg)
 {
-    if(msg->num < 5 && work)
-      emit UpdatePacmanCommand(msg->num, 1);
+    if(msg->action < 5 && work)
+      emit UpdatePacmanCommand(msg->action, 1);
 }
 ListenMsgThread::ListenMsgThread()
 {
