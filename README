@@ -48,7 +48,7 @@ TRADITIONAL EXECUTION
 		 rosrun pacman pacman_world --g
 	- Example 3. Challenge Mode in bigMaze map with mute argument
 		 rosrun pacman pacman_world --c bigMaze --m
-	- In Challenge Mode, a controller node must be executed to control Pac-Man
+	- In Challenge Mode, a controller node must be executed to control Pac-Man: See https://github.com/carlosquinterop/pacman-controller for an example
 
 NETWORK (SCRIPT) EXECUTION
 	-cd ~/catkin_ws/src/ros-pacman
