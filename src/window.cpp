@@ -467,19 +467,17 @@ bool Window::ObsService(pacman::mapService::Request& req, pacman::mapService::Re
     if (counterBtn->text() == "Waiting for initialization request")
 	emit InitializeGame();
     playerName = QString::fromStdString(req.name);
-    //TODO: Modificar InitializeGame para que envíe el parámetro del nombre del usuario
         
     return true;
 }
 
 void Window::InitializeGameSlot()
 {
+    gameTime->setHMS(0, initialGameTimeMins, initialGameTimeSecs);
     maps->CreateMap(mapName);
     QString time = gameTime->toString();
     gameTimeRemainingLCD->display(time);
     playerNameTextEdit->setText(playerName);
-    //TODO: Recibir el nombre del usuario y asignarlo a playerName
-    //playerName = name;
     counterTimer->start(oneSecondTimeMilisecs);
 }
 
