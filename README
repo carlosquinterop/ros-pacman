@@ -1,4 +1,9 @@
 # ros-pacman
+
+CONTEXT
+This repository was originally created for the AI Challenge: an activity directed toward students that belong to one of the universities that are part of the SINFONIA alliance. SINFONIA is an effort from academy and industry to implement and apply solutions to a variety of problems using artificial intelligence. At this moment, the institutions that belong to SINFONIA are: Universidad de los Andes, Universidad Santo Tomás, Universidad del Magdalena and Bancolombia.
+
+DESCRIPTION
 This is a version of the original Pac-Man game implemented over ROS (Robot Operating System, http://www.ros.org/). It consists of a ROS package called pacman and a ROS node called pacman_world that acts as a simulator of the Pac-Man environment, i.e., the dots, bonus, ghosts, maps (obstacles) and Pac-Man himself. The simulator creates all the environment and publishes it in different ROS topics so that a controller node(s) can read them. At the same time, the controller node(s) is (are) expected to generate actions for Pac-Man and publish them in a specific ROS topic. The pacman_world node suscribes to such topic to implement the motion of Pac-man inside the world.
 
 SYSTEM REQUIREMENTS
@@ -10,7 +15,7 @@ SYSTEM REQUIREMENTS
 INSTALLATION
 	- There are two ways to install all the dependencies for the ros-pacman software:
 	1) The user can manually install ROS and the corresponding catkin workspace following the tutorials in http://wiki.ros.org/kinetic/Installation/Ubuntu
-	2) We have provided a script that installs all the dependencies including ROS and the catkin workspace (it takes some time). To run it, execute the following steps:
+	2) We have provided a script that installs all the dependencies including ROS and the catkin workspace (it takes some time). The script also installs git, however it is not mandatory. To run it, execute the following steps:
 	   a) Download and extract the ros-pacman repository from https://github.com/carlosquinterop/ros-pacman
 	   b) Open a terminal
 	   c) cd to the repository folder
@@ -18,7 +23,7 @@ INSTALLATION
 				
 COMPILATION
 	- cd ~/catkin_ws/src
-	- git clone https://github.com/carlosquinterop/ros-pacman.git
+	- git clone https://github.com/carlosquinterop/ros-pacman.git (if git is installed. Otherwise, just download the repository folder into the specified folder)
 	- cd ..
 	- source devel/setup.bash
 	- catkin_make
