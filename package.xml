@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>pacman</name>
-  <version>0.0.0</version>
+  <version>0.0.1</version>
   <description>The pacman package is a simulator of the classic Pac-Man game that provides access to other nodes to the Pac-Man environment through ROS topics and services</description>
   <maintainer email="quintero.carlos@uniandes.edu.co">Carlos Quintero</maintainer>
   <maintainer email="erojas@unimagdalena.edu.co">Eyberth Rojas</maintainer>  

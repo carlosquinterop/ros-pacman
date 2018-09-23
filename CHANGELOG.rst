@@ -2,8 +2,8 @@
 Changelog for package pacman
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.1 (2018-09-22)
+------------------
 * Add maps
 * Updated repository for final changes before launching
 * Fixed performance update in between maps
