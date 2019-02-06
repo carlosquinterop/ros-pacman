@@ -8,7 +8,7 @@ Window::Window(QStringList args)
     ros::init(argc, argv, "pacman_world");
     this->setWindowTitle(tr("Pacman World"));
     this->setWindowIcon(QIcon(":/resources/textures/pacman.jpeg"));
-    this->setMaximumSize(maxWidth, maxHeight);
+    //this->setMaximumSize(maxWidth, maxHeight);
     
     QWidget *w = new QWidget();
     wScores = new QWidget();
@@ -128,6 +128,7 @@ Window::Window(QStringList args)
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), maps, SLOT(CreateMap(QString)));
     connect(mapsList, SIGNAL(currentIndexChanged(QString)), this, SLOT(UpdateMapNameSlot(QString)));
     connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)), glWidget, SLOT(ReceiveMapDataGL(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)));
+    connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)), this, SLOT(UpdateNumberOfPacman(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)));
     connect(maps, SIGNAL(SendMapData(int, int, QImage*, bool*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, QVector<int>*, int, int)), this, SLOT(UpdateSizeSlot()));
     connect(refreshTimer, SIGNAL(timeout()), glWidget, SLOT(UpdateSimulationSlot()));
     connect(listenMsg, SIGNAL(UpdatePacmanCommand(int, int)), glWidget, SLOT(SetPacmanCommand(int, int)));
@@ -147,14 +148,11 @@ Window::Window(QStringList args)
     connect(restartGameTimer, SIGNAL(timeout()), this, SLOT(restartReadySlot()));
     connect(playerNameTextEdit, SIGNAL(textChanged()), this, SLOT(PlayerNameChangedSlot()));
     
-    if (mapName == "ALIANZA" || mapName == "GHOST" || mapName == "mediumCRAZY" || mapName == "mediumPACMAN" || mapName == "originalEMA")
-	numberOfPacmans = 2;
-    else
-	numberOfPacmans = 1;
     glWidget->setNumberOfPacmans(numberOfPacmans);
     
     setLayout(mainLayout);
     maps->CreateMap(mapName);
+    
     if (numberOfPacmans == 1)
     {
       subscriber0 = node->subscribe("pacmanActions0", 100, &ListenMsgThread::callback0, listenMsg);
@@ -529,4 +527,9 @@ void Window::PlayerNameChangedSlot()
 	playerName = "ChallengeMode ";
     else
 	playerName = playerNameTextEdit->toPlainText();
+}
+
+void Window::UpdateNumberOfPacman(int blockWidth, int blockHeight, QImage* mapImage, bool* mObstacles, QVector< int >* pPacman, QVector< int >* pGhosts, QVector< int >* pCookies, QVector< int >* pBonus, QVector< int >* pObstacles, int maxIndexRow, int maxIndexCol)
+{
+    numberOfPacmans = pPacman->size()/2;
 }

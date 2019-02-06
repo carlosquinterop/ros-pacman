@@ -33,6 +33,7 @@
 #include "pacman/pos.h"
 #include "pacman/mapService.h"
 #include "pacman/performance.h"
+#include <QSerialPort>
 
 using namespace std;
 
@@ -74,6 +75,7 @@ private slots:
     void restartReadySlot();
     void UpdateMapNameSlot(QString name);
     void PlayerNameChangedSlot();
+    void UpdateNumberOfPacman(int blockWidth, int blockHeight, QImage *mapImage, bool *mObstacles, QVector<int> *pPacman, QVector<int> *pGhosts, QVector<int> *pCookies, QVector<int> *pBonus, QVector<int> *pObstacles, int maxIndexRow, int maxIndexCol);
     
 private:
     GLWidget *glWidget;
