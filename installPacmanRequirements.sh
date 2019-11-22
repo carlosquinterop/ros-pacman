@@ -81,7 +81,7 @@ echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 source ~/.bashrc
 
 echo 'Installing Dependencies'
-sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential
+sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential libqt5serialport5-dev qtmultimedia5-dev
 if [ $? -eq 0 ]; then
   echo 'OK!'
 else
